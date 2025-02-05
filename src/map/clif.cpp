@@ -10040,24 +10040,49 @@ void clif_name( struct block_list* src, struct block_list *bl, send_target targe
 				packet.gid = bl->id;
 				safestrncpy( packet.name, md->name, NAME_LENGTH );
 
-				char mobhp[50], *str_p = mobhp;
-
-				if( battle_config.show_mob_info&4 ){
-					str_p += sprintf( str_p, "Lv. %d | ", md->level );
+				if(battle_config.show_mob_info&4){
+					std::string id_and_level = "ID: " + std::to_string(md->mob_id) + " | Lv. " + std::to_string(md->level);
+					safestrncpy(packet.party_name,id_and_level.c_str(),NAME_LENGTH);
 				}
 
-				if( battle_config.show_mob_info&1 ){
-					str_p += sprintf( str_p, "HP: %u/%u | ", md->status.hp, md->status.max_hp );
+				if(battle_config.show_mob_info&1){
+					std::string ele_name{};
+					switch(md->status.def_ele){
+						case ELE_NEUTRAL: ele_name = "Neutral";break;
+						case ELE_WATER	: ele_name = "Water";break;
+						case ELE_EARTH	: ele_name = "Earth";break;
+						case ELE_FIRE	: ele_name = "Fire";break;
+						case ELE_WIND	: ele_name = "Wind";break;
+						case ELE_POISON	: ele_name = "Poison";break;
+						case ELE_HOLY	: ele_name = "Holy";break;
+						case ELE_DARK	: ele_name = "Shadow";break;
+						case ELE_GHOST	: ele_name = "Ghost";break;
+						case ELE_UNDEAD	: ele_name = "Undead";break;
+						default			: ele_name = "";
+					}
+					if(ele_name != ""){
+						std::string ele = "[" + ele_name + " " + std::to_string(md->status.ele_lv) + "]";
+						safestrncpy(packet.guild_name,ele.c_str(),NAME_LENGTH);
+					}
 				}
 
-				if( battle_config.show_mob_info&2 ){
-					str_p += sprintf( str_p, "HP: %u%% | ", get_percentage( md->status.hp, md->status.max_hp ) );
-				}
-
-				// Even thought mobhp ain't a name, we send it as one so the client can parse it. [Skotlex]
-				if( str_p != mobhp ){
-					*(str_p-3) = '\0'; //Remove trailing space + pipe.
-					safestrncpy( packet.party_name, mobhp, NAME_LENGTH );
+				if(battle_config.show_mob_info&2){
+					std::string race_name{};
+					switch(md->status.race){
+						case RC_FORMLESS:	race_name = "Formless"; break;
+						case RC_UNDEAD:		race_name = "Undead"; break;
+						case RC_BRUTE:		race_name = "Brute"; break;
+						case RC_PLANT:		race_name = "Plant"; break;
+						case RC_INSECT:		race_name = "Insect"; break;
+						case RC_FISH:		race_name = "Fish"; break;
+						case RC_DEMON:		race_name = "Demon"; break;
+						case RC_DEMIHUMAN:	race_name = "Demi-Human"; break;
+						case RC_ANGEL:		race_name = "Angel"; break;
+						case RC_DRAGON:		race_name = "Dragon"; break;
+						default:			race_name = "";
+					}
+					if(race_name != "")
+						safestrncpy(packet.position_name,race_name.c_str(),NAME_LENGTH);
 				}
 
 				clif_send(&packet, sizeof(packet), src, target);
