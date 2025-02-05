@@ -3841,6 +3841,8 @@ int32 status_calc_pc_sub(map_session_data* sd, uint8 opt)
 
 	memset(&sd->bonus, 0, sizeof(sd->bonus));
 
+	sd->bonus.change_race = RC_NONE_;
+
 	// Autobonus
 	pc_delautobonus(*sd, sd->autobonus, true);
 	pc_delautobonus(*sd, sd->autobonus2, true);
@@ -4914,6 +4916,10 @@ int32 status_calc_pc_sub(map_session_data* sd, uint8 opt)
 			sd->bonus.long_attack_atk_rate += i;
 		}
 	}
+
+	if (sd->bonus.change_race != RC_NONE_)
+		base_status->race = sd->bonus.change_race;
+		
 	status_cpy(&sd->battle_status, base_status);
 
 // ----- CLIENT-SIDE REFRESH -----
@@ -12311,6 +12317,16 @@ int32 status_change_start(struct block_list* src, struct block_list* bl,enum sc_
 		case SC_GOLDENMACECLAN:
 		case SC_CROSSBOWCLAN:
 		case SC_JUMPINGCLAN:
+		case SC_ANGELCLAN:
+		case SC_BRUTECLAN:
+		case SC_DEMIHUMANCLAN:
+		case SC_DEMONCLAN:
+		case SC_DRAGONCLAN:
+		case SC_FISHCLAN:
+		case SC_FORMLESSCLAN:
+		case SC_INSECTCLAN:
+		case SC_PLANTCLAN:
+		case SC_UNDEADCLAN:
 			tick = INFINITE_TICK;
 			status_change_start(src,bl,SC_CLAN_INFO,10000,0,val2,0,0,INFINITE_TICK,flag);
 			break;
@@ -12692,6 +12708,16 @@ int32 status_change_start(struct block_list* src, struct block_list* bl,enum sc_
 			case SC_GOLDENMACECLAN:
 			case SC_CROSSBOWCLAN:
 			case SC_JUMPINGCLAN:
+			case SC_ANGELCLAN:
+			case SC_BRUTECLAN:
+			case SC_DEMIHUMANCLAN:
+			case SC_DEMONCLAN:
+			case SC_DRAGONCLAN:
+			case SC_FISHCLAN:
+			case SC_FORMLESSCLAN:
+			case SC_INSECTCLAN:
+			case SC_PLANTCLAN:
+			case SC_UNDEADCLAN:			
 			case SC_CLAN_INFO:
 				// If the player still has a clan status, but was removed from his clan
 				if( sd && sd->status.clan_id == 0 ){
