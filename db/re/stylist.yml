@@ -420,10 +420,731 @@ Body:
   - Look: Body2
     Options:
       - Index: 1
-        Value: 0
+        BaseJob: 4252
+        Value: 4252
         CostsHuman:
             RequiredItem: Costume_Ticket
+            RequiredItemBox: Costume_Ticket
+            Price: 0
       - Index: 2
-        Value: 1
+        BaseJob: 4252
+        Value: 4060
         CostsHuman:
             RequiredItem: Costume_Ticket
+            RequiredItemBox: Costume_Ticket
+      - Index: 3
+        BaseJob: 4252
+        Value: 4332
+        CostsHuman:
+            RequiredItem: Costume_Ticket
+            RequiredItemBox: Costume_Ticket
+      - Index: 4
+        BaseJob: 4253
+        Value: 4253
+        CostsHuman:
+            Price: 0
+      - Index: 5
+        BaseJob: 4253
+        Value: 4064
+        CostsHuman:
+            RequiredItem: Costume_Ticket
+            RequiredItemBox: Costume_Ticket
+      - Index: 6
+        BaseJob: 4253
+        Value: 4333
+        CostsHuman:
+            RequiredItem: Costume_Ticket
+            RequiredItemBox: Costume_Ticket
+      - Index: 7
+        BaseJob: 4254
+        Value: 4254
+        CostsHuman:
+            Price: 0
+      - Index: 8
+        BaseJob: 4254
+        Value: 4065
+        CostsHuman:
+            RequiredItem: Costume_Ticket
+            RequiredItemBox: Costume_Ticket
+      - Index: 9
+        BaseJob: 4254
+        Value: 4334
+        CostsHuman:
+            RequiredItem: Costume_Ticket
+            RequiredItemBox: Costume_Ticket
+      - Index: 10
+        BaseJob: 4255
+        Value: 4255
+        CostsHuman:
+            Price: 0
+      - Index: 11
+        BaseJob: 4255
+        Value: 4061
+        CostsHuman:
+            RequiredItem: Costume_Ticket
+            RequiredItemBox: Costume_Ticket
+      - Index: 12
+        BaseJob: 4255
+        Value: 4335
+        CostsHuman:
+            RequiredItem: Costume_Ticket
+            RequiredItemBox: Costume_Ticket
+      - Index: 13
+        BaseJob: 4256
+        Value: 4256
+        CostsHuman:
+            Price: 0
+      - Index: 14
+        BaseJob: 4256
+        Value: 4063
+        CostsHuman:
+            RequiredItem: Costume_Ticket
+            RequiredItemBox: Costume_Ticket
+      - Index: 15
+        BaseJob: 4256
+        Value: 4336
+        CostsHuman:
+            RequiredItem: Costume_Ticket
+            RequiredItemBox: Costume_Ticket
+      - Index: 16
+        BaseJob: 4257
+        Value: 4257
+        CostsHuman:
+            Price: 0
+      - Index: 17
+        BaseJob: 4257
+        Value: 4062
+        CostsHuman:
+            RequiredItem: Costume_Ticket
+            RequiredItemBox: Costume_Ticket
+      - Index: 18
+        BaseJob: 4257
+        Value: 4337
+        CostsHuman:
+            RequiredItem: Costume_Ticket
+            RequiredItemBox: Costume_Ticket
+      - Index: 19
+        BaseJob: 4258
+        Value: 4258
+        CostsHuman:
+            Price: 0
+      - Index: 20
+        BaseJob: 4258
+        Value: 4073
+        CostsHuman:
+            RequiredItem: Costume_Ticket
+            RequiredItemBox: Costume_Ticket
+      - Index: 21
+        BaseJob: 4258
+        Value: 4338
+        CostsHuman:
+            RequiredItem: Costume_Ticket
+            RequiredItemBox: Costume_Ticket
+      - Index: 22
+        BaseJob: 4259
+        Value: 4259
+        CostsHuman:
+            Price: 0
+      - Index: 23
+        BaseJob: 4259
+        Value: 4078
+        CostsHuman:
+            RequiredItem: Costume_Ticket
+            RequiredItemBox: Costume_Ticket
+      - Index: 24
+        BaseJob: 4259
+        Value: 4339
+        CostsHuman:
+            RequiredItem: Costume_Ticket
+            RequiredItemBox: Costume_Ticket
+      - Index: 25
+        BaseJob: 4260
+        Value: 4260
+        CostsHuman:
+            Price: 0
+      - Index: 26
+        BaseJob: 4260
+        Value: 4079
+        CostsHuman:
+            RequiredItem: Costume_Ticket
+            RequiredItemBox: Costume_Ticket
+      - Index: 27
+        BaseJob: 4260
+        Value: 4340
+        CostsHuman:
+            RequiredItem: Costume_Ticket
+            RequiredItemBox: Costume_Ticket
+      - Index: 28
+        BaseJob: 4261
+        Value: 4261
+        CostsHuman:
+            Price: 0
+      - Index: 29
+        BaseJob: 4261
+        Value: 4074
+        CostsHuman:
+            RequiredItem: Costume_Ticket
+            RequiredItemBox: Costume_Ticket
+      - Index: 30
+        BaseJob: 4261
+        Value: 4341
+        CostsHuman:
+            RequiredItem: Costume_Ticket
+            RequiredItemBox: Costume_Ticket
+      - Index: 31
+        BaseJob: 4262
+        Value: 4262
+        CostsHuman:
+            Price: 0
+      - Index: 32
+        BaseJob: 4262
+        Value: 4077
+        CostsHuman:
+            RequiredItem: Costume_Ticket
+            RequiredItemBox: Costume_Ticket
+      - Index: 33
+        BaseJob: 4262
+        Value: 4342
+        CostsHuman:
+            RequiredItem: Costume_Ticket
+            RequiredItemBox: Costume_Ticket
+      - Index: 34
+        BaseJob: 4263
+        Value: 4263
+        CostsHuman:
+            Price: 0
+      - Index: 35
+        BaseJob: 4263
+        Value: 4075
+        CostsHuman:
+            RequiredItem: Costume_Ticket
+            RequiredItemBox: Costume_Ticket
+      - Index: 36
+        BaseJob: 4263
+        Value: 4343
+        CostsHuman:
+            RequiredItem: Costume_Ticket
+            RequiredItemBox: Costume_Ticket
+      - Index: 37
+        BaseJob: 4264
+        Value: 4264
+        CostsHuman:
+            Price: 0
+      - Index: 38
+        BaseJob: 4264
+        Value: 4076
+        CostsHuman:
+            RequiredItem: Costume_Ticket
+            RequiredItemBox: Costume_Ticket
+      - Index: 39
+        BaseJob: 4264
+        Value: 4344
+        CostsHuman:
+            RequiredItem: Costume_Ticket
+            RequiredItemBox: Costume_Ticket
+      - Index: 40
+        BaseJob: 4060
+        Value: 4060
+        CostsHuman:
+            Price: 0
+      - Index: 41
+        BaseJob: 4060
+        Value: 4332
+        CostsHuman:
+            RequiredItem: Costume_Ticket
+            RequiredItemBox: Costume_Ticket
+      - Index: 42
+        BaseJob: 4054
+        Value: 4054
+        CostsHuman:
+            Price: 0
+      - Index: 43
+        BaseJob: 4054
+        Value: 4332
+        CostsHuman:
+            RequiredItem: Costume_Ticket
+            RequiredItemBox: Costume_Ticket
+      - Index: 44
+        BaseJob: 4096
+        Value: 4096
+        CostsHuman:
+            Price: 0
+      - Index: 45
+        BaseJob: 4096
+        Value: 4332
+        CostsHuman:
+            RequiredItem: Costume_Ticket
+            RequiredItemBox: Costume_Ticket
+      - Index: 46
+        BaseJob: 4064
+        Value: 4064
+        CostsHuman:
+            Price: 0
+      - Index: 47
+        BaseJob: 4064
+        Value: 4333
+        CostsHuman:
+            RequiredItem: Costume_Ticket
+            RequiredItemBox: Costume_Ticket
+      - Index: 48
+        BaseJob: 4058
+        Value: 4058
+        CostsHuman:
+            Price: 0
+      - Index: 49
+        BaseJob: 4058
+        Value: 4333
+        CostsHuman:
+            RequiredItem: Costume_Ticket
+            RequiredItemBox: Costume_Ticket
+      - Index: 50
+        BaseJob: 4100
+        Value: 4100
+        CostsHuman:
+            Price: 0
+      - Index: 51
+        BaseJob: 4100
+        Value: 4333
+        CostsHuman:
+            RequiredItem: Costume_Ticket
+            RequiredItemBox: Costume_Ticket
+      - Index: 52
+        BaseJob: 4065
+        Value: 4065
+        CostsHuman:
+            Price: 0
+      - Index: 53
+        BaseJob: 4065
+        Value: 4334
+        CostsHuman:
+            RequiredItem: Costume_Ticket
+            RequiredItemBox: Costume_Ticket
+      - Index: 54
+        BaseJob: 4059
+        Value: 4059
+        CostsHuman:
+            Price: 0
+      - Index: 55
+        BaseJob: 4059
+        Value: 4334
+        CostsHuman:
+            RequiredItem: Costume_Ticket
+            RequiredItemBox: Costume_Ticket
+      - Index: 56
+        BaseJob: 4101
+        Value: 4101
+        CostsHuman:
+            Price: 0
+      - Index: 57
+        BaseJob: 4101
+        Value: 4334
+        CostsHuman:
+            RequiredItem: Costume_Ticket
+            RequiredItemBox: Costume_Ticket
+      - Index: 58
+        BaseJob: 4061
+        Value: 4061
+        CostsHuman:
+            Price: 0
+      - Index: 59
+        BaseJob: 4061
+        Value: 4335
+        CostsHuman:
+            RequiredItem: Costume_Ticket
+            RequiredItemBox: Costume_Ticket
+      - Index: 60
+        BaseJob: 4055
+        Value: 4055
+        CostsHuman:
+            Price: 0
+      - Index: 61
+        BaseJob: 4055
+        Value: 4335
+        CostsHuman:
+            RequiredItem: Costume_Ticket
+            RequiredItemBox: Costume_Ticket
+      - Index: 62
+        BaseJob: 4097
+        Value: 4097
+        CostsHuman:
+            Price: 0
+      - Index: 63
+        BaseJob: 4097
+        Value: 4335
+        CostsHuman:
+            RequiredItem: Costume_Ticket
+            RequiredItemBox: Costume_Ticket
+      - Index: 64
+        BaseJob: 4063
+        Value: 4063
+        CostsHuman:
+            Price: 0
+      - Index: 65
+        BaseJob: 4063
+        Value: 4336
+        CostsHuman:
+            RequiredItem: Costume_Ticket
+            RequiredItemBox: Costume_Ticket
+      - Index: 66
+        BaseJob: 4057
+        Value: 4057
+        CostsHuman:
+            Price: 0
+      - Index: 67
+        BaseJob: 4057
+        Value: 4336
+        CostsHuman:
+            RequiredItem: Costume_Ticket
+            RequiredItemBox: Costume_Ticket
+      - Index: 68
+        BaseJob: 4099
+        Value: 4099
+        CostsHuman:
+            Price: 0
+      - Index: 69
+        BaseJob: 4099
+        Value: 4336
+        CostsHuman:
+            RequiredItem: Costume_Ticket
+            RequiredItemBox: Costume_Ticket
+      - Index: 70
+        BaseJob: 4062
+        Value: 4062
+        CostsHuman:
+            Price: 0
+      - Index: 71
+        BaseJob: 4062
+        Value: 4337
+        CostsHuman:
+            RequiredItem: Costume_Ticket
+            RequiredItemBox: Costume_Ticket
+      - Index: 72
+        BaseJob: 4056
+        Value: 4056
+        CostsHuman:
+            Price: 0
+      - Index: 73
+        BaseJob: 4056
+        Value: 4337
+        CostsHuman:
+            RequiredItem: Costume_Ticket
+            RequiredItemBox: Costume_Ticket
+      - Index: 74
+        BaseJob: 4098
+        Value: 4098
+        CostsHuman:
+            Price: 0
+      - Index: 75
+        BaseJob: 4098
+        Value: 4337
+        CostsHuman:
+            RequiredItem: Costume_Ticket
+            RequiredItemBox: Costume_Ticket
+      - Index: 76
+        BaseJob: 4073
+        Value: 4073
+        CostsHuman:
+            Price: 0
+      - Index: 77
+        BaseJob: 4073
+        Value: 4338
+        CostsHuman:
+            RequiredItem: Costume_Ticket
+            RequiredItemBox: Costume_Ticket
+      - Index: 78
+        BaseJob: 4066
+        Value: 4066
+        CostsHuman:
+            Price: 0
+      - Index: 79
+        BaseJob: 4066
+        Value: 4338
+        CostsHuman:
+            RequiredItem: Costume_Ticket
+            RequiredItemBox: Costume_Ticket
+      - Index: 80
+        BaseJob: 4102
+        Value: 4102
+        CostsHuman:
+            Price: 0
+      - Index: 81
+        BaseJob: 4102
+        Value: 4338
+        CostsHuman:
+            RequiredItem: Costume_Ticket
+            RequiredItemBox: Costume_Ticket
+      - Index: 82
+        BaseJob: 4078
+        Value: 4078
+        CostsHuman:
+            Price: 0
+      - Index: 83
+        BaseJob: 4078
+        Value: 4339
+        CostsHuman:
+            RequiredItem: Costume_Ticket
+            RequiredItemBox: Costume_Ticket
+      - Index: 84
+        BaseJob: 4071
+        Value: 4071
+        CostsHuman:
+            Price: 0
+      - Index: 85
+        BaseJob: 4071
+        Value: 4339
+        CostsHuman:
+            RequiredItem: Costume_Ticket
+            RequiredItemBox: Costume_Ticket
+      - Index: 86
+        BaseJob: 4107
+        Value: 4107
+        CostsHuman:
+            Price: 0
+      - Index: 87
+        BaseJob: 4107
+        Value: 4339
+        CostsHuman:
+            RequiredItem: Costume_Ticket
+            RequiredItemBox: Costume_Ticket
+      - Index: 88
+        BaseJob: 4079
+        Value: 4079
+        CostsHuman:
+            Price: 0
+      - Index: 89
+        BaseJob: 4079
+        Value: 4340
+        CostsHuman:
+            RequiredItem: Costume_Ticket
+            RequiredItemBox: Costume_Ticket
+      - Index: 90
+        BaseJob: 4072
+        Value: 4072
+        CostsHuman:
+            Price: 0
+      - Index: 91
+        BaseJob: 4072
+        Value: 4340
+        CostsHuman:
+            RequiredItem: Costume_Ticket
+            RequiredItemBox: Costume_Ticket
+      - Index: 92
+        BaseJob: 4108
+        Value: 4108
+        CostsHuman:
+            Price: 0
+      - Index: 93
+        BaseJob: 4108
+        Value: 4340
+        CostsHuman:
+            RequiredItem: Costume_Ticket
+            RequiredItemBox: Costume_Ticket
+      - Index: 94
+        BaseJob: 4074
+        Value: 4074
+        CostsHuman:
+            Price: 0
+      - Index: 95
+        BaseJob: 4074
+        Value: 4341
+        CostsHuman:
+            RequiredItem: Costume_Ticket
+            RequiredItemBox: Costume_Ticket
+      - Index: 96
+        BaseJob: 4067
+        Value: 4067
+        CostsHuman:
+            Price: 0
+      - Index: 97
+        BaseJob: 4067
+        Value: 4341
+        CostsHuman:
+            RequiredItem: Costume_Ticket
+            RequiredItemBox: Costume_Ticket
+      - Index: 98
+        BaseJob: 4103
+        Value: 4103
+        CostsHuman:
+            Price: 0
+      - Index: 99
+        BaseJob: 4103
+        Value: 4341
+        CostsHuman:
+            RequiredItem: Costume_Ticket
+            RequiredItemBox: Costume_Ticket
+      - Index: 100
+        BaseJob: 4077
+        Value: 4077
+        CostsHuman:
+            Price: 0
+      - Index: 101
+        BaseJob: 4077
+        Value: 4342
+        CostsHuman:
+            RequiredItem: Costume_Ticket
+            RequiredItemBox: Costume_Ticket
+      - Index: 102
+        BaseJob: 4070
+        Value: 4070
+        CostsHuman:
+            Price: 0
+      - Index: 103
+        BaseJob: 4070
+        Value: 4342
+        CostsHuman:
+            RequiredItem: Costume_Ticket
+            RequiredItemBox: Costume_Ticket
+      - Index: 104
+        BaseJob: 4106
+        Value: 4106
+        CostsHuman:
+            Price: 0
+      - Index: 105
+        BaseJob: 4106
+        Value: 4342
+        CostsHuman:
+            RequiredItem: Costume_Ticket
+            RequiredItemBox: Costume_Ticket
+      - Index: 106
+        BaseJob: 4075
+        Value: 4075
+        CostsHuman:
+            Price: 0
+      - Index: 107
+        BaseJob: 4075
+        Value: 4343
+        CostsHuman:
+            RequiredItem: Costume_Ticket
+            RequiredItemBox: Costume_Ticket
+      - Index: 108
+        BaseJob: 4068
+        Value: 4068
+        CostsHuman:
+            Price: 0
+      - Index: 109
+        BaseJob: 4068
+        Value: 4343
+        CostsHuman:
+            RequiredItem: Costume_Ticket
+            RequiredItemBox: Costume_Ticket
+      - Index: 110
+        BaseJob: 4104
+        Value: 4104
+        CostsHuman:
+            Price: 0
+      - Index: 111
+        BaseJob: 4104
+        Value: 4343
+        CostsHuman:
+            RequiredItem: Costume_Ticket
+            RequiredItemBox: Costume_Ticket
+      - Index: 112
+        BaseJob: 4076
+        Value: 4076
+        CostsHuman:
+            Price: 0
+      - Index: 113
+        BaseJob: 4076
+        Value: 4344
+        CostsHuman:
+            RequiredItem: Costume_Ticket
+            RequiredItemBox: Costume_Ticket
+      - Index: 114
+        BaseJob: 4069
+        Value: 4069
+        CostsHuman:
+            Price: 0
+      - Index: 115
+        BaseJob: 4069
+        Value: 4344
+        CostsHuman:
+            RequiredItem: Costume_Ticket
+            RequiredItemBox: Costume_Ticket
+      - Index: 116
+        BaseJob: 4105
+        Value: 4105
+        CostsHuman:
+            Price: 0
+      - Index: 117
+        BaseJob: 4105
+        Value: 4344
+        CostsHuman:
+            RequiredItem: Costume_Ticket
+            RequiredItemBox: Costume_Ticket
+      - Index: 118
+        BaseJob: 4302
+        Value: 4302
+        CostsHuman:
+            Price: 0
+      - Index: 119
+        BaseJob: 4302
+        Value: 4239
+        CostsHuman:
+            RequiredItem: Costume_Ticket
+            RequiredItemBox: Costume_Ticket
+      - Index: 120
+        BaseJob: 4303
+        Value: 4303
+        CostsHuman:
+            Price: 0
+      - Index: 121
+        BaseJob: 4303
+        Value: 4240
+        CostsHuman:
+            RequiredItem: Costume_Ticket
+            RequiredItemBox: Costume_Ticket
+      - Index: 122
+        BaseJob: 4304
+        Value: 4304
+        CostsHuman:
+            Price: 0
+      - Index: 123
+        BaseJob: 4304
+        Value: 4211
+        CostsHuman:
+            RequiredItem: Costume_Ticket
+            RequiredItemBox: Costume_Ticket
+      - Index: 124
+        BaseJob: 4305
+        Value: 4305
+        CostsHuman:
+            Price: 0
+      - Index: 125
+        BaseJob: 4305
+        Value: 4212
+        CostsHuman:
+            RequiredItem: Costume_Ticket
+            RequiredItemBox: Costume_Ticket
+      - Index: 126
+        BaseJob: 4306
+        Value: 4306
+        CostsHuman:
+            Price: 0
+      - Index: 127
+        BaseJob: 4306
+        Value: 4215
+        CostsHuman:
+            RequiredItem: Costume_Ticket
+            RequiredItemBox: Costume_Ticket
+      - Index: 128
+        BaseJob: 4307
+        Value: 4307
+        CostsHuman:
+            Price: 0
+      - Index: 129
+        BaseJob: 4307
+        Value: 4190
+        CostsHuman:
+            RequiredItem: Costume_Ticket
+            RequiredItemBox: Costume_Ticket
+      - Index: 130
+        BaseJob: 4308
+        Value: 4308
+        CostsHuman:
+            Price: 0
+      - Index: 131
+        BaseJob: 4308
+        Value: 4218
+        CostsHuman:
+            RequiredItem: Costume_Ticket
+            RequiredItemBox: Costume_Ticket

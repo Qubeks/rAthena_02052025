@@ -2054,4 +2054,8 @@
 	parseable_packet( HEADER_CZ_GM_CHECKER, sizeof( struct PACKET_CZ_GM_CHECKER ), clif_parse_macro_checker, 0 );
 #endif
 
+#if PACKETVER >= 20231220
+	parseable_packet(HEADER_CZ_REQ_STYLE_CHANGE3, -1, clif_parse_stylist_buy_new, 0);
+#endif
+
 #endif /* CLIF_PACKETDB_HPP */

@@ -4059,8 +4059,10 @@ void clif_changelook(struct block_list *bl, int32 type, int32 val) {
 #if PACKETVER < 20150513
 				return;
 #else
+#if PACKETVER_MAIN_NUM < 20231220
 				if (val && sd && sd->sc.option&OPTION_COSTUME)
  					val = 0;
+#endif
  				vd->body_style = val;
 #endif
 				break;
@@ -22899,6 +22901,13 @@ bool clif_parse_stylist_buy_sub( map_session_data* sd, _look look, int16 index )
 		return false;
 	}
 
+#if PACKETVER >= 20231220
+	// Verify that the player is allowed to change to the selected body style
+	if (look == LOOK_BODY2 && entry->base_job != -1 && entry->base_job != sd->status.class_) {
+		return false;
+	}
+#endif
+
 	int16 inventoryIndex = -1;
 
 	if( costs->requiredItem != 0 ){
@@ -23018,6 +23027,52 @@ void clif_parse_stylist_buy( int32 fd, map_session_data* sd ){
 void clif_parse_stylist_close( int32 fd, map_session_data* sd ){
 #if PACKETVER >= 20151104
 	sd->state.stylist_open = false;
+#endif
+}
+
+void clif_parse_stylist_buy_new(int fd, map_session_data *sd)
+{
+#if PACKETVER >= 20231220
+	struct PACKET_CZ_REQ_STYLE_CHANGE3 *p = (struct PACKET_CZ_REQ_STYLE_CHANGE3*)RFIFOP(fd, 0);
+	const int len = (p->PacketLength - sizeof(*p)) / sizeof(struct PACKET_CZ_REQ_STYLE_CHANGE3_sub);
+
+	enum stylist_params {
+		STYLIST_HAIR_COLOR = 0,
+		STYLIST_HAIR = 1,
+		STYLIST_CLOTHES_COLOR = 2,
+		STYLIST_HEAD_TOP = 3,
+		STYLIST_HEAD_MID = 4,
+		STYLIST_HEAD_BOTTOM = 5,
+		STYLIST_HAIR_DORAM = 6,
+		STYLIST_CLOTHES_COLOR_DORAM = 8,
+		STYLIST_BODY = 9,
+	};
+
+	if (p->count <= 0 || p->count > 10 || len != p->count) {
+		clif_stylist_response(sd, false);
+		return;
+	}
+
+	for (int i = 0; i < len; i++) {
+		bool ret = false;
+		switch (p->list[i].param) {
+		case STYLIST_HAIR_COLOR: ret = clif_parse_stylist_buy_sub(sd, LOOK_HAIR_COLOR, p->list[i].value); break;
+		case STYLIST_HAIR: ret = clif_parse_stylist_buy_sub(sd, LOOK_HAIR, p->list[i].value); break;
+		case STYLIST_CLOTHES_COLOR: ret = clif_parse_stylist_buy_sub(sd, LOOK_CLOTHES_COLOR, p->list[i].value); break;
+		case STYLIST_HEAD_TOP: ret = clif_parse_stylist_buy_sub(sd, LOOK_HEAD_TOP, p->list[i].value); break;
+		case STYLIST_HEAD_MID: ret = clif_parse_stylist_buy_sub(sd, LOOK_HEAD_MID, p->list[i].value); break;
+		case STYLIST_HEAD_BOTTOM: ret = clif_parse_stylist_buy_sub(sd, LOOK_HEAD_BOTTOM, p->list[i].value); break;
+		case STYLIST_HAIR_DORAM: ret = clif_parse_stylist_buy_sub(sd, LOOK_HAIR, p->list[i].value); break;
+		case STYLIST_CLOTHES_COLOR_DORAM: ret = clif_parse_stylist_buy_sub(sd, LOOK_CLOTHES_COLOR, p->list[i].value); break;
+		case STYLIST_BODY: ret = clif_parse_stylist_buy_sub(sd, LOOK_BODY2, p->list[i].value); break;
+		default: break;
+		}
+		if (!ret) {
+			clif_stylist_response(sd, true);
+			return;
+		}
+	}
+	clif_stylist_response(sd, false);
 #endif
 }
 

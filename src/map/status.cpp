@@ -12659,7 +12659,9 @@ int32 status_change_start(struct block_list* src, struct block_list* bl,enum sc_
 				clif_changelook(bl,LOOK_WEAPON,0);
 				clif_changelook(bl,LOOK_SHIELD,0);
 				clif_changelook(bl,LOOK_CLOTHES_COLOR,vd->cloth_color);
+#if PACKETVER_MAIN_NUM < 20231220					
 				clif_changelook(bl,LOOK_BODY2,0);
+#endif				
 				break;
 			case SC_STONE:
 			case SC_STONEWAIT:

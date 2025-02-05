@@ -2303,6 +2303,18 @@ struct PACKET_CZ_REQ_STYLE_CHANGE2 {
 	int16 BodyStyle;
 } __attribute__((packed));
 
+struct PACKET_CZ_REQ_STYLE_CHANGE3_sub {
+	int param;
+	int value;
+} __attribute__((packed));
+
+struct PACKET_CZ_REQ_STYLE_CHANGE3 {
+	int16 PacketType;
+	uint16 PacketLength;
+	int16 count;
+	struct PACKET_CZ_REQ_STYLE_CHANGE3_sub list[];
+} __attribute__((packed));
+
 struct PACKET_ZC_STYLE_CHANGE_RES {
 	int16 PacketType;
 	int8 flag;
