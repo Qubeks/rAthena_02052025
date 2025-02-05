@@ -26034,6 +26034,63 @@ void clif_emotion_expansion_list(map_session_data *sd, std::vector<struct PACKET
 #endif
 }
 
+void clif_quest_status_ack(map_session_data *sd, const struct PACKET_CZ_QUEST_STATUS_REQ_SUB *QuestList, uint16_t QuestCount)
+{
+#if PACKETVER >= 20240516
+	nullpo_retv(sd);
+
+	uint8_t Buffer[2048];
+
+	const uint16_t PacketLength = static_cast<uint16_t>(sizeof(struct PACKET_ZC_QUEST_STATUS_ACK) + QuestCount * sizeof(struct PACKET_ZC_QUEST_STATUS_ACK_SUB));
+	if (PacketLength > sizeof(Buffer))
+		return; // Prevent buffer overflow
+
+	struct PACKET_ZC_QUEST_STATUS_ACK *p = reinterpret_cast<struct PACKET_ZC_QUEST_STATUS_ACK *>(Buffer);
+	p->PacketType = HEADER_ZC_QUEST_STATUS_ACK;
+	p->PacketLength = PacketLength;
+
+	struct PACKET_ZC_QUEST_STATUS_ACK_SUB *List = reinterpret_cast<struct PACKET_ZC_QUEST_STATUS_ACK_SUB *>(Buffer + sizeof(struct PACKET_ZC_QUEST_STATUS_ACK));
+
+	for (size_t i = 0; i < QuestCount; ++i)
+	{
+		const uint32_t QuestID = QuestList[i].QuestID;
+		uint8_t QuestStatus = Q_INACTIVE;
+
+		for (size_t j = 0; j < sd->num_quests; ++j)
+		{
+			if (QuestID == sd->quest_log[j].quest_id)
+			{
+				QuestStatus = (sd->quest_log[j].state == Q_COMPLETE) ? Q_COMPLETE : Q_INACTIVE;
+				break;
+			}
+		}
+
+		List[i].QuestID = QuestID;
+		List[i].QuestStatus = QuestStatus;
+	}
+
+	clif_send(p, p->PacketLength, &sd->bl, SELF);
+#endif
+}
+
+void clif_parse_quest_status(const int fd, map_session_data* const sd)
+{
+#if PACKETVER >= 20240516
+	nullpo_retv(sd);
+
+	const PACKET_CZ_QUEST_STATUS_REQ* const Packet = reinterpret_cast<PACKET_CZ_QUEST_STATUS_REQ*>(RFIFOP(fd, 0));
+	if (Packet->PacketLength <= (sizeof(PACKET_CZ_QUEST_STATUS_REQ) + sizeof(PACKET_CZ_QUEST_STATUS_REQ_SUB)))
+	{
+		return;
+	}
+
+	const PACKET_CZ_QUEST_STATUS_REQ_SUB* const QuestList = reinterpret_cast<PACKET_CZ_QUEST_STATUS_REQ_SUB*>(RFIFOP(fd, sizeof(PACKET_CZ_QUEST_STATUS_REQ)));
+	const uint16_t QuestCount = static_cast<uint16_t>((Packet->PacketLength - sizeof(PACKET_CZ_QUEST_STATUS_REQ)) / sizeof(PACKET_CZ_QUEST_STATUS_REQ_SUB));
+
+	clif_quest_status_ack(sd, QuestList, QuestCount);
+#endif
+}
+
 /*==========================================
  * Main client packet processing function
  *------------------------------------------*/
