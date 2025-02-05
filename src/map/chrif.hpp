@@ -93,4 +93,6 @@ void do_init_chrif(void);
 
 int32 chrif_flush_fifo(void);
 
+int32 chrif_MacroUserReport_Save(int reporterAID, int reportAID, int reportType, char *reportMsg);
+
 #endif /* CHRIF_HPP */

@@ -848,6 +848,17 @@ enum e_ack_additem_to_cart : uint8 {
 	ADDITEM_TO_CART_FAIL_COUNT = 1
 };
 
+enum e_macro_user_report_result : int32 {
+	MACRO_USER_REPORT_COUNTLIMIT = 0,
+	MACRO_USER_REPORT_SUCCESS = 1,
+	MACRO_USER_REPORT_COOLTIME = 2,
+	MACRO_USER_REPORT_EFST_ACTIVATED = 3,
+	MACRO_USER_REPORT_PENALTY_COUNTMAX = 4,
+	MACRO_USER_REPORT_REPORTED = 5,
+	MACRO_USER_REPORT_NOT_USE_AREA = 6,
+	MACRO_CHECK_REMOVE_INVALID_AID = 7,
+};
+
 enum e_changestate_pet : uint8 {
 	CHANGESTATEPET_INIT = 0,
 	CHANGESTATEPET_INTIMACY = 1,
@@ -1508,5 +1519,8 @@ void clif_set_npc_window_pos_percent(map_session_data& sd, int32 x, int32 y);
 void clif_noask_sub( map_session_data& sd, map_session_data& tsd, int32 type );
 
 void clif_specialpopup(map_session_data& sd, int32 id);
+
+void clif_parse_macro_user_report(int fd, map_session_data *sd);
+void clif_macro_user_report_response(map_session_data *sd, int status, char *reportName);
 
 #endif /* CLIF_HPP */

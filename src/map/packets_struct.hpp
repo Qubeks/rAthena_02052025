@@ -5987,6 +5987,28 @@ struct PACKET_CZ_ADVENTURER_AGENCY_JOIN_RESULT {
 DEFINE_PACKET_HEADER(CZ_ADVENTURER_AGENCY_JOIN_RESULT, 0x0af8);
 #endif  // PACKETVER_MAIN_NUM >= 20191218 || PACKETVER_RE_NUM >= 20191211 || PACKETVER_ZERO_NUM >= 20191224
 
+#if PACKETVER >= 20230920
+struct PACKET_CZ_MACRO_USER_REPORT_REQ {
+	int16 packetType;
+	uint32 reporterAID;
+	uint32 reportAID;
+	char reportName[NAME_LENGTH];
+	int16 reportType;
+	char reportMsg[101];
+} __attribute__((packed));
+DEFINE_PACKET_HEADER(CZ_MACRO_USER_REPORT_REQ, 0x0be2);
+#endif
+
+#if PACKETVER >= 20230920
+struct PACKET_ZC_MACRO_USER_REPORT_RES {
+	int16 packetType;
+	uint32 reporterAID;
+	char reportName[NAME_LENGTH];
+	uint32 status;
+} __attribute__((packed));
+DEFINE_PACKET_HEADER(ZC_MACRO_USER_REPORT_RES, 0x0be3);
+#endif
+
 #if !defined(sun) && (!defined(__NETBSD__) || __NetBSD_Version__ >= 600000000) // NetBSD 5 and Solaris don't like pragma pack but accept the packed attribute
 #pragma pack(pop)
 #endif // not NetBSD < 6 / Solaris

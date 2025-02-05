@@ -2058,4 +2058,9 @@
 	parseable_packet(HEADER_CZ_REQ_STYLE_CHANGE3, -1, clif_parse_stylist_buy_new, 0);
 #endif
 
+#if PACKETVER >= 20230920
+	parseable_packet(HEADER_CZ_MACRO_USER_REPORT_REQ, sizeof(struct PACKET_CZ_MACRO_USER_REPORT_REQ), clif_parse_macro_user_report, 0);
+	packet(0x0be3, sizeof(PACKET_ZC_MACRO_USER_REPORT_RES));
+#endif
+
 #endif /* CLIF_PACKETDB_HPP */

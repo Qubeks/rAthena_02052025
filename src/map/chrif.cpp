@@ -1896,6 +1896,20 @@ int32 chrif_removefriend(uint32 char_id, int32 friend_id) {
 	return 0;
 }
 
+/* Ask the char server to save the macro user report */
+int chrif_MacroUserReport_Save(int reporterAID, int reportAID, int reportType, char *reportMsg)
+{
+	WFIFOHEAD(char_fd, 267);
+	WFIFOW(char_fd, 0) = 0x2b2c;
+	WFIFOL(char_fd, 2) = reporterAID;
+	WFIFOL(char_fd, 6) = reportAID;
+	WFIFOB(char_fd, 10) = reportType;
+	safestrncpy(WFIFOCP(char_fd, 11), reportMsg, 255);
+	WFIFOSET(char_fd, 267);
+
+	return 0;
+}
+
 /**
  * @see DBApply
  */

@@ -1150,3 +1150,16 @@ CREATE TABLE IF NOT EXISTS `vendings` (
   `autotrade` tinyint(4) NOT NULL,
   PRIMARY KEY (`id`)
 ) ENGINE=MyISAM;
+
+--
+-- Table structure for table `macro_user_report`
+--
+
+CREATE TABLE IF NOT EXISTS `macro_user_report` (
+  `id` INT UNSIGNED NOT NULL AUTO_INCREMENT,
+  `reporter_aid` INT UNSIGNED NOT NULL,
+  `report_aid` INT UNSIGNED NOT NULL,
+  `report_type` INT UNSIGNED NOT NULL,
+  `report_msg` VARCHAR(256) NOT NULL DEFAULT '',
+  PRIMARY KEY (`id`)
+);
