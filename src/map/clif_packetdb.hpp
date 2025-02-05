@@ -2063,4 +2063,14 @@
 	packet(0x0be3, sizeof(PACKET_ZC_MACRO_USER_REPORT_RES));
 #endif
 
+#if PACKETVER >= 20230802
+	parseable_packet(HEADER_CZ_REQ_EMOTION2, sizeof(struct PACKET_CZ_REQ_EMOTION2), clif_parse_emotion2, 0);
+	packet(HEADER_ZC_EMOTION_SUCCESS, sizeof(struct PACKET_ZC_EMOTION_SUCCESS));
+	packet(HEADER_ZC_EMOTION_FAIL, sizeof(struct PACKET_ZC_EMOTION_FAIL));
+	parseable_packet(HEADER_CZ_EMOTION_EXPANTION_REQ, sizeof(struct PACKET_CZ_EMOTION_EXPANTION_REQ), clif_parse_emotion_expansion_request, 0);
+	packet(HEADER_ZC_EMOTION_EXPANSION_SUCCESS, sizeof(struct PACKET_ZC_EMOTION_EXPANSION_SUCCESS));
+	packet(HEADER_ZC_EMOTION_EXPANSION_FAIL, sizeof(struct PACKET_ZC_EMOTION_EXPANSION_FAIL));
+	packet(HEADER_ZC_EMOTION_EXPANTION_LIST, -1);
+#endif
+
 #endif /* CLIF_PACKETDB_HPP */
