@@ -1875,6 +1875,23 @@ struct PACKET_CZ_MAKE_GROUP2{
 } __attribute__((packed));
 DEFINE_PACKET_HEADER(CZ_MAKE_GROUP2, 0x1e8);
 
+#if PACKETVER_MAIN_NUM >= 20230920
+struct PACKET_CZ_REQUEST_RANDOM_UPGRADE_ENCHANT {
+	int16 packetType;
+	uint64 clientLuaIndex;
+	uint16 index;
+	uint16 slot;
+} __attribute__((packed));
+
+struct PACKET_CZ_REQUEST_PERFECT_UPGRADE_ENCHANT {
+	int16 packetType;
+	uint64 clientLuaIndex;
+	uint16 index;
+	uint16 slot;
+	uint32 itemId;
+} __attribute__((packed));
+#endif
+
 struct PACKET_CZ_GM_CHECKER{
 	int16 packetType;
 	char mapname[MAP_NAME_LENGTH_EXT];
@@ -1939,6 +1956,10 @@ DEFINE_PACKET_HEADER(ZC_WARPLIST, 0xabe)
 DEFINE_PACKET_HEADER(ZC_WARPLIST, 0x11c)
 #endif
 
+#if PACKETVER_MAIN_NUM >= 20230920
+	DEFINE_PACKET_HEADER(CZ_REQUEST_RANDOM_UPGRADE_ENCHANT, 0x0bf0)
+	DEFINE_PACKET_HEADER(CZ_REQUEST_PERFECT_UPGRADE_ENCHANT, 0x0bf1)
+#endif
 
 const int16 MAX_INVENTORY_ITEM_PACKET_NORMAL = ( ( INT16_MAX - ( sizeof( struct packet_itemlist_normal ) - ( sizeof( struct NORMALITEM_INFO ) * MAX_ITEMLIST) ) ) / sizeof( struct NORMALITEM_INFO ) );
 const int16 MAX_INVENTORY_ITEM_PACKET_EQUIP = ( ( INT16_MAX - ( sizeof( struct packet_itemlist_equip ) - ( sizeof( struct EQUIPITEM_INFO ) * MAX_ITEMLIST ) ) ) / sizeof( struct EQUIPITEM_INFO ) );

@@ -28178,358 +28178,358 @@ Body:
               - Material: GH_Cursed_Crystal
                 Amount: 50
               - Material: Enchant_Ticket
-#  - Id: 117  # Skipped (some fields are not supported on rAthena for now)
-#    TargetItems:
-#      Season_Hood_Spring: true
-#    Order:
-#      - Slot: 3
-#      - Slot: 2
-#      - Slot: 1
-#    Slots:
-#      - Slot: 3
-#        PerfectEnchants:
-#          - Item: Physical_Seed_1
-#            Materials:
-#              - Material: Spring_Material_1
-#                Amount: 10
-#              - Material: Spring_Material_2
-#                Amount: 10
-#              - Material: Spring_Material_3
-#                Amount: 10
-#              - Material: Energy_Of_Spring
-#                Amount: 60
-#      - Slot: 2
-#        PerfectEnchants:
-#          - Item: Physical_Fruit_1
-#            Materials:
-#              - Material: Spring_Material_1
-#                Amount: 15
-#              - Material: Spring_Material_2
-#                Amount: 15
-#              - Material: Spring_Material_3
-#                Amount: 15
-#              - Material: Energy_Of_Spring
-#                Amount: 90
-#      - Slot: 1
-#        PerfectEnchants:
-#          - Item: Life_of_Spring_1
-#            Materials:
-#              - Material: Spring_Material_1
-#                Amount: 25
-#              - Material: Spring_Material_2
-#                Amount: 25
-#              - Material: Spring_Material_3
-#                Amount: 25
-#              - Material: Energy_Of_Spring
-#                Amount: 140
-#  - Id: 118  # Skipped (some fields are not supported on rAthena for now)
-#    TargetItems:
-#      Circul_Of_Life_Spring: true
-#    Order:
-#      - Slot: 3
-#      - Slot: 2
-#      - Slot: 1
-#    Slots:
-#      - Slot: 3
-#        PerfectEnchants:
-#          - Item: Physical_Seed_1
-#            Materials:
-#              - Material: Spring_Material_1
-#                Amount: 10
-#              - Material: Spring_Material_2
-#                Amount: 10
-#              - Material: Spring_Material_3
-#                Amount: 10
-#              - Material: Energy_Of_Spring
-#                Amount: 60
-#      - Slot: 2
-#        PerfectEnchants:
-#          - Item: Physical_Fruit_1
-#            Materials:
-#              - Material: Spring_Material_1
-#                Amount: 15
-#              - Material: Spring_Material_2
-#                Amount: 15
-#              - Material: Spring_Material_3
-#                Amount: 15
-#              - Material: Energy_Of_Spring
-#                Amount: 90
-#      - Slot: 1
-#        PerfectEnchants:
-#          - Item: Life_of_Spring_1
-#            Materials:
-#              - Material: Spring_Material_1
-#                Amount: 25
-#              - Material: Spring_Material_2
-#                Amount: 25
-#              - Material: Spring_Material_3
-#                Amount: 25
-#              - Material: Energy_Of_Spring
-#                Amount: 140
-#  - Id: 119  # Skipped (some fields are not supported on rAthena for now)
-#    TargetItems:
-#      Season_Hood_Summer: true
-#    Order:
-#      - Slot: 3
-#      - Slot: 2
-#      - Slot: 1
-#    Slots:
-#      - Slot: 3
-#        PerfectEnchants:
-#          - Item: Physical_Seed_1
-#            Materials:
-#              - Material: Summer_Material_1
-#                Amount: 10
-#              - Material: Summer_Material_2
-#                Amount: 10
-#              - Material: Summer_Material_3
-#                Amount: 10
-#              - Material: Energy_Of_Summer
-#                Amount: 60
-#      - Slot: 2
-#        PerfectEnchants:
-#          - Item: Physical_Fruit_1
-#            Materials:
-#              - Material: Summer_Material_1
-#                Amount: 15
-#              - Material: Summer_Material_2
-#                Amount: 15
-#              - Material: Summer_Material_3
-#                Amount: 15
-#              - Material: Energy_Of_Summer
-#                Amount: 90
-#      - Slot: 1
-#        PerfectEnchants:
-#          - Item: Life_of_Summer_1
-#            Materials:
-#              - Material: Summer_Material_1
-#                Amount: 25
-#              - Material: Summer_Material_2
-#                Amount: 25
-#              - Material: Summer_Material_3
-#                Amount: 25
-#              - Material: Energy_Of_Summer
-#                Amount: 140
-#  - Id: 120  # Skipped (some fields are not supported on rAthena for now)
-#    TargetItems:
-#      Circul_Of_Life_Summer: true
-#    Order:
-#      - Slot: 3
-#      - Slot: 2
-#      - Slot: 1
-#    Slots:
-#      - Slot: 3
-#        PerfectEnchants:
-#          - Item: Physical_Seed_1
-#            Materials:
-#              - Material: Summer_Material_1
-#                Amount: 10
-#              - Material: Summer_Material_2
-#                Amount: 10
-#              - Material: Summer_Material_3
-#                Amount: 10
-#              - Material: Energy_Of_Summer
-#                Amount: 60
-#      - Slot: 2
-#        PerfectEnchants:
-#          - Item: Physical_Fruit_1
-#            Materials:
-#              - Material: Summer_Material_1
-#                Amount: 15
-#              - Material: Summer_Material_2
-#                Amount: 15
-#              - Material: Summer_Material_3
-#                Amount: 15
-#              - Material: Energy_Of_Summer
-#                Amount: 90
-#      - Slot: 1
-#        PerfectEnchants:
-#          - Item: Life_of_Summer_1
-#            Materials:
-#              - Material: Summer_Material_1
-#                Amount: 25
-#              - Material: Summer_Material_2
-#                Amount: 25
-#              - Material: Summer_Material_3
-#                Amount: 25
-#              - Material: Energy_Of_Summer
-#                Amount: 140
-#  - Id: 121  # Skipped (some fields are not supported on rAthena for now)
-#    TargetItems:
-#      Season_Hood_Autumn: true
-#    Order:
-#      - Slot: 3
-#      - Slot: 2
-#      - Slot: 1
-#    Slots:
-#      - Slot: 3
-#        PerfectEnchants:
-#          - Item: Magical_Seed_1
-#            Materials:
-#              - Material: Autumn_Material_1
-#                Amount: 10
-#              - Material: Autumn_Material_2
-#                Amount: 10
-#              - Material: Autumn_Material_3
-#                Amount: 10
-#              - Material: Energy_Of_Autumn
-#                Amount: 60
-#      - Slot: 2
-#        PerfectEnchants:
-#          - Item: Magical_Fruit_1
-#            Materials:
-#              - Material: Autumn_Material_1
-#                Amount: 15
-#              - Material: Autumn_Material_2
-#                Amount: 15
-#              - Material: Autumn_Material_3
-#                Amount: 15
-#              - Material: Energy_Of_Autumn
-#                Amount: 90
-#      - Slot: 1
-#        PerfectEnchants:
-#          - Item: Life_of_Autumn_1
-#            Materials:
-#              - Material: Autumn_Material_1
-#                Amount: 25
-#              - Material: Autumn_Material_2
-#                Amount: 25
-#              - Material: Autumn_Material_3
-#                Amount: 25
-#              - Material: Energy_Of_Autumn
-#                Amount: 140
-#  - Id: 122  # Skipped (some fields are not supported on rAthena for now)
-#    TargetItems:
-#      Circul_Of_Life_Autumn: true
-#    Order:
-#      - Slot: 3
-#      - Slot: 2
-#      - Slot: 1
-#    Slots:
-#      - Slot: 3
-#        PerfectEnchants:
-#          - Item: Magical_Seed_1
-#            Materials:
-#              - Material: Autumn_Material_1
-#                Amount: 10
-#              - Material: Autumn_Material_2
-#                Amount: 10
-#              - Material: Autumn_Material_3
-#                Amount: 10
-#              - Material: Energy_Of_Autumn
-#                Amount: 60
-#      - Slot: 2
-#        PerfectEnchants:
-#          - Item: Magical_Fruit_1
-#            Materials:
-#              - Material: Autumn_Material_1
-#                Amount: 15
-#              - Material: Autumn_Material_2
-#                Amount: 15
-#              - Material: Autumn_Material_3
-#                Amount: 15
-#              - Material: Energy_Of_Autumn
-#                Amount: 90
-#      - Slot: 1
-#        PerfectEnchants:
-#          - Item: Life_of_Autumn_1
-#            Materials:
-#              - Material: Autumn_Material_1
-#                Amount: 25
-#              - Material: Autumn_Material_2
-#                Amount: 25
-#              - Material: Autumn_Material_3
-#                Amount: 25
-#              - Material: Energy_Of_Autumn
-#                Amount: 140
-#  - Id: 123  # Skipped (some fields are not supported on rAthena for now)
-#    TargetItems:
-#      Season_Hood_Winter: true
-#    Order:
-#      - Slot: 3
-#      - Slot: 2
-#      - Slot: 1
-#    Slots:
-#      - Slot: 3
-#        PerfectEnchants:
-#          - Item: Physical_Seed_1
-#            Materials:
-#              - Material: Winter_Material_1
-#                Amount: 10
-#              - Material: Winter_Material_2
-#                Amount: 10
-#              - Material: Winter_Material_3
-#                Amount: 10
-#              - Material: Energy_Of_Winter
-#                Amount: 60
-#      - Slot: 2
-#        PerfectEnchants:
-#          - Item: Physical_Fruit_1
-#            Materials:
-#              - Material: Winter_Material_1
-#                Amount: 15
-#              - Material: Winter_Material_2
-#                Amount: 15
-#              - Material: Winter_Material_3
-#                Amount: 15
-#              - Material: Energy_Of_Winter
-#                Amount: 90
-#      - Slot: 1
-#        PerfectEnchants:
-#          - Item: Life_of_Winter_1
-#            Materials:
-#              - Material: Winter_Material_1
-#                Amount: 25
-#              - Material: Winter_Material_2
-#                Amount: 25
-#              - Material: Winter_Material_3
-#                Amount: 25
-#              - Material: Energy_Of_Winter
-#                Amount: 140
-#  - Id: 124  # Skipped (some fields are not supported on rAthena for now)
-#    TargetItems:
-#      Circul_Of_Life_Winter: true
-#    Order:
-#      - Slot: 3
-#      - Slot: 2
-#      - Slot: 1
-#    Slots:
-#      - Slot: 3
-#        PerfectEnchants:
-#          - Item: Physical_Seed_1
-#            Materials:
-#              - Material: Winter_Material_1
-#                Amount: 10
-#              - Material: Winter_Material_2
-#                Amount: 10
-#              - Material: Winter_Material_3
-#                Amount: 10
-#              - Material: Energy_Of_Winter
-#                Amount: 60
-#      - Slot: 2
-#        PerfectEnchants:
-#          - Item: Physical_Fruit_1
-#            Materials:
-#              - Material: Winter_Material_1
-#                Amount: 15
-#              - Material: Winter_Material_2
-#                Amount: 15
-#              - Material: Winter_Material_3
-#                Amount: 15
-#              - Material: Energy_Of_Winter
-#                Amount: 90
-#      - Slot: 1
-#        PerfectEnchants:
-#          - Item: Life_of_Winter_1
-#            Materials:
-#              - Material: Winter_Material_1
-#                Amount: 25
-#              - Material: Winter_Material_2
-#                Amount: 25
-#              - Material: Winter_Material_3
-#                Amount: 25
-#              - Material: Energy_Of_Winter
-#                Amount: 140
+  - Id: 117  # Skipped (some fields are not supported on rAthena for now)
+    TargetItems:
+      Season_Hood_Spring: true
+    Order:
+      - Slot: 3
+      - Slot: 2
+      - Slot: 1
+    Slots:
+      - Slot: 3
+        PerfectEnchants:
+          - Item: Physical_Seed_1
+            Materials:
+              - Material: Spring_Material_1
+                Amount: 10
+              - Material: Spring_Material_2
+                Amount: 10
+              - Material: Spring_Material_3
+                Amount: 10
+              - Material: Energy_Of_Spring
+                Amount: 60
+      - Slot: 2
+        PerfectEnchants:
+          - Item: Physical_Fruit_1
+            Materials:
+              - Material: Spring_Material_1
+                Amount: 15
+              - Material: Spring_Material_2
+                Amount: 15
+              - Material: Spring_Material_3
+                Amount: 15
+              - Material: Energy_Of_Spring
+                Amount: 90
+      - Slot: 1
+        PerfectEnchants:
+          - Item: Life_of_Spring_1
+            Materials:
+              - Material: Spring_Material_1
+                Amount: 25
+              - Material: Spring_Material_2
+                Amount: 25
+              - Material: Spring_Material_3
+                Amount: 25
+              - Material: Energy_Of_Spring
+                Amount: 140
+  - Id: 118  # Skipped (some fields are not supported on rAthena for now)
+    TargetItems:
+      Circul_Of_Life_Spring: true
+    Order:
+      - Slot: 3
+      - Slot: 2
+      - Slot: 1
+    Slots:
+      - Slot: 3
+        PerfectEnchants:
+          - Item: Physical_Seed_1
+            Materials:
+              - Material: Spring_Material_1
+                Amount: 10
+              - Material: Spring_Material_2
+                Amount: 10
+              - Material: Spring_Material_3
+                Amount: 10
+              - Material: Energy_Of_Spring
+                Amount: 60
+      - Slot: 2
+        PerfectEnchants:
+          - Item: Physical_Fruit_1
+            Materials:
+              - Material: Spring_Material_1
+                Amount: 15
+              - Material: Spring_Material_2
+                Amount: 15
+              - Material: Spring_Material_3
+                Amount: 15
+              - Material: Energy_Of_Spring
+                Amount: 90
+      - Slot: 1
+        PerfectEnchants:
+          - Item: Life_of_Spring_1
+            Materials:
+              - Material: Spring_Material_1
+                Amount: 25
+              - Material: Spring_Material_2
+                Amount: 25
+              - Material: Spring_Material_3
+                Amount: 25
+              - Material: Energy_Of_Spring
+                Amount: 140
+  - Id: 119  # Skipped (some fields are not supported on rAthena for now)
+    TargetItems:
+      Season_Hood_Summer: true
+    Order:
+      - Slot: 3
+      - Slot: 2
+      - Slot: 1
+    Slots:
+      - Slot: 3
+        PerfectEnchants:
+          - Item: Physical_Seed_1
+            Materials:
+              - Material: Summer_Material_1
+                Amount: 10
+              - Material: Summer_Material_2
+                Amount: 10
+              - Material: Summer_Material_3
+                Amount: 10
+              - Material: Energy_Of_Summer
+                Amount: 60
+      - Slot: 2
+        PerfectEnchants:
+          - Item: Physical_Fruit_1
+            Materials:
+              - Material: Summer_Material_1
+                Amount: 15
+              - Material: Summer_Material_2
+                Amount: 15
+              - Material: Summer_Material_3
+                Amount: 15
+              - Material: Energy_Of_Summer
+                Amount: 90
+      - Slot: 1
+        PerfectEnchants:
+          - Item: Life_of_Summer_1
+            Materials:
+              - Material: Summer_Material_1
+                Amount: 25
+              - Material: Summer_Material_2
+                Amount: 25
+              - Material: Summer_Material_3
+                Amount: 25
+              - Material: Energy_Of_Summer
+                Amount: 140
+  - Id: 120  # Skipped (some fields are not supported on rAthena for now)
+    TargetItems:
+      Circul_Of_Life_Summer: true
+    Order:
+      - Slot: 3
+      - Slot: 2
+      - Slot: 1
+    Slots:
+      - Slot: 3
+        PerfectEnchants:
+          - Item: Physical_Seed_1
+            Materials:
+              - Material: Summer_Material_1
+                Amount: 10
+              - Material: Summer_Material_2
+                Amount: 10
+              - Material: Summer_Material_3
+                Amount: 10
+              - Material: Energy_Of_Summer
+                Amount: 60
+      - Slot: 2
+        PerfectEnchants:
+          - Item: Physical_Fruit_1
+            Materials:
+              - Material: Summer_Material_1
+                Amount: 15
+              - Material: Summer_Material_2
+                Amount: 15
+              - Material: Summer_Material_3
+                Amount: 15
+              - Material: Energy_Of_Summer
+                Amount: 90
+      - Slot: 1
+        PerfectEnchants:
+          - Item: Life_of_Summer_1
+            Materials:
+              - Material: Summer_Material_1
+                Amount: 25
+              - Material: Summer_Material_2
+                Amount: 25
+              - Material: Summer_Material_3
+                Amount: 25
+              - Material: Energy_Of_Summer
+                Amount: 140
+  - Id: 121  # Skipped (some fields are not supported on rAthena for now)
+    TargetItems:
+      Season_Hood_Autumn: true
+    Order:
+      - Slot: 3
+      - Slot: 2
+      - Slot: 1
+    Slots:
+      - Slot: 3
+        PerfectEnchants:
+          - Item: Magical_Seed_1
+            Materials:
+              - Material: Autumn_Material_1
+                Amount: 10
+              - Material: Autumn_Material_2
+                Amount: 10
+              - Material: Autumn_Material_3
+                Amount: 10
+              - Material: Energy_Of_Autumn
+                Amount: 60
+      - Slot: 2
+        PerfectEnchants:
+          - Item: Magical_Fruit_1
+            Materials:
+              - Material: Autumn_Material_1
+                Amount: 15
+              - Material: Autumn_Material_2
+                Amount: 15
+              - Material: Autumn_Material_3
+                Amount: 15
+              - Material: Energy_Of_Autumn
+                Amount: 90
+      - Slot: 1
+        PerfectEnchants:
+          - Item: Life_of_Autumn_1
+            Materials:
+              - Material: Autumn_Material_1
+                Amount: 25
+              - Material: Autumn_Material_2
+                Amount: 25
+              - Material: Autumn_Material_3
+                Amount: 25
+              - Material: Energy_Of_Autumn
+                Amount: 140
+  - Id: 122  # Skipped (some fields are not supported on rAthena for now)
+    TargetItems:
+      Circul_Of_Life_Autumn: true
+    Order:
+      - Slot: 3
+      - Slot: 2
+      - Slot: 1
+    Slots:
+      - Slot: 3
+        PerfectEnchants:
+          - Item: Magical_Seed_1
+            Materials:
+              - Material: Autumn_Material_1
+                Amount: 10
+              - Material: Autumn_Material_2
+                Amount: 10
+              - Material: Autumn_Material_3
+                Amount: 10
+              - Material: Energy_Of_Autumn
+                Amount: 60
+      - Slot: 2
+        PerfectEnchants:
+          - Item: Magical_Fruit_1
+            Materials:
+              - Material: Autumn_Material_1
+                Amount: 15
+              - Material: Autumn_Material_2
+                Amount: 15
+              - Material: Autumn_Material_3
+                Amount: 15
+              - Material: Energy_Of_Autumn
+                Amount: 90
+      - Slot: 1
+        PerfectEnchants:
+          - Item: Life_of_Autumn_1
+            Materials:
+              - Material: Autumn_Material_1
+                Amount: 25
+              - Material: Autumn_Material_2
+                Amount: 25
+              - Material: Autumn_Material_3
+                Amount: 25
+              - Material: Energy_Of_Autumn
+                Amount: 140
+  - Id: 123  # Skipped (some fields are not supported on rAthena for now)
+    TargetItems:
+      Season_Hood_Winter: true
+    Order:
+      - Slot: 3
+      - Slot: 2
+      - Slot: 1
+    Slots:
+      - Slot: 3
+        PerfectEnchants:
+          - Item: Physical_Seed_1
+            Materials:
+              - Material: Winter_Material_1
+                Amount: 10
+              - Material: Winter_Material_2
+                Amount: 10
+              - Material: Winter_Material_3
+                Amount: 10
+              - Material: Energy_Of_Winter
+                Amount: 60
+      - Slot: 2
+        PerfectEnchants:
+          - Item: Physical_Fruit_1
+            Materials:
+              - Material: Winter_Material_1
+                Amount: 15
+              - Material: Winter_Material_2
+                Amount: 15
+              - Material: Winter_Material_3
+                Amount: 15
+              - Material: Energy_Of_Winter
+                Amount: 90
+      - Slot: 1
+        PerfectEnchants:
+          - Item: Life_of_Winter_1
+            Materials:
+              - Material: Winter_Material_1
+                Amount: 25
+              - Material: Winter_Material_2
+                Amount: 25
+              - Material: Winter_Material_3
+                Amount: 25
+              - Material: Energy_Of_Winter
+                Amount: 140
+  - Id: 124  # Skipped (some fields are not supported on rAthena for now)
+    TargetItems:
+      Circul_Of_Life_Winter: true
+    Order:
+      - Slot: 3
+      - Slot: 2
+      - Slot: 1
+    Slots:
+      - Slot: 3
+        PerfectEnchants:
+          - Item: Physical_Seed_1
+            Materials:
+              - Material: Winter_Material_1
+                Amount: 10
+              - Material: Winter_Material_2
+                Amount: 10
+              - Material: Winter_Material_3
+                Amount: 10
+              - Material: Energy_Of_Winter
+                Amount: 60
+      - Slot: 2
+        PerfectEnchants:
+          - Item: Physical_Fruit_1
+            Materials:
+              - Material: Winter_Material_1
+                Amount: 15
+              - Material: Winter_Material_2
+                Amount: 15
+              - Material: Winter_Material_3
+                Amount: 15
+              - Material: Energy_Of_Winter
+                Amount: 90
+      - Slot: 1
+        PerfectEnchants:
+          - Item: Life_of_Winter_1
+            Materials:
+              - Material: Winter_Material_1
+                Amount: 25
+              - Material: Winter_Material_2
+                Amount: 25
+              - Material: Winter_Material_3
+                Amount: 25
+              - Material: Energy_Of_Winter
+                Amount: 140
   - Id: 125
     TargetItems:
       FateSin_Boots_MT: true

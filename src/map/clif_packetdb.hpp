@@ -2073,4 +2073,9 @@
 	packet(HEADER_ZC_EMOTION_EXPANTION_LIST, -1);
 #endif
 
+#if PACKETVER_MAIN_NUM >= 20230920
+	parseable_packet(HEADER_CZ_REQUEST_RANDOM_UPGRADE_ENCHANT, sizeof(struct PACKET_CZ_REQUEST_RANDOM_UPGRADE_ENCHANT), clif_parse_enchantwindow_upgrade_random, 0);
+	parseable_packet(HEADER_CZ_REQUEST_PERFECT_UPGRADE_ENCHANT, sizeof(struct PACKET_CZ_REQUEST_PERFECT_UPGRADE_ENCHANT), clif_parse_enchantwindow_upgrade, 0);
+#endif
+
 #endif /* CLIF_PACKETDB_HPP */

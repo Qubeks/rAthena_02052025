@@ -3444,6 +3444,13 @@ struct s_item_enchant_upgrade{
 	std::unordered_map<t_itemid, uint16> materials;
 };
 
+struct s_item_enchant_random_upgrade{
+	t_itemid enchant_item_id;
+	uint32 zeny;
+	std::unordered_map<t_itemid, uint16> materials;
+	std::unordered_map<t_itemid, std::shared_ptr<s_item_enchant_normal_sub>> enchants;
+};
+
 struct s_item_enchant_slot{
 	uint16 slot;
 	struct{
@@ -3459,6 +3466,9 @@ struct s_item_enchant_slot{
 	struct{
 		std::unordered_map<t_itemid, std::shared_ptr<s_item_enchant_upgrade>> enchants;
 	} upgrade;
+	struct {
+		std::unordered_map<t_itemid, std::shared_ptr<s_item_enchant_random_upgrade>> enchants;
+	} random_upgrade;	
 };
 
 struct s_item_enchant{

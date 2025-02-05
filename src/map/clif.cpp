@@ -24950,6 +24950,120 @@ void clif_parse_enchantwindow_upgrade( int32 fd, map_session_data* sd ){
 #endif
 }
 
+void clif_parse_enchantwindow_upgrade_random(int fd, map_session_data *sd)
+{
+#if PACKETVER_MAIN_NUM >= 20230920
+	struct PACKET_CZ_REQUEST_RANDOM_UPGRADE_ENCHANT *p = (struct PACKET_CZ_REQUEST_RANDOM_UPGRADE_ENCHANT*)RFIFOP(fd, 0);
+
+	if( sd->state.item_enchant_index != p->clientLuaIndex ){
+		return;
+	}
+
+	uint16 index = server_index( p->index );
+
+	if( index >= MAX_INVENTORY ){
+		return;
+	}
+
+	if( sd->inventory_data[index] == nullptr ){
+		return;
+	}
+
+	struct item& selected_item = sd->inventory.u.items_inventory[index];
+	std::shared_ptr<s_item_enchant> enchant = item_enchant_db.find( p->clientLuaIndex );
+
+	if( enchant == nullptr ){
+		return;
+	}
+
+	if( !clif_parse_enchant_basecheck( selected_item, enchant ) ){
+		return;
+	}
+
+	uint16 slot = p->slot;
+
+	if( slot >= MAX_SLOTS ){
+		return;
+	}
+
+	if( slot < sd->inventory_data[index]->slots ){
+		return;
+	}
+
+	if( selected_item.card[slot] == 0 ){
+		return;
+	}
+
+	std::shared_ptr<s_item_enchant_slot> enchant_slot = util::umap_find( enchant->slots, slot );
+
+	if( enchant_slot == nullptr ){
+		return;
+	}
+
+	std::shared_ptr<s_item_enchant_random_upgrade> random_upgrades = util::umap_find( enchant_slot->random_upgrade.enchants, selected_item.card[slot] );
+
+	if( random_upgrades == nullptr ){
+		return;
+	}
+
+	if( sd->status.zeny < random_upgrades->zeny ){
+		return;
+	}
+
+	std::unordered_map<uint16, uint16> materials;
+
+	for( const auto& entry : random_upgrades->materials ){
+		int16 idx = pc_search_inventory( sd, entry.first );
+
+		if( idx < 0 ){
+			return;
+		}
+
+		if( sd->inventory.u.items_inventory[idx].amount < entry.second ){
+			return;
+		}
+
+		materials[idx] = entry.second;
+	}
+
+	if( pc_payzeny( sd, random_upgrades->zeny, LOG_TYPE_ENCHANT ) != 0 ){
+		return;
+	}
+
+	for( const auto& entry : materials ){
+		if( pc_delitem( sd, entry.first, entry.second, 0, 0, LOG_TYPE_ENCHANT )  != 0 ){
+			return;
+		}
+	}
+
+	// Log removal of item
+	log_pick_pc( sd, LOG_TYPE_ENCHANT, -1, &selected_item );
+
+	size_t maximum = 3 * random_upgrades->enchants.size();
+	bool enchanted = false;
+
+	for( int i = 0; i < maximum; i++ ){
+		std::shared_ptr<s_item_enchant_normal_sub> random_upgrade = util::umap_random( random_upgrades->enchants );
+
+		if( rnd_value( 0, 100000 ) < random_upgrade->chance ){
+			selected_item.card[slot] = random_upgrade->item_id;
+			enchanted = true;
+			break;
+		}
+	}
+
+	if( !enchanted ){
+		std::shared_ptr<s_item_enchant_normal_sub> random_upgrade = util::umap_random( random_upgrades->enchants );
+		selected_item.card[slot] = random_upgrade->item_id;
+	}
+
+	// Log retrieving the item again -> with the new enchant
+	log_pick_pc( sd, LOG_TYPE_ENCHANT, 1, &selected_item );
+
+	clif_enchantwindow_result( *sd, true, selected_item.card[slot] );
+#endif
+}
+
 void clif_parse_enchantwindow_reset( int32 fd, map_session_data* sd ){
 #if PACKETVER_MAIN_NUM >= 20201118 || PACKETVER_RE_NUM >= 20211103 || PACKETVER_ZERO_NUM >= 20221024
 	const PACKET_CZ_REQUEST_RESET_ENCHANT* p = reinterpret_cast<PACKET_CZ_REQUEST_RESET_ENCHANT*>( RFIFOP( fd, 0 ) );
