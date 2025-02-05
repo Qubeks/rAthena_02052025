@@ -641,6 +641,7 @@ int32 clif_send(const void* buf, int32 len, struct block_list* bl, enum send_tar
 	case GUILD_SAMEMAP_WOS:
 	case GUILD:
 	case GUILD_WOS:
+	case GUILD_ALLIANCE:	
 	case GUILD_NOBG: {
 		if (!sd || !sd->status.guild_id || !sd->guild)
 			break;
@@ -657,7 +658,7 @@ int32 clif_send(const void* buf, int32 len, struct block_list* bl, enum send_tar
 				if( sd->bl.id == bl->id && (type == GUILD_WOS || type == GUILD_SAMEMAP_WOS || type == GUILD_AREA_WOS) )
 					continue;
 
-				if( type != GUILD && type != GUILD_NOBG && type != GUILD_WOS && sd->bl.m != bl->m )
+				if( type != GUILD && type != GUILD_NOBG && type != GUILD_WOS && type != GUILD_ALLIANCE && sd->bl.m != bl->m )
 					continue;
 
 				if( (type == GUILD_AREA || type == GUILD_AREA_WOS) && (sd->bl.x < x0 || sd->bl.y < y0 || sd->bl.x > x1 || sd->bl.y > y1) )
@@ -668,6 +669,26 @@ int32 clif_send(const void* buf, int32 len, struct block_list* bl, enum send_tar
 				WFIFOSET(fd,len);
 			}
 		}
+
+		if (type == GUILD_ALLIANCE) {
+			for (const auto &al : g.alliance) {
+				if (al.guild_id == 0 || al.opposition != 0)
+					continue;
+				const auto &ag = guild_search(al.guild_id);
+				if (!ag)
+					continue;
+				for (i = 0; i < ag->guild.max_member; i++) {
+					if ((sd = ag->guild.member[i].sd) != nullptr) {
+						if (!session_isActive(fd = sd->fd))
+							continue;
+						WFIFOHEAD(fd, len);
+						memcpy(WFIFOP(fd, 0), buf, len);
+						WFIFOSET(fd, len);
+					}
+				}
+			}
+		}
+		
 		if (!enable_spy) //Skip unnecessary parsing. [Skotlex]
 			break;
 
@@ -9258,6 +9279,29 @@ void clif_guild_message( const struct mmo_guild& g, const char* mes, size_t len 
 	clif_send(p, p->packetLength, &sd->bl, GUILD_NOBG);
 }
 
+void clif_guild_alliance_message(const struct mmo_guild &g, const char *mes, int len)
+{
+	map_session_data *sd;
+	uint8 buf[256];
+
+	if( len == 0 )
+	{
+		return;
+	}
+	else if( len > sizeof(buf)-5 )
+	{
+		ShowWarning("clif_guild_alliance_message: Truncated message '%s' (len=%d, max=%" PRIuPTR ", guild_id=%d).\n", mes, len, sizeof(buf)-5, g.guild_id);
+		len = sizeof(buf) - 5;
+	}
+
+	WBUFW(buf, 0) = 0x0bde;
+	WBUFW(buf, 2) = len + 5;
+	safestrncpy(WBUFCP(buf,4), mes, len+1);
+
+	if ((sd = guild_getavailablesd(g)) != NULL)
+		clif_send(buf, WBUFW(buf, 2), &sd->bl, GUILD_ALLIANCE);
+}
+
 /// Request for guild alliance 
 /// 0171 <inviter account id>.L <guild name>.24B (ZC_REQ_ALLY_GUILD).
 void clif_guild_reqalliance(map_session_data& sd,uint32 account_id,const char *name)
@@ -14632,6 +14676,21 @@ void clif_parse_GuildMessage(int32 fd, map_session_data* sd){
 		guild_send_message(sd, output, strlen(output) );
 }
 
+void clif_parse_GuildAllianceMessage(int fd, map_session_data* sd){
+	char name[NAME_LENGTH], message[CHAT_SIZE_MAX], output[CHAT_SIZE_MAX+NAME_LENGTH*2];
+
+	// validate packet and retrieve name and message
+	if( !clif_process_message( sd, false, name, message, output ) )
+		return;
+
+	if (sd->status.guild_id == 0)
+		return;
+
+	auto g = guild_search(sd->status.guild_id);
+	if (!g)
+		return;
+	clif_guild_alliance_message(g->guild, output, static_cast<int>(strlen(output)));
+}
 
 /// Guild alliance request (CZ_REQ_ALLY_GUILD).
 /// 0170 <account id>.L <inviter account id>.L <inviter char id>.L

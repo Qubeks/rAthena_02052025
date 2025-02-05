@@ -2078,4 +2078,8 @@
 	parseable_packet(HEADER_CZ_REQUEST_PERFECT_UPGRADE_ENCHANT, sizeof(struct PACKET_CZ_REQUEST_PERFECT_UPGRADE_ENCHANT), clif_parse_enchantwindow_upgrade, 0);
 #endif
 
+#if PACKETVER_MAIN_NUM >= 20231115
+	parseable_packet(0x0bdd, -1, clif_parse_GuildAllianceMessage, 2, 4);
+#endif
+
 #endif /* CLIF_PACKETDB_HPP */
