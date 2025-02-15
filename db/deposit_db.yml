@@ -1,0 +1,146 @@
+###########################################################################
+# Deposit Database
+###########################################################################
+#
+# Settings
+#
+###########################################################################
+# - StorageId               Storage Id.
+#   Bound                   if storage shared by account or not. (Default: true)
+#   Withdraw                If item in this storage can be withdrawed after deposited. (Default: true)
+#   WithdrawFee             Price to withdraw any item from this storage. (Default: 0)
+#   Items:                  List of possible items.
+#     - Item                Item name.
+#       Amount              Item amount. (Default: 1)
+#       Refine              Item refine. (Default: 0)
+#       Withdraw            If this item can be withdrawed after deposited. (Default: true)
+#       WithdrawFee         Price to withdraw this item from this storage. (Default: 0)
+#       Script              Script to execute when the item successfully deposited. (Default: null)
+###########################################################################
+#
+# Pre-renewal Cards
+#
+###########################################################################
+
+Header:
+  Type: DEPOSIT_DB
+  Version: 1
+
+Body:
+  - StorageId: 10
+    #Bound: false
+    WithdrawFee: 1000000
+    Items:
+     - Item: Knight_Of_Abyss_Card
+       Amount: 100
+       Script: |
+         bonus2 bAddClass,Class_Boss,1;
+     - Item: Agav_Card
+       Amount: 100
+       Script: |
+         bonus bMatkRate,1;
+         bonus bDef,-10;
+         if ( BaseClass == Job_Mage )
+            bonus bMaxSP,1;
+     - Item: Alarm_Card
+       Amount: 100
+       Script: |
+         bonus bMaxHP,1;
+         bonus bVit,1;
+     - Item: Alice_Card
+       Amount: 100
+       Script: |
+         bonus2 bSubClass,Class_Boss,1;
+         bonus2 bSubClass,Class_Normal,-1;
+     - Item: Alicel_Card
+       Amount: 100
+       Script: |
+         bonus bFlee,1;
+         bonus bDef,-1;
+     - Item: Aliot_Card
+       Amount: 100
+       Script: |
+         if ( BaseClass == Job_Swordman || BaseClass == Job_Merchant || BaseClass == Job_Thief )
+            bonus bStr,1; 
+            bonus bMaxHPrate,1;
+         if ( BaseClass == Job_Mage || BaseClass == Job_Archer || BaseClass == Job_Acolyte )
+            bonus bInt,1; 
+            bonus bMaxSPrate,1;
+     - Item: Aliza_Card #to be changed
+       Amount: 100
+       Script: |
+         bonus bFlee,1;
+         bonus bDef,-1;
+     - Item: Alligator_Card
+       Amount: 100
+       Script: |
+         bonus bLongAtkDef,1;
+     - Item: Am_Mut_Card
+       Amount: 100
+       Script: |
+         bonus2 bSubRace,RC_DemiHuman,-1; 
+         bonus2 bSubRace,RC_Player_Human,-1; 
+         bonus2 bExpAddRace,RC_DemiHuman,1;
+     - Item: Ambernite_Card
+       Amount: 100
+       Script: |
+         bonus bDef,1;
+     - Item: Amon_Ra_Card
+       Amount: 1
+       Script: |
+         bonus bAllStats,1;
+     - Item: Anacondaq_Card
+       Amount: 100
+       Script: |
+         bonus2 bAddEle,Ele_Poison,1;
+     - Item: Ancient_Mimic_Card
+       Amount: 100
+       Script: |
+         bonus bAgi,readparam(bLuk)/40;
+     - Item: Ancient_Mummy_Card #to be changed
+       Amount: 100
+       Script: |
+         bonus bAgi,readparam(bLuk)/40;
+     - Item: Ancient_Worm_Card
+       Amount: 100
+       Script: |
+          bonus2 bSubRace,RC_Demon,-1; 
+          bonus2 bExpAddRace,RC_Demon,1;
+     - Item: Andre_Card
+       Amount: 100
+       Script: |
+          bonus bBaseAtk,20;
+     - Item: Andre_Egg_Card
+       Amount: 100
+       Script: |
+          bonus bMaxHPrate,1;
+     - Item: Angeling_Card #to be changed
+       Amount: 10
+       Script: |
+          bonus bMaxHPrate,1;
+     - Item: Anolian_Card
+       Amount: 100
+       Script: |
+          bonus3 bAutoSpellWhenHit,"AC_CONCENTRATION",1+9*(getskilllv("AC_CONCENTRATION")==10),30;
+     - Item: Anopheles_Card
+       Amount: 100
+       Script: |
+          bonus3 bAddMonsterDropItem,12058,RC_Insect,50;
+     - Item: Antonio_Card
+       Amount: 100
+       Script: |
+          bonus3 bAutoSpellWhenHit,"AL_TELEPORT",1,500;
+     - Item: Anubis_Card
+       Amount: 100
+       Script: |
+          bonus2 bSubRace,RC_Angel,30;
+  - StorageId: 11
+    Bound: true
+    Items:
+     - Item: Sword
+       Script: |
+         bonus bAgi,100;
+     - Item: Sword_
+       Refine: 7
+       Script: |
+         bonus bDex,100;

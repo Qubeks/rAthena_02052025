@@ -529,7 +529,7 @@ int32 char_mmo_char_tosql(uint32 char_id, struct mmo_charstatus* p){
 }
 
 /// Saves an array of 'item' entries into the specified table.
-int32 char_memitemdata_to_sql(const struct item items[], int32 max, int32 id, enum storage_type tableswitch, uint8 stor_id) {
+int32 char_memitemdata_to_sql(const struct item items[], int32 max, int32 id, enum storage_type tableswitch, uint16 stor_id, uint16 mode) {
 	StringBuf buf;
 	SqlStmt stmt{ *sql_handle };
 	int32 i, j, offset = 0, errors = 0;
@@ -552,7 +552,10 @@ int32 char_memitemdata_to_sql(const struct item items[], int32 max, int32 id, en
 		case TABLE_STORAGE:
 			printname = inter_premiumStorage_getPrintableName(stor_id);
 			tablename = inter_premiumStorage_getTableName(stor_id);
-			selectoption = "account_id";
+			if (mode & STOR_MODE_CHAR)
+				selectoption = "char_id";
+			else
+				selectoption = "account_id";
 			break;
 		case TABLE_GUILD_STORAGE:
 			printname = "Guild Storage";
@@ -742,7 +745,7 @@ int32 char_memitemdata_to_sql(const struct item items[], int32 max, int32 id, en
 	return errors;
 }
 
-bool char_memitemdata_from_sql(struct s_storage* p, int32 max, int32 id, enum storage_type tableswitch, uint8 stor_id) {
+bool char_memitemdata_from_sql(struct s_storage* p, int32 max, int32 id, enum storage_type tableswitch, uint16 stor_id, uint16 mode) {
 	StringBuf buf;
 	SqlStmt stmt{ *sql_handle };
 	int32 i,j, offset = 0, max2;
@@ -767,7 +770,10 @@ bool char_memitemdata_from_sql(struct s_storage* p, int32 max, int32 id, enum st
 		case TABLE_STORAGE:
 			printname = "Storage";
 			tablename = inter_premiumStorage_getTableName(stor_id);
-			selectoption = "account_id";
+			if (mode & STOR_MODE_CHAR)
+				selectoption = "char_id";
+			else
+				selectoption = "account_id";
 			storage = p->u.items_storage;
 			max2 = inter_premiumStorage_getMax(p->stor_id);
 			break;

@@ -378,6 +378,20 @@ struct s_qi_display {
 	e_questinfo_markcolor color;
 };
 
+struct s_deposit_bonus
+{
+	int type;
+	int val1;
+	int val2;
+};
+
+struct s_deposit_items
+{
+	t_itemid nameid;
+	uint16 amount;
+	char refine;
+};
+
 class map_session_data {
 public:
 	struct block_list bl;
@@ -947,6 +961,12 @@ public:
 	s_macro_detect macro_detect;
 
 	std::vector<uint32> party_booking_requests;
+
+	struct {
+		bool calc;
+		std::unordered_map<uint16, std::vector<s_deposit_items>> items;
+		std::vector<s_deposit_bonus> bonus;
+	} deposit;	
 };
 
 extern struct eri *pc_sc_display_ers; /// Player's SC display table

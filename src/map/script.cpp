@@ -42,6 +42,7 @@
 #include "clan.hpp"
 #include "clif.hpp"
 #include "date.hpp" // date type enum, date_get()
+#include "deposit.hpp"
 #include "elemental.hpp"
 #include "guild.hpp"
 #include "homunculus.hpp"
@@ -27642,6 +27643,104 @@ BUILDIN_FUNC(mesitemicon){
 	return SCRIPT_CMD_SUCCESS;
 }
 
+BUILDIN_FUNC(getdepositstore)
+{
+	int count = 0;
+
+	for (const auto& pair : deposit_db)
+	{
+		std::shared_ptr<s_deposit_stor> stor = pair.second;
+
+		if (stor->items.empty())
+			continue;
+
+		setd_sub_num(st, NULL, ".@stor_id", count, stor->stor_id, NULL);
+		setd_sub_str(st, NULL, ".@stor_name$", count++, storage_getName(stor->stor_id), NULL);
+	}
+
+	script_pushint(st, count);
+
+	return SCRIPT_CMD_SUCCESS;
+}
+
+BUILDIN_FUNC(getdepositlist)
+{
+	map_session_data* sd;
+
+	if (script_hasdata(st, 3) && script_isstring(st, 3)) // Character Name
+	{
+		if (!script_nick2sd(3, sd))
+			return SCRIPT_CMD_FAILURE;
+	}
+	else // Account ID
+	{
+		if (!script_accid2sd(3, sd))
+			return SCRIPT_CMD_FAILURE;
+	}
+
+	int j = 0, k = 0;
+	int stor_id = script_getnum(st, 2);
+	std::shared_ptr<s_deposit_stor> stor = deposit_db.find(stor_id);
+	if (stor != nullptr)
+	{
+		const auto& list = sd->deposit.items[stor->stor_id];
+		for (std::shared_ptr<s_deposit_item> entry : stor->items)
+		{
+			t_itemid nameid = entry->nameid;
+
+			auto idx = std::find_if(list.begin(), list.end(),
+				[&nameid](const s_deposit_items& s) { return (s.nameid == nameid); });
+
+			if (idx != list.end())
+			{
+				setd_sub_num(st, NULL, ".@amount2", j, idx->amount, NULL);
+				setd_sub_num(st, NULL, ".@refine2", j, idx->refine, NULL);
+				if (idx->amount >= entry->amount && idx->refine >= entry->refine)
+				{
+					setd_sub_num(st, NULL, ".@flag", j, 1, NULL);
+					setd_sub_num(st, NULL, ".@count", 0, ++k, NULL);
+				}
+			}
+
+			setd_sub_num(st, NULL, ".@amount", j, entry->amount, NULL);
+			setd_sub_num(st, NULL, ".@refine", j, entry->refine, NULL);
+			setd_sub_num(st, NULL, ".@nameid", j++, entry->nameid, NULL);
+		}
+	}
+
+	script_pushint(st, j);
+
+	return SCRIPT_CMD_SUCCESS;
+}
+
+BUILDIN_FUNC(getdepositbonus)
+{
+	map_session_data* sd;
+
+	if (script_hasdata(st, 2) && script_isstring(st, 2))
+	{
+		if (!script_nick2sd(2, sd))
+			return SCRIPT_CMD_FAILURE;
+	}
+	else
+	{
+		if (!script_accid2sd(2, sd))
+			return SCRIPT_CMD_FAILURE;
+	}
+
+	int j = 0;
+	const auto& list = sd->deposit.bonus;
+	for (const auto& it : list) {
+		setd_sub_num(st, NULL, ".@type", j, it.type, NULL);
+		setd_sub_num(st, NULL, ".@val1", j, it.val1, NULL);
+		setd_sub_num(st, NULL, ".@val2", j, it.val2, NULL);
+		j++;
+	}
+
+	script_pushint(st, j);
+	return SCRIPT_CMD_SUCCESS;
+}
+
 #include <custom/script.inc>
 
 // declarations that were supposed to be exported from npc_chat.cpp
@@ -28413,6 +28512,10 @@ struct script_function buildin_func[] = {
 	BUILDIN_DEF(permission_check, "i?"),
 	BUILDIN_DEF(permission_add, "i?"),
 	BUILDIN_DEF2(permission_add, "permission_remove", "i?"),
+
+	BUILDIN_DEF(getdepositstore, ""),
+	BUILDIN_DEF(getdepositlist, "i?"),
+	BUILDIN_DEF(getdepositbonus, "?"),
 
 	BUILDIN_DEF( mesitemicon, "i??" ),
 

@@ -35,6 +35,7 @@
 #include "pc_groups.hpp"
 #include "pet.hpp"
 #include "script.hpp"
+#include "deposit.hpp"
 
 using namespace rathena;
 
@@ -3852,6 +3853,33 @@ int32 status_calc_pc_sub(map_session_data* sd, uint8 opt)
 		pet_delautobonus(*sd, sd->pd->autobonus, true);
 		pet_delautobonus(*sd, sd->pd->autobonus2, true);
 		pet_delautobonus(*sd, sd->pd->autobonus3, true);
+	}
+
+	sd->deposit.calc = false;
+	if (!sd->deposit.items.empty())
+	{
+		sd->deposit.calc = true;
+		sd->deposit.bonus.clear();
+		for (const auto& pair : sd->deposit.items)
+		{
+			uint16 stor_id = pair.first;
+			std::vector<s_deposit_items> ditems = pair.second;
+
+			if (ditems.empty())
+				continue;
+			for (s_deposit_items& it : ditems)
+			{
+				std::shared_ptr<s_deposit_item> entry = deposit_db.findItemInStor(stor_id, it.nameid);
+				if (entry != nullptr && entry->script && it.amount >= entry->amount && it.refine >= entry->refine)
+				{
+					run_script(entry->script, 0, sd->bl.id, 0);
+					if (!calculating)
+						return 1;
+				}
+
+			}
+		}
+		sd->deposit.calc = false;
 	}
 
 	// Parse equipment

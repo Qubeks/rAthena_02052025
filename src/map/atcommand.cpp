@@ -30,6 +30,7 @@
 #include "chrif.hpp"
 #include "clan.hpp"
 #include "clif.hpp"
+#include "deposit.hpp"
 #include "duel.hpp"
 #include "elemental.hpp"
 #include "guild.hpp"
@@ -4537,6 +4538,15 @@ ACMD_FUNC(reloadbarterdb){
 	return 0;
 }
 
+ACMD_FUNC(reloaddepositdb){
+	nullpo_retr(-1, sd);
+
+	do_reload_deposit();
+	clif_displaymessage(fd, "Deposit database has been reloaded.");
+
+	return 0;
+}
+
 ACMD_FUNC(reloadlogconf){
 	nullpo_retr(-1, sd);
 
@@ -7505,7 +7515,7 @@ ACMD_FUNC(pettalk)
 			}
 			sd->emotionlasttime = time(nullptr);
 
-			clif_emotion(&pd->bl, i);
+			clif_emotion( pd->bl, static_cast<emotion_type>( i ) );
 			return 0;
 		}
 	}
@@ -8270,7 +8280,7 @@ ACMD_FUNC(hommutate)
 	if (m_class != -1 && m_id != -1 && m_class&HOM_EVO && m_id&HOM_S && sd->hd->homunculus.level >= 99) {
 		hom_mutate(sd->hd, homun_id);
 	} else {
-		clif_emotion(&sd->hd->bl, ET_SWEAT);
+		clif_emotion( sd->hd->bl, ET_SWEAT );
 	}
 	return 0;
 }
@@ -11507,6 +11517,7 @@ void atcommand_basecommands(void) {
 		ACMD_DEF(reloadachievementdb),
 		ACMD_DEF(reloadattendancedb),
 		ACMD_DEF(reloadbarterdb),
+		ACMD_DEF(reloaddepositdb),
 		ACMD_DEF(reloadlogconf),
 		ACMD_DEF(partysharelvl),
 		ACMD_DEF(mapinfo),

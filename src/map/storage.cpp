@@ -23,6 +23,7 @@
 #include "packets.hpp"
 #include "pc.hpp"
 #include "pc_groups.hpp"
+#include "deposit.hpp"
 
 using namespace rathena;
 
@@ -259,6 +260,69 @@ static int32 storage_additem(map_session_data* sd, struct s_storage *stor, struc
 	if( (it->bound > BOUND_ACCOUNT) && !pc_can_give_bounded_items(sd) ) {
 		clif_displaymessage(sd->fd, msg_txt(sd,294));
 		return 1;
+	}
+
+	std::shared_ptr<s_deposit_stor> deposit = deposit_db.find(stor->stor_id);
+	if (deposit != nullptr)
+	{
+		char message[CHAT_SIZE_MAX + 1];
+		std::shared_ptr<s_deposit_item> entry = deposit_db.findItemInStor(stor->stor_id, it->nameid);
+
+		struct item ditem = {};
+		ditem.nameid = it->nameid;
+		std::string itemlstr = item_db.create_item_link(ditem);
+
+		ARR_FIND(0, stor->max_amount, i, stor->u.items_storage[i].nameid == it->nameid);
+
+		if (entry == nullptr)
+		{
+			safesnprintf(message, sizeof(message), "You can't deposit %s.", itemlstr.c_str());
+			clif_displaymessage(sd->fd, message);			
+			return 1;
+		}
+
+		if (itemdb_isstackable2(data))
+		{
+
+			if (i < stor->max_amount)
+			{
+				if (amount > entry->amount - stor->u.items_storage[i].amount)
+				{
+					if (stor->u.items_storage[i].amount >= entry->amount)
+					{
+						safesnprintf(message, sizeof(message), "Deposited item %s has reached maximum amount (%d).", itemlstr.c_str(), entry->amount);
+						clif_displaymessage(sd->fd, message);
+					}
+					safesnprintf(message, sizeof(message), "Maximum amount of %s can be deposited is %d (%d/%d).", itemlstr.c_str(), entry->amount, stor->u.items_storage[i].amount, entry->amount);
+					clif_displaymessage(sd->fd, message);
+					return 2;
+				}
+			}
+			else
+			{
+				if (amount > entry->amount)
+				{
+					safesnprintf(message, sizeof(message), "Maximum amount of %s can be deposited is %d (0/%d).", itemlstr.c_str(), entry->amount, entry->amount);
+					clif_displaymessage(sd->fd, message);
+					return 2;
+				}
+			}
+		}
+		else
+		{
+			if (i < stor->max_amount)
+			{
+				safesnprintf(message, sizeof(message), "Deposited item %s has reached maximum amount (%d).", itemlstr.c_str(), entry->amount);
+				clif_displaymessage(sd->fd, message);
+				return 2;
+			}
+			if (entry->refine && it->refine < entry->refine)
+			{
+				safesnprintf(message, sizeof(message), "Deposit item %s refine count need to be +%d.", itemlstr.c_str(), entry->refine);
+				clif_displaymessage(sd->fd, message);
+				return 1;
+			}
+		}
 	}
 
 	if( itemdb_isstackable2(data) ) { // Stackable
@@ -1118,6 +1182,12 @@ void storage_guild_storage_quit(map_session_data* sd, int32 flag)
 void storage_premiumStorage_open(map_session_data *sd) {
 	nullpo_retv(sd);
 
+	if (!sd->state.pc_loaded)
+	{
+		deposit_save(sd, false);
+		return;
+	}
+
 	sd->state.storage_flag = 3;
 	storage_sortitem(sd->premiumStorage.u.items_storage, ARRAYLENGTH(sd->premiumStorage.u.items_storage));
 	clif_storagelist(sd, sd->premiumStorage.u.items_storage, ARRAYLENGTH(sd->premiumStorage.u.items_storage), storage_getName(sd->premiumStorage.stor_id));
@@ -1150,7 +1220,13 @@ bool storage_premiumStorage_load(map_session_data *sd, uint8 num, uint8 mode) {
 	}
 
 	if (sd->premiumStorage.stor_id != num)
+	{
+		std::shared_ptr<s_deposit_stor> deposit = deposit_db.find(sd->premiumStorage.stor_id);
+		if (deposit != nullptr && !deposit->bound)
+			mode |= STOR_MODE_CHAR;
+		
 		return intif_storage_request(sd, TABLE_STORAGE, num, mode);
+	}
 	else {
 		sd->premiumStorage.state.put = (mode&STOR_MODE_PUT) ? 1 : 0;
 		sd->premiumStorage.state.get = (mode&STOR_MODE_GET) ? 1 : 0;
@@ -1167,7 +1243,14 @@ bool storage_premiumStorage_load(map_session_data *sd, uint8 num, uint8 mode) {
 void storage_premiumStorage_save(map_session_data *sd) {
 	nullpo_retv(sd);
 
-	intif_storage_save(sd, &sd->premiumStorage);
+	uint16 mode;
+	std::shared_ptr<s_deposit_stor> deposit = deposit_db.find(sd->premiumStorage.stor_id);
+	if (deposit != nullptr && !deposit->bound)
+		mode = STOR_MODE_CHAR;
+
+	intif_storage_save(sd, &sd->premiumStorage, mode);
+
+	deposit_save(sd);
 }
 
 /**

@@ -56,6 +56,9 @@
     <ClInclude Include="date.hpp">
       <Filter>Header Files</Filter>
     </ClInclude>
+    <ClInclude Include="deposit.hpp">
+      <Filter>Header Files</Filter>
+    </ClInclude>	
     <ClInclude Include="duel.hpp">
       <Filter>Header Files</Filter>
     </ClInclude>
@@ -193,6 +196,9 @@
     <ClCompile Include="date.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
+    <ClCompile Include="deposit.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>	
     <ClCompile Include="duel.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>

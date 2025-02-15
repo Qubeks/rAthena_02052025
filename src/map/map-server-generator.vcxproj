@@ -207,6 +207,7 @@
     <ClInclude Include="clif_packetdb.hpp" />
     <ClInclude Include="clif_shuffle.hpp" />
     <ClInclude Include="date.hpp" />
+    <ClInclude Include="deposit.hpp" />	
     <ClInclude Include="duel.hpp" />
     <ClInclude Include="elemental.hpp" />
 	<ClInclude Include="emotes.hpp" />
@@ -254,6 +255,7 @@
     <ClCompile Include="clan.cpp" />
     <ClCompile Include="clif.cpp" />
     <ClCompile Include="date.cpp" />
+    <ClCompile Include="deposit.cpp" />	
     <ClCompile Include="duel.cpp" />
     <ClCompile Include="elemental.cpp" />
 	<ClCompile Include="emotes.cpp" />
