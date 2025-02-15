@@ -1610,6 +1610,16 @@
 	export_constant(SC_GOLDENMACECLAN);
 	export_constant(SC_CROSSBOWCLAN);
 	export_constant(SC_JUMPINGCLAN);
+	export_constant(SC_ANGELCLAN);
+	export_constant(SC_BRUTECLAN);
+	export_constant(SC_DEMIHUMANCLAN);
+	export_constant(SC_DEMONCLAN);
+	export_constant(SC_DRAGONCLAN);
+	export_constant(SC_FISHCLAN);
+	export_constant(SC_FORMLESSCLAN);
+	export_constant(SC_INSECTCLAN);
+	export_constant(SC_PLANTCLAN);
+	export_constant(SC_UNDEADCLAN);	
 	export_constant(SC_TAROTCARD);
 	export_constant(SC_GEFFEN_MAGIC1);
 	export_constant(SC_GEFFEN_MAGIC2);
@@ -1966,16 +1976,10 @@
 	export_constant(SC_STAR_BURST);
 	export_constant(SC_SKY_ENCHANT);
 	export_constant(SC_WILD_WALK);
-	export_constant(SC_ANGELCLAN);
-	export_constant(SC_BRUTECLAN);
-	export_constant(SC_DEMIHUMANCLAN);
-	export_constant(SC_DEMONCLAN);
-	export_constant(SC_DRAGONCLAN);
-	export_constant(SC_FISHCLAN);
-	export_constant(SC_FORMLESSCLAN);
-	export_constant(SC_INSECTCLAN);
-	export_constant(SC_PLANTCLAN);
-	export_constant(SC_UNDEADCLAN);
+	export_constant(SC_SHADOW_CLOCK);
+	export_constant(SC_SHINKIROU_CALL);
+	export_constant(SC_NIGHTMARE);
+	export_constant(SC_SBUNSHIN);
 
 /// Do not modify code below this, until the end of the API hook, since it will be automatically generated again
 /// @APIHOOK_START(EFST_CONST)
@@ -10331,6 +10335,7 @@
 	export_constant(UNT_GROUND_GRAVITATION);
 	export_constant(UNT_KUNAIWAIKYOKU);
 	export_constant(UNT_STAR_BURST);
+	export_constant(UNT_KUNAIKAITEN);
 	export_constant(UNT_GD_LEADERSHIP);
 	export_constant(UNT_GD_GLORYWOUNDS);
 	export_constant(UNT_GD_SOULCOLD);
