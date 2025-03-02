@@ -81,7 +81,7 @@ function	script	TransformToRaceFantasy	{
 	
 }
 
-function	script	TransformToHuman	{		
+function	script	TransformToPlayer	{		
 	set race_id, 0;	// Race ID 
 	setlook(6, 0);	
 	setlook(7, 0);
