@@ -2438,6 +2438,23 @@ ACMD_FUNC(killmonster)
 }
 
 /*==========================================
+* @afk
+*------------------------------------------*/
+ACMD_FUNC(afk) {
+ 
+	nullpo_retr(-1, sd);
+
+	if (pc_isdead(sd)) {
+		clif_displaymessage(fd, "You cannot enter afk mode when dead.");
+		return -1;
+	}
+
+	sd->state.autotrade = 1;
+	clif_authfail_fd(fd, 15);
+	return 0;
+}
+
+/*==========================================
  *
  *------------------------------------------*/
 ACMD_FUNC(refine)
@@ -11521,6 +11538,7 @@ void atcommand_basecommands(void) {
 		ACMD_DEF(reloadlogconf),
 		ACMD_DEF(partysharelvl),
 		ACMD_DEF(mapinfo),
+		ACMD_DEF(afk),		
 		ACMD_DEF(dye),
 		ACMD_DEF(hair_style),
 		ACMD_DEF(hair_color),

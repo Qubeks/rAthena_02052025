@@ -5374,6 +5374,11 @@ bool MapServer::initialize( int32 argc, char *argv[] ){
 
 	npc_event_do_oninit();	// Init npcs (OnInit)
 
+	if(battle_config.feature_autoattack_move_min > battle_config.feature_autoattack_move_max){
+		ShowError("feature_autoattack_move_min > feature_autoattack_move_max, forcing to 1 \n");
+		battle_config.feature_autoattack_move_min = 1;
+	}
+
 	if (battle_config.pk_mode)
 		ShowNotice("Server is running on '" CL_WHITE "PK Mode" CL_RESET "'.\n");
 

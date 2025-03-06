@@ -6013,6 +6013,10 @@ void clif_skillcastcancel( block_list& bl ){
 /// Note: when this packet is received an unknown flag is always set to 0,
 /// suggesting this is an ACK packet for the UseSkill packets and should be sent on success too [FlavioJS]
 void clif_skill_fail( map_session_data& sd, uint16 skill_id, enum useskill_fail_cause cause, int32 btype, t_itemid itemId ){
+
+	if(sd.sc.getSCE(SC_AUTOATTACK))
+		return;
+
 	if(battle_config.display_skill_fail&1)
 		return; //Disable all skill failed messages
 
@@ -9966,6 +9970,9 @@ void clif_name( struct block_list* src, struct block_list *bl, send_target targe
 	switch( bl->type ){
 		case BL_PC: {
 			PACKET_ZC_ACK_REQNAMEALL packet = { 0 };
+			char temp_name[NAME_LENGTH];
+			const char* autoString = "[AUTO]";
+			size_t autoLength = strlen(autoString);			
 
 			packet.packet_id = HEADER_ZC_ACK_REQNAMEALL;
 			packet.gid = bl->id;
@@ -9983,7 +9990,14 @@ void clif_name( struct block_list* src, struct block_list *bl, send_target targe
 				return;
 			}
 
-			safestrncpy( packet.name, sd->status.name, NAME_LENGTH );
+			if(battle_config.feature_autoattack_prefixname && sd->sc.getSCE(SC_AUTOATTACK) && autoLength < NAME_LENGTH){ //&& sd->state.autotrade
+				size_t remainingSpace = NAME_LENGTH - autoLength;
+				safestrncpy( temp_name, sd->status.name, NAME_LENGTH );
+				if (strlen(sd->status.name) > remainingSpace)
+					temp_name[remainingSpace] = '\0';  // Truncate the string
+				snprintf(packet.name, NAME_LENGTH, "%s%s", autoString, temp_name);
+			} else
+				safestrncpy( packet.name, sd->status.name, NAME_LENGTH );
 
 			party_data *p = nullptr;
 

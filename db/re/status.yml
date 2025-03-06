@@ -6942,6 +6942,17 @@ Body:
   - Status: Tarotcard
     Icon: EFST_TAROTCARD
     DurationLookup: CG_TAROTCARD
+  - Status: AutoAttack
+    Icon: EFST_AUTOATTACK
+    Flags:
+      NoClearbuff: true
+      NoDispell: true
+      NoBanishingBuster: true
+      NoClearance: true
+      NoRemoveOnDead: true
+    Script: |
+      bonus2 bDropAddRace,RC_All,-100;
+#      bonus2 bExpAddRace,RC_All,-100;      
   - Status: Geffen_Magic1
     Icon: EFST_GEFFEN_MAGIC1
     Flags:

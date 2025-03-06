@@ -1843,6 +1843,7 @@
 	export_constant(SC_POISON_SHIELD);
 	export_constant(SC_POISON_SHIELD_OPTION);
 	export_constant(SC_SUB_WEAPONPROPERTY);
+	export_constant(SC_AUTOATTACK);
 	export_constant(SC_M_LIFEPOTION);
 	export_constant(SC_S_MANAPOTION);
 	export_constant(SC_ALMIGHTY);
@@ -3361,6 +3362,7 @@
 	export_constant(EFST_RUSH_QUAKE2);
 	export_constant(EFST_SBUNSHIN);
 	export_constant(EFST_MTP_W_POTION_100);
+	export_constant(EFST_AUTOATTACK);
 	export_constant(EFST_CHANGE_SIZE);
 	export_constant(EFST_CHANGE_SIZE_MONSTER);
 	export_constant(EFST_SHOW_EFFECT1);

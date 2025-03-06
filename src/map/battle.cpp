@@ -12057,6 +12057,26 @@ static const struct _battle_data {
 	{ "instance_block_invite",              &battle_config.instance_block_invite,           1,      0,      1,              },
 	{ "instance_block_expulsion",           &battle_config.instance_block_expulsion,        1,      0,      1,              },
 
+	//autoattack
+	{ "feature.autoattack_autoheal",		&battle_config.feature_autoattack_autoheal,		1,		0,		1,				},
+	{ "feature.autoattack_autopotion",		&battle_config.feature_autoattack_autopotion,	1,		0,		1,				},
+	{ "feature.autoattack_sittorest",		&battle_config.feature_autoattack_sittorest,	1,		0,		1,				},
+	{ "feature.autoattack_attackskill",		&battle_config.feature_autoattack_attackskill,	1,		0,		1,				},
+	{ "feature.autoattack_buffskill",		&battle_config.feature_autoattack_buffskill,	1,		0,		1,				},
+	{ "feature.autoattack_buffitems",		&battle_config.feature_autoattack_buffitems,	1,		0,		1,				},
+	{ "feature.autoattack_teleport",		&battle_config.feature_autoattack_teleport,		1,		0,		1,				},
+	{ "feature.autoattack_pickup",			&battle_config.feature_autoattack_pickup,		1,		0,		1,				},
+	{ "feature.autoattack_prefixname",		&battle_config.feature_autoattack_prefixname,	1,		0,		1,				},
+	{ "feature.autoattack_pdetection",		&battle_config.feature_autoattack_pdetection,	15,     1,      30,      		},
+	{ "feature.autoattack_mselection",		&battle_config.feature_autoattack_mselection,	1,		0,		1,				},
+	{ "feature.autoattack_mdetection",		&battle_config.feature_autoattack_mdetection,	15,     1,      30,      		},
+	{ "feature.autoattack_move_min",		&battle_config.feature_autoattack_move_min,		7,      1,      20,      		},
+	{ "feature.autoattack_move_max",		&battle_config.feature_autoattack_move_max,		7,      1,      20,      		},
+	{ "feature.autoattack_movetype",		&battle_config.feature_autoattack_movetype,		0,		0,		1,				},
+	{ "feature.autoattack_teleport_mvp",	&battle_config.feature_autoattack_teleport_mvp,	1,		0,		1,				},
+	{ "feature.autoattack_askill_delay",	&battle_config.feature_autoattack_askill_delay,	500,	0,		INT_MAX,		},
+	{ "feature.autoattack_bskill_delay",	&battle_config.feature_autoattack_bskill_delay,	500,	0,		INT_MAX,		},
+
 	// 4th Job Stuff
 	{ "use_traitpoint_table",               &battle_config.use_traitpoint_table,            1,      0,      1,              },
 	{ "trait_points_job_change",            &battle_config.trait_points_job_change,         7,      1,      1000,           },

@@ -6799,6 +6799,17 @@ Body:
       BlEffect: true
   - Status: WeaponBreaker
     DurationLookup: NPC_WEAPONBRAKER
+  - Status: AutoAttack
+    Icon: EFST_AUTOATTACK
+    Flags:
+      NoClearbuff: true
+      NoDispell: true
+      NoBanishingBuster: true
+      NoClearance: true
+      NoRemoveOnDead: true    
+    Script: |
+      bonus2 bDropAddRace,RC_All,-100;
+#      bonus2 bExpAddRace,RC_All,-100;      
   - Status: Powerup
     Icon: EFST_POWERUP
     DurationLookup: NPC_POWERUP

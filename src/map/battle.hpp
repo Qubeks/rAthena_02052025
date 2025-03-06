@@ -728,6 +728,27 @@ struct Battle_Config
 	int32 instance_block_leaderchange;
 	int32 instance_block_invite;
 	int32 instance_block_expulsion;
+	
+	// auto attack
+	int32 feature_autoattack_autoheal;
+	int32 feature_autoattack_autopotion;
+	int32 feature_autoattack_sittorest;
+	int32 feature_autoattack_attackskill;
+	int32 feature_autoattack_buffskill;
+	int32 feature_autoattack_buffitems;
+	int32 feature_autoattack_teleport;
+	int32 feature_autoattack_pickup;
+	int32 feature_autoattack_prefixname;
+	int32 feature_autoattack_pdetection;
+	int32 feature_autoattack_mselection;
+	int32 feature_autoattack_mdetection;
+	int32 feature_autoattack_move_min;
+	int32 feature_autoattack_move_max;
+	int32 feature_autoattack_movetype;
+	int32 feature_autoattack_teleport_mvp;
+	int32 feature_autoattack_askill_delay;
+	int32 feature_autoattack_bskill_delay;
+	
 	// 4th Jobs Stuff
 	int32 trait_points_job_change;
 	int32 use_traitpoint_table;
