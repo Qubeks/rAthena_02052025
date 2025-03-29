@@ -3521,6 +3521,8 @@
 	export_constant(RC2_ILLUSION_MOONLIGHT);
 	export_constant(RC2_EP16_DEF);
 	export_constant(RC2_EDDA_ARUNAFELTZ);
+	export_constant(RC2_LASAGNA);
+	export_constant(RC2_GLAST_HEIM_ABYSS);
 	export_constant(RC2_MAX);
 
 	/* monster ai */
