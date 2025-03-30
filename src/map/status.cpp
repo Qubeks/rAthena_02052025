@@ -7570,8 +7570,6 @@ static defType status_calc_def(struct block_list *bl, status_change *sc, int32 d
 	if(sc->getSCE(SC_ETERNALCHAOS))
 		return 0;
 #endif
-	if(sc->getSCE(SC_BARRIER))
-		return 100;
 	if(sc->getSCE(SC_KEEPING))
 		return 90;
 #ifndef RENEWAL /// Steel Body does not provide 90 DEF in [RENEWAL]
@@ -7743,8 +7741,6 @@ static defType status_calc_mdef(struct block_list *bl, status_change *sc, int32 
 
 	if(sc->getSCE(SC_BERSERK))
 		return 0;
-	if(sc->getSCE(SC_BARRIER))
-		return 100;
 
 #ifndef RENEWAL /// Steel Body does not provide 90 MDEF in [RENEWAL]
 	if(sc->getSCE(SC_STEELBODY))
