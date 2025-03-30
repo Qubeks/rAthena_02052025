@@ -3488,7 +3488,7 @@
 	export_constant(RC_PLAYER_DORAM);
 	export_constant(RC_ALL);
 
-	export_constant(RC2_NONE);
+	export_deprecated_constant(RC2_NONE);	// Mar. 2025
 	export_constant(RC2_GOBLIN);
 	export_constant(RC2_KOBOLD);
 	export_constant(RC2_ORC);
@@ -3527,7 +3527,7 @@
 	export_constant(RC2_EDDA_ARUNAFELTZ);
 	export_constant(RC2_LASAGNA);
 	export_constant(RC2_GLAST_HEIM_ABYSS);
-	export_constant(RC2_MAX);
+	export_deprecated_constant(RC2_MAX);	// Mar. 2025
 
 	/* monster ai */
 	export_constant(MONSTER_TYPE_01);
