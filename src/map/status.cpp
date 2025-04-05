@@ -14167,9 +14167,9 @@ TIMER_FUNC(status_change_timer){
 					if(sd->aa.autositregen.is_active){
 						bool overweight;
 #ifdef RENEWAL
-						overweight = pc_is70overweight(sd);
+						overweight = pc_getpercentweight(*sd) >= battle_config.open_box_weight_rate;
 #else
-						overweight = pc_is50overweight(sd);
+						overweight = pc_getpercentweight(*sd) >= battle_config.open_box_weight_rate;
 #endif
 						if(!pc_issit(sd) 
 						&& ((sd->aa.autositregen.min_hp > 0 && ((status->hp * 100 / sd->aa.autositregen.min_hp) < sd->status.max_hp))
