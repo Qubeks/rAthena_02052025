@@ -782,6 +782,7 @@ public:
 		int16 critical_rangeatk;
 		int16 weapon_atk_rate, weapon_matk_rate;
 		enum e_race change_race;		
+		int32 skill_ratio;		
 	} bonus;
 	// zeroed vars end here.
 
