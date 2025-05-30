@@ -6788,9 +6788,10 @@ Body:
       NoDispell: true
       NoBanishingBuster: true
       NoClearance: true
-      NoRemoveOnDead: true    
-    Script: |
-      bonus2 bDropAddRace,RC_All,-100;
+      NoRemoveOnDead: true
+      NoSave: true    
+#    Script: |
+#      bonus2 bDropAddRace,RC_All,-100;
 #      bonus2 bExpAddRace,RC_All,-100;      
   - Status: Powerup
     Icon: EFST_POWERUP

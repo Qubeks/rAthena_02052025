@@ -6937,8 +6937,9 @@ Body:
       NoBanishingBuster: true
       NoClearance: true
       NoRemoveOnDead: true
-    Script: |
-      bonus2 bDropAddRace,RC_All,-100;
+      NoSave: true
+#    Script: |
+#      bonus2 bDropAddRace,RC_All,-100;
 #      bonus2 bExpAddRace,RC_All,-100;      
   - Status: Geffen_Magic1
     Icon: EFST_GEFFEN_MAGIC1

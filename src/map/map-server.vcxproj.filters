@@ -17,6 +17,12 @@
     <ClInclude Include="atcommand.hpp">
       <Filter>Header Files</Filter>
     </ClInclude>
+    <ClInclude Include="autoattack.hpp">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="autoattack_script.hpp">
+      <Filter>Header Files</Filter>
+    </ClInclude>	
     <ClInclude Include="battle.hpp">
       <Filter>Header Files</Filter>
     </ClInclude>
@@ -166,6 +172,12 @@
     <ClCompile Include="atcommand.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
+    <ClCompile Include="autoattack.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="autoattack_script.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>	
     <ClCompile Include="battle.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>

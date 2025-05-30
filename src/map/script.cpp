@@ -13,9 +13,6 @@
 #include <cmath>
 #include <csetjmp>
 #include <cstdlib> // atoi, strtol, strtoll, exit
-#include <sstream>
-#include <string>
-#include <vector>
 
 #ifdef PCRE_SUPPORT
 #include <pcre.h> // preg_match
@@ -35,6 +32,8 @@
 #include <common/utils.hpp>
 
 #include "achievement.hpp"
+#include "autoattack.hpp"
+#include "autoattack_script.hpp"
 #include "atcommand.hpp"
 #include "battle.hpp"
 #include "battleground.hpp"
@@ -6122,6 +6121,9 @@ BUILDIN_FUNC(jobchange)
 			return SCRIPT_CMD_SUCCESS;
 
 		pc_jobchange(sd, job, upper);
+
+		sd->aa.autoattackskills.clear();
+		sd->aa.autobuffskills.clear();		
 	}
 
 	return SCRIPT_CMD_SUCCESS;
@@ -10434,989 +10436,6 @@ BUILDIN_FUNC(getskilllv)
 	return SCRIPT_CMD_SUCCESS;
 }
 
-/// Returns infos on a skill.
-///
-/// getskillinfostring(<id>,<skill id>)
-/// getskillinfostring(<id>,"<skill name>")
-/// 0 = Description
-BUILDIN_FUNC(getskillinfostring)
-{
-	int skill_id, id;
-	TBL_PC* sd;
-
-	if( !script_rid2sd(sd) )
-		return SCRIPT_CMD_SUCCESS;// no player attached, report source
-
-	id = script_getnum(st,2);
-	skill_id = ( script_isstring(st, 3) ? skill_name2id(script_getstr(st,3)) : script_getnum(st,3) );
-
-	switch(id){
-		case 0:	// skill->desc
-			std::shared_ptr<s_skill_db> skill = skill_db.find(skill_id);
-			if (!skill)
-				return SCRIPT_CMD_SUCCESS;
-			script_pushstrcopy(st, skill->desc);
-			break;
-	}
-
-	return SCRIPT_CMD_SUCCESS;
-}
-
-/// Returns infos on a skill.
-///
-/// getskillinfostring(<id>,<skill id>)
-/// 1 = Check if skill is available for auto buff
-BUILDIN_FUNC(getskillinfoint)
-{
-	int skill_id, id;
-	TBL_PC* sd;
-	bool skill_status = false;
-
-	if( !script_rid2sd(sd) )
-		return SCRIPT_CMD_SUCCESS;// no player attached, report source
-
-	id = script_getnum(st,2);
-	skill_id = script_getnum(st,3);
-	std::shared_ptr<s_skill_db> skill;
-	e_cast_type type = skill_get_casttype(skill_id);
-
-	switch(id){
-		case 1:	// Check if skill is available for auto buff
-			skill = skill_db.find(skill_id);
-			if (!skill)
-				return skill_status;
-			else if(skill 
-				&& (
-						(type == CAST_NODAMAGE && skill->inf&(INF_SUPPORT_SKILL|INF_SELF_SKILL)
-						&& skill_get_sc(skill->nameid) > 0)
-						|| skill_id == MO_CALLSPIRITS
-						|| skill_id == CH_SOULCOLLECT
-						|| skill_id == SA_AUTOSPELL
-					)
-				)
-				skill_status = true;
-
-			script_pushint(st, skill_status);
-			break;
-		case 2:	// Check if skill is available for auto attack
-			skill = skill_db.find(skill_id);
-			if (!skill)
-				return skill_status;
-			else if (skill && skill->skill_type != BF_NONE && skill->inf != INF_PASSIVE_SKILL && !skill_get_nk(skill_id, NK_NODAMAGE) && (type != CAST_NODAMAGE || skill->inf & INF_SELF_SKILL))
-				skill_status = true;
-
-			script_pushint(st, skill_status);
-			break;
-	}
-
-	return SCRIPT_CMD_SUCCESS;
-}
-
-// Start auto attack from rental items
-BUILDIN_FUNC( autoattack_fromitem ){
-    map_session_data* sd;
-
-    if( !script_rid2sd( sd ) ){
-        return SCRIPT_CMD_SUCCESS;
-    }
-
-    if( sd->itemid == 0 ){
-        ShowError( "autoattack_fromitem: Called outside of an item script without item id.\n" );
-        return SCRIPT_CMD_SUCCESS;
-    }
-
-    if( sd->inventory.u.items_inventory[sd->itemindex].expire_time == 0 ){
-        ShowError( "autoattack_fromitem: Called from item %u, which is not a consumed delayed.\n", sd->itemid );
-        return SCRIPT_CMD_SUCCESS;
-    }
-
-    t_tick duration_ = DIFF_TICK(sd->inventory.u.items_inventory[sd->itemindex].expire_time,time(NULL));
-    
-    if( duration_ >= 86400) 
-        duration_ = 86400000;
-    else
-        duration_ = duration_ * 1000;
-        
-    status_change_start(&sd->bl, &sd->bl, SC_AUTOATTACK, 10000, 0, 0, 0, 0, duration_, SCSTART_NOAVOID);
-
-    return SCRIPT_CMD_SUCCESS;
-}
-
-/// Returns info of player on autoattack
-///
-/// getautoattackstring(<id>{,<index>})
-/// id
-/// 0 = Auto Heal all desc - Index = skill id
-/// 1 = HP / SP Potions
-/// 2 = Auto sit to rest
-/// 3 = auto buff skill desc
-/// 4 = auto attack skill desc
-/// 5 = auto buff items desc
-/// 6 = melee attack
-/// 7 = teleport
-/// 9 = item configuration
-BUILDIN_FUNC(getautoattackstring)
-{
-	int index = 0, id, i;
-	TBL_PC* sd;
-	std::string buf = "";
-	std::shared_ptr<s_skill_db> skill;
-	std::shared_ptr<item_data> item_data;
-	std::shared_ptr<s_mob_db> mob;
-
-	if( !script_rid2sd(sd) )
-		return SCRIPT_CMD_SUCCESS;// no player attached, report source
-
-	id = script_getnum(st,2);
-	index = script_getnum(st,3);
-
-	switch(id){
-		case 0:	// auto heal desc
-			/*if(index > 0){ // Only show desc on skill id index
-				struct s_autoheal autoheal;
-				skill = skill_db.find(index);
-				if (!skill)
-					return SCRIPT_CMD_SUCCESS;
-				auto itAutoheal = std::find_if(sd->aa.autoheal.begin(), sd->aa.autoheal.end(), [index] ( s_autoheal const &v) {return v.skill_id == index;});
-				if(itAutoheal != sd->aa.autoheal.end()){
-					autoheal = (*itAutoheal);
-					buf += std::string("^FF0000(") + std::to_string(index) + ")^000000 [" + skill->desc + "] - Lv : " + std::to_string(autoheal.skill_lv) + " - HP % : " + std::to_string(autoheal.min_hp);
-				}
-			} else*/ if(index == 0) { // Show the list of all active auto heal skill
-				if(sd->aa.autoheal.size() > 0){
-					for(auto &itAutoheal : sd->aa.autoheal){
-						skill = skill_db.find(itAutoheal.skill_id);
-						if(skill)
-							buf += std::string("^FF0000(") + std::to_string(itAutoheal.skill_id) + ")^000000 [" + skill->desc + "] - Lv : " + std::to_string(itAutoheal.skill_lv) + " - HP % : " + std::to_string(itAutoheal.min_hp) + "\n";
-					}
-				}
-			}
-
-			script_pushstrcopy(st, buf.c_str());
-			break;
-		case 1:	// HP / SP Potions
-			/*if(index > 0){ // Only show desc on skill id index
-				struct s_autoheal autoheal;
-				skill = skill_db.find(index);
-				if (!skill)
-					return SCRIPT_CMD_SUCCESS;
-				auto itAutoheal = std::find_if(sd->aa.autoheal.begin(), sd->aa.autoheal.end(), [index] ( s_autoheal const &v) {return v.skill_id == index;});
-				if(itAutoheal != sd->aa.autoheal.end()){
-					autoheal = (*itAutoheal);
-					buf += std::string("^FF0000(") + std::to_string(index) + ")^000000 [" + skill->desc + "] - Lv : " + std::to_string(autoheal.skill_lv) + " - HP % : " + std::to_string(autoheal.min_hp);
-				}
-			} else*/ 
-			if(index == -1) { // Show the list of all potions set
-				for (i = 0; i < MAX_INVENTORY; i++) {
-					// Find item data
-					if ((item_data = item_db.find(sd->inventory.u.items_inventory[i].nameid)) == nullptr)
-						continue; // Skip invalid items
-
-					if (item_data->type == IT_HEALING) { // Check if item is usable
-						// Check if the item is already active
-						bool is_active = std::any_of(
-							sd->aa.autopotion.begin(),
-							sd->aa.autopotion.end(),
-							[item_id = item_data->nameid](const s_autopotion &v) { return v.item_id == item_id; });
-
-						// Add to the menu
-						if (is_active) {
-							// If the item is active, mark it as [ON]
-							buf += "^0000FF[ON]^000000 (" + std::to_string(item_data->nameid) + ") " + item_data->ename + ":";
-						} else {
-							// If the item is not active, mark it as [OFF]
-							buf += "^FF0000[OFF]^000000 (" + std::to_string(item_data->nameid) + ") " + item_data->ename + ":";
-						}
-					}
-				}
-			} else if(index == 0) { // Show the list of all active potions set
-				if (!sd->aa.autopotion.empty()) {
-					for (auto &itAutopotion : sd->aa.autopotion) {
-						// Find item data for the active item
-						item_data = item_db.find(itAutopotion.item_id);
-						if (item_data) {
-							// Add active items to the menu
-							buf += "^0000FF[ON]^000000 (" + std::to_string(itAutopotion.item_id) + ")^000000 " + item_data->ename.c_str() + " ";
-						if(itAutopotion.min_hp)
-							buf += "- HP < " + std::to_string(itAutopotion.min_hp) + "%:";
-						if(itAutopotion.min_sp)
-							buf += "- SP < " + std::to_string(itAutopotion.min_sp) + "%:";
-						}
-					}
-				} else {
-					buf += "No active items.";
-				}
-			}
-
-			script_pushstrcopy(st, buf.c_str());
-			break;
-
-		case 2:	// Auto sit to rest
-			switch(index){
-				case 0:
-					if(sd->aa.autositregen.is_active)
-						buf += std::string("^0000FF(Enabled)^000000 \n");
-					else
-						buf += std::string("^FF0000(Disabled)^000000 \n");
-					break;
-				case 1:
-					if(sd->aa.autositregen.min_hp > 0)
-						buf += "Your character will take a ^FF0000Sit^000000 to rest if HP < " + std::to_string(sd->aa.autositregen.min_hp) + 
-								"% - ^FF0000Stand^000000 if HP >= " + std::to_string(sd->aa.autositregen.max_hp) + "% \n";
-					break;
-				case 2:
-					if(sd->aa.autositregen.min_sp)
-						buf += "Your character will take a ^FF0000Sit^000000 to rest if SP < " + std::to_string(sd->aa.autositregen.min_sp) + 
-								"% - ^FF0000Stand^000000 if SP >= " + std::to_string(sd->aa.autositregen.max_sp) + "% \n";
-					break;
-			}
-
-			script_pushstrcopy(st, buf.c_str());
-			break;
-
-		case 3:	// auto buff skill desc
-			if(index == -1){ // Show all buff skills available
-				for(i=0;i<MAX_SKILL;i++){
-					if(sd->status.skill[i].id > 0 && sd->status.skill[i].lv > 0){
-						skill = skill_db.find(sd->status.skill[i].id);
-						e_cast_type type = skill_get_casttype(sd->status.skill[i].id);
-						//ShowError("skill id %i desc %s lvl %d is supprt %d status %d \n", skill->nameid,skill->desc,sd->status.skill[i].lv, skill->inf&(INF_SUPPORT_SKILL|INF_SELF_SKILL), skill_get_sc(skill->nameid) > 0);
-						if(skill 
-							&& (
-								(type == CAST_NODAMAGE && skill->inf&(INF_SUPPORT_SKILL|INF_SELF_SKILL)
-								&& skill_get_sc(skill->nameid) > 0)
-								|| skill->nameid == MO_CALLSPIRITS
-								|| skill->nameid == CH_SOULCOLLECT
-								|| skill->nameid == SA_AUTOSPELL)){
-
-							bool is_active = false;
-							//Remove skill from menu if it's already active.
-							for (auto &itAutobuffskills : sd->aa.autobuffskills){
-								if (itAutobuffskills.skill_id == sd->status.skill[i].id) {
-									is_active = true;
-									break;
-								}
-							}								
-							// Add menu option with active status
-							if (is_active) {
-								buf += std::string("^0000FF[ON] ^000000(") + std::to_string(skill->nameid) + ") " + skill->desc + 
-									   " - Lv. [" + std::to_string(sd->status.skill[i].lv) + "]:";
-							} else {
-								buf += std::string("^FF0000[OFF] ^000000(") + std::to_string(skill->nameid) + ") " + skill->desc + 
-									   " - Lv. [" + std::to_string(sd->status.skill[i].lv) + "]:";
-							}
-						}
-					}
-				}
-			} else if(index == 0) { // Show the list of all active buff skill
-				if(sd->aa.autobuffskills.size() > 0){
-					for(auto &itAutobuffskills : sd->aa.autobuffskills){
-						skill = skill_db.find(itAutobuffskills.skill_id);
-						if(skill)
-							buf += std::string("^0000FF[ON] (") + std::to_string(itAutobuffskills.skill_id) + ")^000000 " + skill->desc + 
-									" - Lv. [" + std::to_string(itAutobuffskills.skill_lv) + "]:";
-					}
-				}
-			}
-
-			script_pushstrcopy(st, buf.c_str());
-			break;
-
-		case 4:	// auto attack skill desc
-			if(index == -1){ // Show all attack skills available
-				for(i=0;i<MAX_SKILL;i++){
-					if(sd->status.skill[i].id > 0 && sd->status.skill[i].lv > 0){
-						skill = skill_db.find(sd->status.skill[i].id);
-						e_cast_type type = skill_get_casttype(sd->status.skill[i].id);
-						//Debug skill shows
-						/*if(sd->status.skill[i].id == MO_CHAINCOMBO){
-							ShowError("skill id %d skill->desc %s \n",sd->status.skill[i].id, skill->desc);
-							ShowError("skill->skill_type != BF_NONE  %d \n",skill->skill_type != BF_NONE );
-							ShowError("skill->inf != INF_PASSIVE_SKILL   %d \n",skill->inf != INF_PASSIVE_SKILL );
-							ShowError("!skill_get_nk(sd->status.skill[i].id, NK_NODAMAGE) %d \n",(!skill_get_nk(sd->status.skill[i].id, NK_NODAMAGE)) );
-							ShowError("(type != CAST_NODAMAGE || skill->inf & INF_SELF_SKILL) %d \n",(type != CAST_NODAMAGE || skill->inf & INF_SELF_SKILL));
-							ShowError("type %d \n",type);
-						}*/
-						if (skill 
-							&& skill->skill_type != BF_NONE 
-							&& skill->inf != INF_PASSIVE_SKILL 
-							&& !skill_get_nk(sd->status.skill[i].id, NK_NODAMAGE) 
-							&& (type != CAST_NODAMAGE || skill->inf & INF_SELF_SKILL)){
-
-							bool is_active = false;
-							for (auto &itAutoattackskills : sd->aa.autoattackskills) {
-								if (itAutoattackskills.skill_id == sd->status.skill[i].id) {
-									is_active = true;
-									break;
-								}
-							}
-
-							// Add menu option with active status
-							if (is_active) {
-								buf += std::string("^0000FF[ON] ^000000(") + std::to_string(skill->nameid) + ") " + skill->desc + 
-									   " - Lv. [" + std::to_string(sd->status.skill[i].lv) + "]:";
-							} else {
-								buf += std::string("^FF0000[OFF] ^000000(") + std::to_string(skill->nameid) + ") " + skill->desc + 
-									   " - Lv. [" + std::to_string(sd->status.skill[i].lv) + "]:";
-							}
-						}
-					}
-				}
-			} else if(index == 0) { // Show the list of all active attack skill
-				if(sd->aa.autoattackskills.size() > 0){
-					for(auto &itAutoattackskills : sd->aa.autoattackskills){
-						skill = skill_db.find(itAutoattackskills.skill_id);
-						if (skill) {
-							buf += std::string("^0000FF[ON] ^000000(") + std::to_string(skill->nameid) + ") " + skill->desc +
-								   " - Lv. [" + std::to_string(itAutoattackskills.skill_lv) + "]:";
-						} else {
-							buf += "No active skills.";
-						}
-					}
-				}
-			}
-
-			script_pushstrcopy(st, buf.c_str());
-			break;
-
-		case 5:	// Buff items
-
-			if (index == -1) { // List all buff items in the inventory
-				for (i = 0; i < MAX_INVENTORY; i++) {
-					// Find item data
-					if ((item_data = item_db.find(sd->inventory.u.items_inventory[i].nameid)) == nullptr)
-						continue; // Skip invalid items
-
-					if (item_data->type == IT_USABLE) { // Check if item is usable
-						// Check if the item is already active
-						bool is_active = std::any_of(
-							sd->aa.autobuffitems.begin(),
-							sd->aa.autobuffitems.end(),
-							[item_id = item_data->nameid](const s_autobuffitems &v) { return v.item_id == item_id; });
-
-						// Add to the menu
-						if (is_active) {
-							// If the item is active, mark it as [ON]
-							buf += "^0000FF[ON]^000000 (" + std::to_string(item_data->nameid) + ") " + item_data->ename + ":";
-						} else {
-							// If the item is not active, mark it as [OFF]
-							buf += "^FF0000[OFF]^000000 (" + std::to_string(item_data->nameid) + ") " + item_data->ename + ":";
-						}
-					}
-				}
-			} else if (index == 0) { // Show active buff items
-				if (!sd->aa.autobuffitems.empty()) {
-					for (auto &itAutobuffitem : sd->aa.autobuffitems) {
-						// Find item data for the active item
-						item_data = item_db.find(itAutobuffitem.item_id);
-						if (item_data) {
-							// Add active items to the menu
-							buf += "^0000FF[ON]^000000 (" + std::to_string(item_data->nameid) + ") " + item_data->ename + ":";
-						}
-					}
-				} else {
-					buf += "No active items.";
-				}
-			}
-
-			script_pushstrcopy(st, buf.c_str());
-			break;
-
-		case 6:	// Melee attack
-			if(index == 0){
-				if(!sd->aa.stopmelee)
-					buf += std::string("[ON] - Melee attack");
-				else
-					buf += std::string("[OFF] - Melee attack");
-			}
-			script_pushstrcopy(st, buf.c_str());
-			break;
-
-		case 7:	// Teleport
-			if(index == 0){
-				if(!sd->aa.teleport.use_teleport)
-					buf += std::string("[ON] - Teleport Skill \n");
-				else
-					buf += std::string("[OFF] - Teleport Skill \n");
-				
-				if(!sd->aa.teleport.use_flywing)
-					buf += std::string("[ON] - Fly Wing \n");
-				else
-					buf += std::string("[OFF] - Fly Wing \n");
-				
-				if(sd->aa.teleport.min_hp)
-					buf += std::string("Emergency espace if hit when HP < ") + std::to_string(sd->aa.teleport.min_hp) + std::string("% \n");
-				if(sd->aa.teleport.delay_nomobmeet)
-					buf += std::string("TP if no monster attacked after ") + std::to_string(sd->aa.teleport.delay_nomobmeet) + std::string("s \n");
-			}
-			script_pushstrcopy(st, buf.c_str());
-			break;
-
-		case 8:	// Monsters selection
-			if(index == 0){
-				if(sd->aa.mobs.aggressive_behavior)
-					buf += std::string("Ignore aggressive monsters not on the list \n");
-				else
-					buf += std::string("Attack aggressive monsters not on the list \n");
-
-				if(sd->aa.mobs.id.size() > 0){
-					for (i=0; i<sd->aa.mobs.id.size(); i++){
-						mob = mob_db.find(sd->aa.mobs.id.at(i));
-						if (mob == nullptr)
-							continue;
-						buf += std::string("^FF0000(") + std::to_string(mob->id) + ")^000000 [" + mob->name.c_str() + "] \n";
-					}
-				} else
-					buf += std::string("No monster on the list, every monster encountered will be attacked \n");
-			}
-			script_pushstrcopy(st, buf.c_str());
-			break;
-
-		case 9:	// Items selection
-			if(index == 0){
-				switch(sd->aa.prio_item_config){
-					case 0:
-						buf += std::string("Priorize fight \n");
-						break;
-					case 1:
-						buf += std::string("Priorize loot \n");
-						break;
-				}
-				switch(sd->aa.pickup_item_config){
-					case 0:
-						buf += std::string("Pick up every item on the floor \n");
-						break;
-					case 1:
-						buf += std::string("Pick up only items on the list \n");
-						break;
-					case 2:
-						buf += std::string("Don't pick up any item \n");
-						break;	
-				}
-				if(sd->aa.pickup_item_id.size() > 0){
-					for (i=0; i<sd->aa.pickup_item_id.size(); i++){
-						if( ( item_data = item_db.find(sd->aa.pickup_item_id.at(i)) ) == NULL )
-							break;
-
-						buf += std::string("^FF0000(") + std::to_string(item_data->nameid) + ")^000000 [" + item_data->name.c_str() + "] \n";
-					}
-				} else
-					buf += std::string("\n No item to pick up in the list \n");
-			}
-			script_pushstrcopy(st, buf.c_str());
-			break;
-	}
-
-	return SCRIPT_CMD_SUCCESS;
-}
-
-/// Returns info of player on autoattack
-///
-/// getautoattackint(<id>{,<index>})
-/// id
-/// 0 = Auto Heal all desc - Index = skill id (if 0 == size)
-/// 1 = HP / SP Potions available in inventory
-/// 2 = Sit to rest status
-/// 3 = Active auto buffs skills
-/// 4 = Active auto attack skills
-/// 5 = Active auto buffs items
-/// 6 = Melee attack status
-/// 7 = Teleport informations
-/// 8 = Monster list
-/// 9 = Item configuration
-BUILDIN_FUNC(getautoattackint)
-{
-	int index, id;
-	TBL_PC* sd;
-	int num = 0, i;
-	std::shared_ptr<s_skill_db> skill;
-	std::shared_ptr<item_data> item_data;
-
-	if( !script_rid2sd(sd) )
-		return SCRIPT_CMD_SUCCESS;// no player attached, report source
-
-	id = script_getnum(st,2);
-	if (script_hasdata(st, 3))
-		index = script_getnum(st,3);
-
-	switch(id){
-		case 0:	// auto heal
-			/*if(index){ // Only show status on skill id index
-				struct s_autoheal autoheal;
-				skill = skill_db.find(index);
-				if (!skill)
-					return SCRIPT_CMD_SUCCESS;
-				auto itAutoheal = std::find_if(sd->aa.autoheal.begin(), sd->aa.autoheal.end(), [index] ( s_autoheal const &v) {return v.skill_id == index;});
-				if(itAutoheal != sd->aa.autoheal.end()){
-					autoheal = (*itAutoheal);
-					num = autoheal.is_active;
-				}
-			}
-			else */
-			if(index == 0)
-				num = static_cast<int>(sd->aa.autoheal.size());
-
-			script_pushint(st, num);
-			break;
-		case 1:	// HP / SP Potions available in inventory
-			if(index == 0){
-				for(i = 0; i < MAX_INVENTORY; i++){
-					if( ( item_data = item_db.find(sd->inventory.u.items_inventory[i].nameid) ) == NULL )
-						break;
-
-					if(item_data->type == IT_HEALING) // check if item is type healing for potions
-						num++;
-				}
-				script_pushint(st, num);
-				return SCRIPT_CMD_SUCCESS;
-			}
-
-			script_pushint(st, num);
-			break;
-		case 2:	// Sit to Rest is_active
-			if(index == 0){
-				script_pushint(st, sd->aa.autositregen.is_active);
-				return SCRIPT_CMD_SUCCESS;
-			}
-
-			script_pushint(st, num);
-			break;
-		case 3:	// Active auto buffs skills
-			if(index == 0)
-				num = static_cast<int>(sd->aa.autobuffskills.size());
-
-			script_pushint(st, num);
-			break;
-		case 4:	// Active auto attack skills
-			if(index == 0)
-				num = static_cast<int>(sd->aa.autoattackskills.size());
-
-			script_pushint(st, num);
-			break;
-		case 5:	// Buff items
-			if(index == 0)
-				num = static_cast<int>(sd->aa.autobuffitems.size());
-
-			script_pushint(st, num);
-			break;
-		case 6: // Melee attack
-			if(index == 0)
-				num = sd->aa.stopmelee;
-
-			script_pushint(st, num);
-			break;
-		case 7: // Teleport
-			switch(index){
-				case 0:
-					num = sd->aa.teleport.use_teleport;
-					break;
-				case 1:
-					num = sd->aa.teleport.use_flywing;
-					break;
-				case 2:
-					num = sd->aa.teleport.min_hp;
-					break;
-				case 3:
-					num = sd->aa.teleport.delay_nomobmeet;
-					break;
-			}
-			script_pushint(st, num);
-			break;
-		case 8: // Monster list
-			switch(index){
-				case 0:
-					num = sd->aa.mobs.aggressive_behavior;
-					break;
-				case 1:
-					num = static_cast<int>(sd->aa.mobs.id.size());
-					break;
-			}
-
-			script_pushint(st, num);
-			break;
-		case 9: // Item list
-			switch(index){
-				case 1:
-					num = static_cast<int>(sd->aa.pickup_item_id.size());
-					break;
-				case 2:
-					num = sd->aa.pickup_item_config;
-					break;
-				case 3:
-					num = sd->aa.prio_item_config;
-					break;
-			}
-
-			script_pushint(st, num);
-			break;
-		default:
-			num = 0;
-			script_pushint(st, num);
-			break;
-	}
-
-	return SCRIPT_CMD_SUCCESS;
-}
-
-/// Save info of player on autoattack
-///
-/// setautoattack(<str>)
-/// Parse a string with ; as separator
-/// id;
-/// id = 0 //  autoheal (is_active;skill_id;skill_lv;min_hp)
-BUILDIN_FUNC(setautoattack)
-{
-	TBL_PC* sd;
-	const char delim = ';';
-	std::vector<std::string> result;
-	std::string item, str;
-	int id = -1;
-
-	std::shared_ptr<s_skill_db> skill;
-	std::shared_ptr<item_data> item_data;
-	std::shared_ptr<s_mob_db> mob;
-
-	if( !script_rid2sd(sd) )
-		return SCRIPT_CMD_SUCCESS;// no player attached, report source
-
-	str = script_getstr(st, 2);
-	std::stringstream ss(str);
-	//ShowError("result debug : %s \n",str.c_str());
-
-    while (getline (ss, item, delim)) {
-        result.push_back (item);
-    }
-
-	if(result.size() > 0){
-		id = std::stoi(result.at(0)); // id
-		switch(id){
-			case 0:
-				if(result.size() == 5){ // id = 0 - autoheal (is_active;skill_id;skill_lv;min_hp)
-					struct s_autoheal autoheal;
-					int skill_id = std::stoi(result.at(2));
-					int is_active = std::stoi(result.at(1));
-
-					//check if skill exist and is support type
-					skill = skill_db.find(skill_id);
-					if (!skill || !(skill->inf&INF_SUPPORT_SKILL))
-						return SCRIPT_CMD_SUCCESS;
-
-					if(!is_active){
-						sd->aa.autoheal.erase(
-						std::remove_if(sd->aa.autoheal.begin(), sd->aa.autoheal.end(), [skill_id](s_autoheal const &v) {
-							return v.skill_id == skill_id;
-						}),
-						sd->aa.autoheal.end());
-						break;
-					}
-					auto itAutoheal = std::find_if(sd->aa.autoheal.begin(), sd->aa.autoheal.end(), [skill_id] ( s_autoheal const &v) {return v.skill_id == skill_id;});
-					if(itAutoheal != sd->aa.autoheal.end()){
-						itAutoheal->is_active = is_active;
-						itAutoheal->skill_lv = std::stoi(result.at(3));
-						itAutoheal->min_hp = std::stoi(result.at(4));
-					} else {
-						autoheal.is_active = is_active;
-						autoheal.skill_id = skill_id;
-						autoheal.skill_lv = std::stoi(result.at(3));
-						autoheal.min_hp = std::stoi(result.at(4));
-						autoheal.last_use = 1;
-						sd->aa.autoheal.push_back(autoheal);
-					}
-				}
-				break;
-			case 1:
-				if(result.size() == 5){ // id = 1 - autopotion (is_active;item_id;min_hp;min_sp)
-					struct s_autopotion autopotion;
-					t_itemid nameid = std::stoi(result.at(2));
-					int is_active = std::stoi(result.at(1));
-					int min_hp = std::stoi(result.at(3));
-					int min_sp = std::stoi(result.at(4));
-
-					//check if item exist
-					if( ( item_data = item_db.find(nameid) ) == NULL )
-						return SCRIPT_CMD_SUCCESS;
-					if(item_data->type != IT_HEALING) // check if item is type healing for potions
-						return SCRIPT_CMD_SUCCESS;
-
-					if(!is_active || (min_hp == 0 && min_sp == 0) ){
-						sd->aa.autopotion.erase(
-						std::remove_if(sd->aa.autopotion.begin(), sd->aa.autopotion.end(), [nameid](s_autopotion const &v) {
-							return v.item_id == nameid;
-						}),
-						sd->aa.autopotion.end());
-						break;
-					}
-
-					auto itAutopotion = std::find_if(sd->aa.autopotion.begin(), sd->aa.autopotion.end(), [nameid] ( s_autopotion const &v) {return v.item_id == nameid;});
-					if(itAutopotion != sd->aa.autopotion.end()){
-						itAutopotion->is_active = is_active;
-						itAutopotion->min_hp = min_hp;
-						itAutopotion->min_sp = min_sp;
-					} else {
-						autopotion.is_active = is_active;
-						autopotion.item_id = nameid;
-						autopotion.min_hp = min_hp;
-						autopotion.min_sp = min_sp;
-						sd->aa.autopotion.push_back(autopotion);
-					}
-				}
-				break;
-
-			case 2:
-				if(result.size() == 6){ // id = 2 - sit regen (is_active;min_hp;max_hp;min_sp;max_sp)
-					int is_active = std::stoi(result.at(1));
-					int min_hp = std::stoi(result.at(2));
-					int max_hp = std::stoi(result.at(3));
-					int min_sp = std::stoi(result.at(4));
-					int max_sp = std::stoi(result.at(5));
-
-					if(!is_active)
-						sd->aa.autositregen.is_active = false;
-					else {
-						sd->aa.autositregen.is_active = true;
-						sd->aa.autositregen.min_hp = min_hp;
-						sd->aa.autositregen.max_hp = max_hp;
-						sd->aa.autositregen.min_sp = min_sp;
-						sd->aa.autositregen.max_sp = max_sp;
-					}
-				}
-				break;
-
-			case 3:
-				if(result.size() == 4){ // id = 3 - autobuffskills (is_active;skill_id;skill_lv)
-					struct s_autobuffskills autobuffskills;
-					int skill_id = std::stoi(result.at(2));
-					int is_active = std::stoi(result.at(1));
-
-					//check if skill exist and is support type and has status change
-					skill = skill_db.find(skill_id);
-					e_cast_type type = skill_get_casttype(skill_id);
-					if ((!skill || type != CAST_NODAMAGE || !(skill->inf&(INF_SUPPORT_SKILL|INF_SELF_SKILL)) || skill_get_sc(skill->nameid) == 0) && (skill_id != 261 || skill_id != 401))
-						return SCRIPT_CMD_SUCCESS;
-		
-					if(!is_active){
-						sd->aa.autobuffskills.erase(
-						std::remove_if(sd->aa.autobuffskills.begin(), sd->aa.autobuffskills.end(), [skill_id](s_autobuffskills const &v) {
-							return v.skill_id == skill_id;
-						}),
-						sd->aa.autobuffskills.end());
-						break;
-					}
-					auto itAutobuffskills = std::find_if(sd->aa.autobuffskills.begin(), sd->aa.autobuffskills.end(), [skill_id] ( s_autobuffskills const &v) {return v.skill_id == skill_id;});
-					if(itAutobuffskills != sd->aa.autobuffskills.end()){
-						itAutobuffskills->is_active = is_active;
-						itAutobuffskills->skill_lv = std::stoi(result.at(3));
-					} else {
-						autobuffskills.is_active = is_active;
-						autobuffskills.skill_id = skill_id;
-						autobuffskills.skill_lv = std::stoi(result.at(3));
-						autobuffskills.last_use = 1;
-						sd->aa.autobuffskills.push_back(autobuffskills);
-					}
-				}
-				break;
-
-			case 4:
-				if(result.size() == 4){ // id = 4 - autoattackskills (is_active;skill_id;skill_lv)
-					struct s_autoattackskills autoattackskills;
-					int skill_id = std::stoi(result.at(2));
-					int is_active = std::stoi(result.at(1));
-
-					//check if skill exist and is support type and has status change
-					skill = skill_db.find(skill_id);
-					e_cast_type type = skill_get_casttype(skill_id);
-					if (!(skill && skill->skill_type != BF_NONE && skill->inf != INF_PASSIVE_SKILL && !skill_get_nk(skill_id, NK_NODAMAGE) && (type != CAST_NODAMAGE || skill->inf & INF_SELF_SKILL)))
-						return SCRIPT_CMD_SUCCESS;
-
-					if(!is_active){
-						sd->aa.autoattackskills.erase(
-						std::remove_if(sd->aa.autoattackskills.begin(), sd->aa.autoattackskills.end(), [skill_id](s_autoattackskills const &v) {
-							return v.skill_id == skill_id;
-						}),
-						sd->aa.autoattackskills.end());
-						break;
-					}
-					auto itAutoattackskills = std::find_if(sd->aa.autoattackskills.begin(), sd->aa.autoattackskills.end(), [skill_id] ( s_autoattackskills const &v) {return v.skill_id == skill_id;});
-					if(itAutoattackskills != sd->aa.autoattackskills.end()){
-						itAutoattackskills->is_active = is_active;
-						itAutoattackskills->skill_lv = std::stoi(result.at(3));
-					} else {
-						autoattackskills.is_active = is_active;
-						autoattackskills.skill_id = skill_id;
-						autoattackskills.skill_lv = std::stoi(result.at(3));
-						autoattackskills.last_use = 1;
-						sd->aa.autoattackskills.push_back(autoattackskills);
-					}
-				}
-				break;
-
-			case 5:
-				if(result.size() == 4){ // id = 5 - autobuffitems (is_active;item_id;delay)
-					struct s_autobuffitems autobuffitems;
-					t_itemid nameid = std::stoi(result.at(2));
-					int is_active = std::stoi(result.at(1));
-
-					//check if item exist
-					if( ( item_data = item_db.find(nameid) ) == NULL )
-						return SCRIPT_CMD_SUCCESS;
-					if(item_data->type != IT_USABLE) // check if item is type usable
-						return SCRIPT_CMD_SUCCESS;
-
-					if(!is_active){
-						sd->aa.autobuffitems.erase(
-						std::remove_if(sd->aa.autobuffitems.begin(), sd->aa.autobuffitems.end(), [nameid](s_autobuffitems const &v) {
-							return v.item_id == nameid;
-						}),
-						sd->aa.autobuffitems.end());
-						break;
-					}
-					auto itAutobuffitem = std::find_if(sd->aa.autobuffitems.begin(), sd->aa.autobuffitems.end(), [nameid] ( s_autobuffitems const &v) {return v.item_id == nameid;});
-					if(itAutobuffitem != sd->aa.autobuffitems.end()){
-						itAutobuffitem->is_active = is_active;
-						itAutobuffitem->delay = std::stoi(result.at(3))*1000;
-					} else {
-						autobuffitems.is_active = is_active;
-						autobuffitems.item_id = nameid;
-						autobuffitems.delay = std::stoi(result.at(3))*1000;
-						autobuffitems.last_use = 1;
-						sd->aa.autobuffitems.push_back(autobuffitems);
-					}
-				}
-				break;
-			case 6:
-				if(result.size() == 2) // id = 6 - melee attack (status)
-					sd->aa.stopmelee = std::stoi(result.at(1));
-				break;
-			case 7:
-				if(result.size() == 3){ // id = 7 - teleport (index,value)
-					int index = std::stoi(result.at(1));
-					switch(index){
-						case 0:
-							sd->aa.teleport.use_teleport = std::stoi(result.at(2));
-							break;
-						case 1:
-							sd->aa.teleport.use_flywing = std::stoi(result.at(2));
-							break;
-						case 2:
-							sd->aa.teleport.min_hp = std::stoi(result.at(2));
-							break;
-						case 3:
-							sd->aa.teleport.delay_nomobmeet = std::stoi(result.at(2))*1000;
-							break;
-					}
-				}
-				break;
-			case 8:
-				if(result.size() == 4){ // id = 8 - monster (is_active;monster_id;aggressive_behavior)
-					uint32 mob_id = std::stoi(result.at(2));
-					int status = std::stoi(result.at(1));
-					bool monster_found = false;
-					int i;
-
-					if(status == -1){
-						sd->aa.mobs.id.clear();
-						break;
-					}
-
-					//check if mob exist
-					if(mob_id > 0){
-						if( ( mob = mob_db.find(mob_id) ) == NULL )
-							return SCRIPT_CMD_SUCCESS;
-					}
-
-					if(!status){
-						if(mob_id > 0){
-							if(sd->aa.mobs.id.size() > 0){
-								for(i=0;i<sd->aa.mobs.id.size(); i++){
-									if(sd->aa.mobs.id.at(i) == mob_id){
-										sd->aa.mobs.id.erase(sd->aa.mobs.id.begin()+i);
-										break;
-									}
-								}
-							}
-						} else 
-							sd->aa.mobs.aggressive_behavior = std::stoi(result.at(3));
-					} else if(mob_id > 0 && sd->aa.mobs.id.size() < 20){
-						for(i=0;i<sd->aa.mobs.id.size(); i++){
-							if(sd->aa.mobs.id.at(i) == mob_id){
-								monster_found = true;
-								break;
-							}
-						}
-						if(!monster_found)
-							sd->aa.mobs.id.push_back(mob_id);
-					}
-				}
-				break;
-
-			case 9:
-				if(result.size() == 3){ // id = 9 - item pickup (is_active;item_id)
-					int i;
-					t_itemid nameid = std::stoi(result.at(2));
-					int status = std::stoi(result.at(1));
-					bool item_found = false;
-
-					switch(status){
-						case -1:
-							sd->aa.pickup_item_id.clear();
-							break;
-						case 0:
-							if(!sd->aa.pickup_item_id.empty()){
-								for(i=0;i<sd->aa.pickup_item_id.size(); i++){
-									if(sd->aa.pickup_item_id.at(i) == nameid){
-										sd->aa.pickup_item_id.erase(sd->aa.pickup_item_id.begin()+i);
-										break;
-									}
-								}
-							}
-							break;
-						case 1:
-							//check if item exist
-							if( ( item_data = item_db.find(nameid) ) == NULL )
-								return SCRIPT_CMD_SUCCESS;
-
-							if(!sd->aa.pickup_item_id.empty()){
-								for(i=0;i<sd->aa.pickup_item_id.size(); i++){
-									if(sd->aa.pickup_item_id.at(i) == nameid){
-										item_found = true;
-										break;
-									}
-								}
-							}
-							if(!item_found)
-								sd->aa.pickup_item_id.push_back(nameid);
-
-							break;
-						case 2:
-							sd->aa.pickup_item_config = (int)nameid;
-							break;
-						case 3:
-							sd->aa.prio_item_config = (int)nameid;
-							break;
-					}
-				}
-				break;
-			case 10:
-				sd->aa.pickup_item_id.clear();
-				sd->aa.pickup_item_config = 0;
-				sd->aa.prio_item_config = 0;
-				sd->aa.mobs.id.clear();
-				sd->aa.mobs.aggressive_behavior = 0;
-				sd->aa.autobuffitems.clear();
-				sd->aa.stopmelee = 0;
-				sd->aa.autoattackskills.clear();
-				sd->aa.autobuffskills.clear();
-				sd->aa.autositregen.is_active = 0;
-				sd->aa.autopotion.clear();
-				sd->aa.autoheal.clear();
-				break;
-
-		}
-	}
-
-	return SCRIPT_CMD_SUCCESS;
-}
-
 /// Returns the level of the guild skill.
 ///
 /// getgdskilllv(<guild id>,<skill id>) -> <level>
@@ -13917,6 +12936,8 @@ BUILDIN_FUNC(resetskill)
 	if (!script_charid2sd(2,sd))
 		return SCRIPT_CMD_FAILURE;
 	pc_resetskill(sd,1);
+	sd->aa.autoattackskills.clear();
+	sd->aa.autobuffskills.clear();	
 	return SCRIPT_CMD_SUCCESS;
 }
 
@@ -28684,31 +27705,6 @@ BUILDIN_FUNC(permission_add)
 	return SCRIPT_CMD_SUCCESS;
 }
 
-BUILDIN_FUNC(mesitemicon){
-	t_itemid nameid = script_getnum( st, 2 );
-	std::shared_ptr<item_data> data = item_db.find( nameid );
-	
-	if( data == nullptr ){
-		ShowError( "buildin_mesitemicon: Item ID %u does not exists.\n", nameid );
-		script_pushconststr( st, "" );
-		return SCRIPT_CMD_FAILURE;
-	}
-
-	const char* name = nullptr;
-
-	if( script_hasdata( st, 3 ) ){
-		name = script_getstr( st, 3 );
-	}
-
-	// Create the link, depending on configuration
-	std::string itemlstr = item_db.create_item_icon_for_mes( data, name );
-
-	// Push it to the script engine for further usage
-	script_pushstrcopy( st, itemlstr.c_str() );
-
-	return SCRIPT_CMD_SUCCESS;
-}
-
 BUILDIN_FUNC(getdepositstore)
 {
 	int count = 0;
@@ -28804,6 +27800,362 @@ BUILDIN_FUNC(getdepositbonus)
 	}
 
 	script_pushint(st, j);
+	return SCRIPT_CMD_SUCCESS;
+}
+
+/// Returns infos on a skill.
+///
+/// aa_getskillinfostring(<id>,<skill id>)
+/// aa_getskillinfostring(<id>,"<skill name>")
+/// 0 = Description
+BUILDIN_FUNC(aa_getskillinfostring)
+{
+	int skill_id, id;
+	TBL_PC* sd;
+
+	if (!script_rid2sd(sd))
+		return SCRIPT_CMD_FAILURE;// no player attached, report source
+
+	id = script_getnum(st, 2);
+	skill_id = (script_isstring(st, 3) ? skill_name2id(script_getstr(st, 3)) : script_getnum(st, 3));
+
+	switch (id) {
+	case 0:	// skill->desc
+		std::shared_ptr<s_skill_db> skill = skill_db.find(skill_id);
+		if (!skill)
+			return SCRIPT_CMD_SUCCESS;
+		script_pushstrcopy(st, skill->desc);
+		break;
+	}
+
+	return SCRIPT_CMD_SUCCESS;
+}
+
+// Start auto buff from rental items
+BUILDIN_FUNC(autoattack_fromitem) {
+	map_session_data* sd;
+	t_tick max_duration = 86400;
+
+	if (!script_rid2sd(sd))
+		return SCRIPT_CMD_FAILURE;
+
+	t_itemid item_id = script_getnum(st, 2);
+
+	return handleAutoattack_fromitem(sd, item_id, max_duration);
+}
+
+/*
+	Returns info of player on autoattack
+
+	aa_getautoattackstring(<id>{,<index>})
+	0 = Auto Heal all desc - Index = skill id
+	1 = HP / SP Potions
+	2 = Ressurrection
+	3 = auto buff skill desc
+	4 = auto sit rest
+	5 = auto buff items desc
+	6 = teleport desc
+	7 = General autoattack_potions state (disable / enable)
+	8 = Return to savepoint when dead (disable / enable)
+	9 = Token of siegfried use for auto res (disable / enable)
+	10 = Auto accept party request
+	11 = Priorize Loot / Fight - 0 Fight - 1 Loot
+	12 = Monster selection
+	13 = Item pickup selection
+*/
+BUILDIN_FUNC(aa_getautoattackstring)
+{
+	int index = 0, extra_index = 0, id;
+	TBL_PC* sd;
+	std::ostringstream os_buf;
+	os_buf.str("");
+	struct party_data* p = nullptr;
+
+	if (!script_rid2sd(sd))
+		return SCRIPT_CMD_FAILURE;// no player attached, report source
+
+	id = script_getnum(st, 2);
+	index = script_getnum(st, 3);
+	extra_index = script_getnum(st, 4);
+
+	switch (id) {
+	case 0: // auto heal desc
+		handle_autoattack_heal(os_buf, index, extra_index, st, sd);
+		break;
+
+	case 1: // HP / SP Potions - // potion_menu_list
+		handle_autoattack_potions(os_buf, index, st, sd);
+		break;
+
+	case 2: // auto attack skill desc
+		handle_autoattack_attack(os_buf, index, extra_index, st, sd);
+		break;
+
+	case 3:// auto buff skill desc
+		handle_autoattack_buff(os_buf, index, extra_index, st, sd);
+		break;
+
+	case 4: // Auto sit to rest
+		handle_autoattack_sitrest(os_buf, index, st, sd);
+		break;
+
+	case 5:	// Buff items - Used for show the buffitems_menu
+		handle_autoattack_items(os_buf, index, st, sd);
+		break;
+
+	case 6: 
+		handle_autoattack_teleport(os_buf, index, st, sd);
+		break;
+
+	case 7:
+		handle_potions(os_buf, sd);
+		break;
+
+	case 8:
+		handle_return_to_savepoint(os_buf, sd);
+		break;
+
+	case 9:
+		handle_token_of_siegfried(os_buf, sd);
+		break;
+
+	case 10:
+		handle_party_request(os_buf, sd);
+		break;
+
+	case 11:
+		handle_priorize_loot_fight(os_buf, sd);
+		break;
+
+	case 12: // monster desc
+		handle_autoattack_monsterselection(os_buf, index, extra_index, st, sd);
+		break;
+
+	case 13: // item pick up
+		handle_autoattack_itempickup(os_buf, index, extra_index, st, sd);
+		break;
+	}
+
+	script_pushstrcopy(st, os_buf.str().c_str());
+	return SCRIPT_CMD_SUCCESS;
+}
+
+BUILDIN_FUNC(aa_getautoattackint)
+{
+	TBL_PC* sd;
+	if (!script_rid2sd(sd)) return SCRIPT_CMD_SUCCESS; // No player attached, report source
+
+	int id = script_getnum(st, 2);
+	int num = 0; // Variable utilisee pour stocker le resultat
+	std::shared_ptr<item_data> item_data;
+
+	const uint32 char_id = sd->status.char_id;
+
+	switch (id) {
+	case 0: // Auto heal
+	case 2: // Active auto attack skills
+	case 3: // Active auto buffs skills
+	case 4: // Active potions
+	case 5: // Buff items
+	case 6: // Return to save point on death
+	case 7: // Token of Siegfried
+	case 8: // Auto accept party request
+	case 9: // Pick up item config
+	case 10: // Prio item config
+	case 11: // Stop melee
+	case 12: // teleport use fly wing
+	case 13: // teleport use skill
+	case 14: // Sit regen hp
+	case 15: // Sit regen sp
+	case 16: // Attack aggressve monster
+	case 17: // Item pick up selecton size
+	case 18: // Action on end
+		num = handleGetautoattackint(sd, id);
+		break;
+	case 1: // HP / SP Potions available in inventory
+		for (int i = 0; i < MAX_INVENTORY; ++i) {
+			item_data = item_db.find(sd->inventory.u.items_inventory[i].nameid);
+			if (!item_data) break;
+			if (item_data->type == IT_HEALING) ++num;
+		}
+		break;
+	default:
+		num = 0;
+		break;
+	}
+
+	script_pushint(st, num);
+	return SCRIPT_CMD_SUCCESS;
+}
+
+/*
+	Save info of player on autoattack
+
+	aa_setautoattack(<str>)
+	Parse a string with ; as separator
+	id;
+	id = 0 - autoheal (is_active;skill_id;skill_lv;min_hp)
+	id = 1 - autopotion (is_active;item_id;min_hp;min_sp)
+	id = 2 - attack skill (is_active;skill_id;skill_lv)
+	id = 3 - buff skills (is_active;skill_id;skill_lv)
+	id = 4 - teleport flywing
+	id = 5 - autoattackitems(is_active; item_id; delay)
+	id = 6 - teleport skill
+	id = 7 - Melee Attack
+	id = 8 - Active autoattack potions
+	id = 9 - Return to save point on death
+	id = 10 - reset config
+	id = 11 - Token of siegfried
+	id = 12 - Auto accept parrty request
+	id = 13 - Priorize loot / fight
+	id = 14 - Sit rest hp
+	id = 15 - Sit rest sp
+	id = 16 - Teleport min hp
+	id = 17 - Teleport delay no mob meet
+	id = 18 - Ignore aggressive monster not in the list
+	id = 19 - Monster selection list
+	id = 20 - Item Pickup configuration
+	id = 21 - Item Pickup selection
+	id = 22 - Action on end
+	id = 23 - Max monster surround
+*/
+BUILDIN_FUNC(aa_setautoattack)
+{
+	TBL_PC* sd;
+	const char delim = ';';
+	std::vector<std::string> result;
+	std::string item, str;
+	int id = -1;
+
+	if (!script_rid2sd(sd))
+		return SCRIPT_CMD_SUCCESS; // No player attached
+
+	str = script_getstr(st, 2);
+	std::stringstream ss(str);
+
+	while (std::getline(ss, item, delim)) {
+		result.push_back(item);
+	}
+
+	if (result.empty())
+		return SCRIPT_CMD_FAILURE;
+
+	// Extract the ID to process
+	id = std::stoi(result[0]);
+
+	switch (id) {
+	case 0:
+		handleAutoHeal(result, sd);
+		break;
+	case 1:
+		handleAutoPotion(result, sd);
+		break;
+	case 2:
+		handleAutoAttackSkills(result, sd);
+		break;
+	case 3:
+		handleAutoBuffSkills(result, sd);
+		break;
+	case 4:
+		handleTeleportFlywing(result, sd);
+		break;
+	case 5:
+		handleAutoAttackItems(result, sd);
+		break;
+	case 6:
+		handleTeleportSkill(result, sd);
+		break;
+	case 7:
+		handleMeleeAttack(result, sd);
+		break;
+	case 8:
+		handleAutoAttackPotionState(result, sd);
+		break;
+	case 9:
+		handleReturnToSavepoint(result, sd);
+		break;
+	case 10:
+		handleResetAutoAttackConfig(sd);
+		break;
+	case 11:
+		handleTokenOfSiegfried(result, sd);
+		break;
+	case 12:
+		handleAcceptPartyRequest(result, sd);
+		break;
+	case 13:
+		handlePriorizeLootFight(result, sd);
+		break;
+	case 14:
+		handleSitRestHp(result, sd);
+		break;
+	case 15:
+		handleSitRestSp(result, sd);
+		break;
+	case 16:
+		handleTeleportMinHp(result, sd);
+		break;
+	case 17:
+		handleTeleportNoMobMeet(result, sd);
+		break;
+	case 18:
+		handleIgnoreAggressiveMonster(result, sd);
+		break;
+	case 19:
+		handleMonsterSelection(result, sd);
+		break;
+	case 20:
+		handleItemPickupConfiguration(result, sd);
+		break;
+	case 21:
+		handleItemPickupSelection(result, sd);
+		break;
+	case 22:
+		handleActionOnEnd(result, sd);
+		break;
+	case 23:
+		handleMonsterSurround(result, sd);
+		break;
+	}
+
+	return SCRIPT_CMD_SUCCESS;
+}
+
+BUILDIN_FUNC(aa_getstate)
+{
+	TBL_PC* sd;
+
+	if (!script_rid2sd(sd))
+		return SCRIPT_CMD_SUCCESS;// no player attached, report source
+
+	script_pushint(st, sd->state.autoattack);
+
+	return SCRIPT_CMD_SUCCESS;
+}
+
+
+BUILDIN_FUNC(mesitemicon){
+	t_itemid nameid = script_getnum( st, 2 );
+	std::shared_ptr<item_data> data = item_db.find( nameid );
+	
+	if( data == nullptr ){
+		ShowError( "buildin_mesitemicon: Item ID %u does not exists.\n", nameid );
+		script_pushconststr( st, "" );
+		return SCRIPT_CMD_FAILURE;
+	}
+
+	const char* name = nullptr;
+
+	if( script_hasdata( st, 3 ) ){
+		name = script_getstr( st, 3 );
+	}
+
+	// Create the link, depending on configuration
+	std::string itemlstr = item_db.create_item_icon_for_mes( data, name );
+
+	// Push it to the script engine for further usage
+	script_pushstrcopy( st, itemlstr.c_str() );
+
 	return SCRIPT_CMD_SUCCESS;
 }
 
@@ -28980,12 +28332,6 @@ struct script_function buildin_func[] = {
 	BUILDIN_DEF(guildskill,"vi"),
 	BUILDIN_DEF(getskilllv,"v"),
 	BUILDIN_DEF(getgdskilllv,"iv"),
-	BUILDIN_DEF(getskillinfostring,"iv"),
-	BUILDIN_DEF(getskillinfoint,"ii"),
-	BUILDIN_DEF(setautoattack,"s"),
-	BUILDIN_DEF(autoattack_fromitem,""),
-	BUILDIN_DEF(getautoattackstring,"i?"),
-	BUILDIN_DEF(getautoattackint,"i?"),	
 	BUILDIN_DEF(basicskillcheck,""),
 	BUILDIN_DEF(getgmlevel,"?"),
 	BUILDIN_DEF(getgroupid,"?"),
@@ -29584,10 +28930,19 @@ struct script_function buildin_func[] = {
 	BUILDIN_DEF(permission_check, "i?"),
 	BUILDIN_DEF(permission_add, "i?"),
 	BUILDIN_DEF2(permission_add, "permission_remove", "i?"),
-
+	
+	// Deposit System
 	BUILDIN_DEF(getdepositstore, ""),
 	BUILDIN_DEF(getdepositlist, "i?"),
 	BUILDIN_DEF(getdepositbonus, "?"),
+
+	// Autoattack System
+	BUILDIN_DEF(aa_getskillinfostring, "iv"),
+	BUILDIN_DEF(aa_setautoattack, "s"),
+	BUILDIN_DEF(autoattack_fromitem, "i"),
+	BUILDIN_DEF(aa_getautoattackstring, "i??"),
+	BUILDIN_DEF(aa_getautoattackint, "i?"),
+	BUILDIN_DEF(aa_getstate, ""),
 
 	BUILDIN_DEF( mesitemicon, "i??" ),
 

@@ -1912,7 +1912,16 @@ int32 npc_touch_areanpc(map_session_data* sd, int16 m, int16 x, int16 y, struct 
 			sd->count_rewarp = 0;
 			break;
 		}
-		pc_setpos(sd, nd->u.warp.mapindex, nd->u.warp.x, nd->u.warp.y, CLR_OUTSIGHT);
+		if ((sd->state.autoattack && sd->mapindex == nd->u.warp.mapindex) || !sd->state.autoattack) {
+			pc_setpos(sd, nd->u.warp.mapindex, nd->u.warp.x, nd->u.warp.y, CLR_OUTSIGHT);
+
+			if (sd->state.autoattack) {
+				// Action after tp
+				aa_status_checkmapchange(sd);
+				pc_delinvincibletimer(sd);
+				clif_parse_LoadEndAck(0, sd);
+			}
+		}
 		return 2;
 	case NPCTYPE_SCRIPT:
 		// warp type sorted first, no need to check if they override any other OnTouch areas.

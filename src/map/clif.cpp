@@ -27,6 +27,7 @@
 
 #include "achievement.hpp"
 #include "atcommand.hpp"
+#include "autoattack.hpp"
 #include "battle.hpp"
 #include "battleground.hpp"
 #include "cashshop.hpp"
@@ -5992,7 +5993,7 @@ void clif_skillcastcancel( block_list& bl ){
 /// suggesting this is an ACK packet for the UseSkill packets and should be sent on success too [FlavioJS]
 void clif_skill_fail( map_session_data& sd, uint16 skill_id, enum useskill_fail_cause cause, int32 btype, t_itemid itemId ){
 
-	if(sd.sc.getSCE(SC_AUTOATTACK))
+	if(sd.state.autoattack)
 		return;
 
 	if(battle_config.display_skill_fail&1)
@@ -9931,10 +9932,7 @@ void clif_name( struct block_list* src, struct block_list *bl, send_target targe
 
 	switch( bl->type ){
 		case BL_PC: {
-			PACKET_ZC_ACK_REQNAMEALL packet = { 0 };
-			char temp_name[NAME_LENGTH];
-			const char* autoString = "[AUTO]";
-			size_t autoLength = strlen(autoString);			
+			PACKET_ZC_ACK_REQNAMEALL packet = { 0 };		
 
 			packet.packet_id = HEADER_ZC_ACK_REQNAMEALL;
 			packet.gid = bl->id;
@@ -9952,13 +9950,11 @@ void clif_name( struct block_list* src, struct block_list *bl, send_target targe
 				return;
 			}
 
-			if(battle_config.feature_autoattack_prefixname && sd->sc.getSCE(SC_AUTOATTACK) && autoLength < NAME_LENGTH){ //&& sd->state.autotrade
-				size_t remainingSpace = NAME_LENGTH - autoLength;
-				safestrncpy( temp_name, sd->status.name, NAME_LENGTH );
-				if (strlen(sd->status.name) > remainingSpace)
-					temp_name[remainingSpace] = '\0';  // Truncate the string
-				snprintf(packet.name, NAME_LENGTH, "%s%s", autoString, temp_name);
-			} else
+			if (!(battle_config.feature_autoattack_prefixname && sd->state.autoattack)) {
+				clif_send(&packet, sizeof(packet), src, target);
+				return;
+			}
+			else
 				safestrncpy( packet.name, sd->status.name, NAME_LENGTH );
 
 			party_data *p = nullptr;
@@ -11868,6 +11864,8 @@ void clif_parse_Restart(int32 fd, map_session_data *sd)
 {
 	switch(RFIFOB(fd,packet_db[RFIFOW(fd,0)].pos[0])) {
 	case 0x00:
+		if(sd->state.autoattack)
+			status_change_end(&sd->bl, SC_AUTOATTACK);	
 		pc_respawn(sd,CLR_OUTSIGHT);
 		break;
 	case 0x01:

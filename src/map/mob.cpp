@@ -1302,14 +1302,7 @@ static int32 mob_ai_sub_hard_activesearch(struct block_list *bl,va_list ap)
 	target= va_arg(ap,struct block_list**);
 	mode= static_cast<enum e_mode>(va_arg(ap, int32));
 
-	if(battle_config.feature_autoattack_teleport_mvp && bl->type == BL_PC){
-		TBL_PC *sd = BL_CAST(BL_PC, bl);
-		e_mob_bosstype bosstype = md->get_bosstype();
-
-		if(bosstype != BOSSTYPE_NONE){
-			aa_teleport(sd);
-		}
-	}
+	aa_mob_ai_search_mvpcheck(bl, md);
 
 	//If can't seek yet, not an enemy, or you can't attack it, skip.
 	if ((*target) == bl || !status_check_skilluse(&md->bl, bl, 0, 0))
@@ -2766,11 +2759,7 @@ void mob_damage(struct mob_data *md, struct block_list *src, int32 damage)
 	if (src && damage > 0) { //Store total damage...
 		//Log damage
 		mob_log_damage(md, src, static_cast<int64>(damage));
-
-		if(src->type == BL_PC){
-			map_session_data *sd = (map_session_data *)src;
-			sd->aa.last_attack = gettick();
-		}		
+		
 	}
 
 	if (battle_config.show_mob_info&3)
@@ -3163,6 +3152,11 @@ int32 mob_dead(struct mob_data *md, struct block_list *src, int32 type)
 			if ((base_exp > 0 || job_exp > 0) && entry.flag == MDLF_HOMUN && homkillonly && battle_config.hom_idle_no_share && pc_isidle_hom(tmpsd[i]))
 				base_exp = job_exp = 0;
 
+			if (sd && sd->state.autoattack) {
+				base_exp = base_exp * battle_config.feature_autoattack_exp_ratio / 100;
+				job_exp = job_exp * battle_config.feature_autoattack_exp_ratio / 100;
+			}
+
 			if ( ( temp = tmpsd[i]->status.party_id)>0 ) {
 				int32 j;
 				for( j = 0; j < pnum && pt[j].id != temp; j++ ); //Locate party.
@@ -3277,6 +3271,9 @@ int32 mob_dead(struct mob_data *md, struct block_list *src, int32 type)
 
 					if (rnd()%10000 >= drop_rate)
 						continue;
+
+					if (sd && sd->state.autoattack)
+						drop_rate = drop_rate * battle_config.feature_autoattack_drop_ratio / 100;
 
 					std::shared_ptr<s_mob_drop> mobdrop = std::make_shared<s_mob_drop>();
 

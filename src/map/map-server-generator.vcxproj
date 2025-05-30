@@ -191,9 +191,11 @@
       <Profile>true</Profile>
     </Link>
   </ItemDefinitionGroup>
-  <ItemGroup>
+  <ItemGroup>  
     <ClInclude Include="achievement.hpp" />
     <ClInclude Include="atcommand.hpp" />
+    <ClInclude Include="autoattack.hpp" />
+    <ClInclude Include="autoattack_script.hpp" />	
     <ClInclude Include="battle.hpp" />
     <ClInclude Include="battleground.hpp" />
     <ClInclude Include="buyingstore.hpp" />
@@ -242,9 +244,11 @@
     <ClInclude Include="unit.hpp" />
     <ClInclude Include="vending.hpp" />
   </ItemGroup>
-  <ItemGroup>
+  <ItemGroup> 
     <ClCompile Include="achievement.cpp" />
     <ClCompile Include="atcommand.cpp" />
+    <ClCompile Include="autoattack.cpp" />
+    <ClCompile Include="autoattack_script.cpp" /> 	
     <ClCompile Include="battle.cpp" />
     <ClCompile Include="battleground.cpp" />
     <ClCompile Include="buyingstore.cpp" />
