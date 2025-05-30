@@ -10858,17 +10858,16 @@ BUILDIN_FUNC(getautoattackstring)
 					buf += std::string("Ignore aggressive monsters not on the list \n");
 				else
 					buf += std::string("Attack aggressive monsters not on the list \n");
-			}
-			if(index == 1){
+
 				if(sd->aa.mobs.id.size() > 0){
 					for (i=0; i<sd->aa.mobs.id.size(); i++){
 						mob = mob_db.find(sd->aa.mobs.id.at(i));
 						if (mob == nullptr)
 							continue;
-						buf += std::string("^FF0000(") + std::to_string(mob->id) + ")^000000 [" + mob->name.c_str() + "]:";
+						buf += std::string("^FF0000(") + std::to_string(mob->id) + ")^000000 [" + mob->name.c_str() + "] \n";
 					}
 				} else
-					buf += std::string("No monster on the list, every monster encountered will be attacked \n");			
+					buf += std::string("No monster on the list, every monster encountered will be attacked \n");
 			}
 			script_pushstrcopy(st, buf.c_str());
 			break;
