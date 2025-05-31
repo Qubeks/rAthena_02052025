@@ -58,6 +58,8 @@ enum emote_msg : int8;
 enum emotion_expansion_msg : int8;
 struct PACKET_ZC_EMOTION_EXPANTION_LIST_sub;
 
+#define DMGVAL_IGNORE -30000
+
 enum e_PacketDBVersion { // packet DB
 	MIN_PACKET_DB  = 0x064,
 	MAX_PACKET_DB  = 0xCFF,
