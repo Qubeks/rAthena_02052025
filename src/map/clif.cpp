@@ -9950,12 +9950,12 @@ void clif_name( struct block_list* src, struct block_list *bl, send_target targe
 				return;
 			}
 
+			safestrncpy( packet.name, sd->status.name, NAME_LENGTH );
+
 			if (!(battle_config.feature_autoattack_prefixname && sd->state.autoattack)) {
 				clif_send(&packet, sizeof(packet), src, target);
 				return;
 			}
-			else
-				safestrncpy( packet.name, sd->status.name, NAME_LENGTH );
 
 			party_data *p = nullptr;
 
