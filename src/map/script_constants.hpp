@@ -4344,6 +4344,7 @@
 	export_constant(STOR_MODE_GET);
 	export_constant(STOR_MODE_PUT);
 	export_constant(STOR_MODE_ALL);
+	export_constant(STOR_MODE_CHAR);
 
 	/* instance enter */
 	export_constant(IE_OK);

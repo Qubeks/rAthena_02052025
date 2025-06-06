@@ -70,17 +70,17 @@ prontera,147,172,4	script	Collector	4_M_HUMERCHANT,{
 		.@s2 = select(implode(.@menu2$, ":")) - 1;
 
 		// Set required Zeny amount (adjust as needed)
-		set .@required_zeny, 5000; // Example: 5000 Zeny cost
+		//set .@required_zeny, 5000; // Example: 5000 Zeny cost
 
-		if (Zeny < .@required_zeny) {
-			clear();
-			mes "You need at least " + callfunc("F_InsertComma", .@required_zeny) + " Zeny to open Deposit Box.";
-			close;
-		}
+		//if (Zeny < .@required_zeny) {
+		//	clear();
+		//	mes "You need at least " + callfunc("F_InsertComma", .@required_zeny) + " Zeny to open Deposit Box.";
+		//	close;
+		//}
 
 		// Deduct Zeny and open storage
-		Zeny -= .@required_zeny;
-		close2;
+		//Zeny -= .@required_zeny;
+		//close2;
 		openstorage2 .@stor_id[.@s2], STOR_MODE_PUT | STOR_MODE_GET;
 		end;
 	}

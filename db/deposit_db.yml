@@ -8,13 +8,15 @@
 # - StorageId               Storage Id.
 #   Bound                   if storage shared by account or not. (Default: true)
 #   Withdraw                If item in this storage can be withdrawed after deposited. (Default: true)
+#   DepositFee              Price to deposit any item from this storage. (Default: 0)
 #   WithdrawFee             Price to withdraw any item from this storage. (Default: 0)
 #   Items:                  List of possible items.
 #     - Item                Item name.
 #       Amount              Item amount. (Default: 1)
 #       Refine              Item refine. (Default: 0)
 #       Withdraw            If this item can be withdrawed after deposited. (Default: true)
-#       WithdrawFee         Price to withdraw this item from this storage. (Default: 0)
+#       DepositFee          Price to deposit this item from this storage. (Default: 0)
+#       WithdrawFee         Price to withdraw any item from this storage. (Default: 0)
 #       Script              Script to execute when the item successfully deposited. (Default: null)
 ###########################################################################
 #
@@ -28,7 +30,7 @@ Header:
 
 Body:
   - StorageId: 10
-    #Bound: false
+    DepositFee: 1000000
     WithdrawFee: 1000000
     Items:
      - Item: Knight_Of_Abyss_Card

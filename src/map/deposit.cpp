@@ -65,6 +65,21 @@ uint64 DepositDatabase::parseBodyNode(const ryml::NodeRef& node)
 			deposit->withdraw = true;
 	}
 
+	if (this->nodeExists(node, "DepositFee"))
+	{
+		int32 deposit_fee;
+
+		if (!this->asInt32(node, "DepositFee", deposit_fee))
+			return 0;
+
+		deposit->deposit_fee = deposit_fee;
+	}
+	else
+	{
+		if (!exists)
+			deposit->deposit_fee = 0;
+	}
+
 	if (this->nodeExists(node, "WithdrawFee"))
 	{
 		int32 withdraw_fee;
@@ -153,7 +168,7 @@ uint64 DepositDatabase::parseBodyNode(const ryml::NodeRef& node)
 				return 0;
 			}
 
-			entry->refine = refine;
+			entry->refine = (char)refine;
 		}
 		else
 		{
@@ -176,19 +191,34 @@ uint64 DepositDatabase::parseBodyNode(const ryml::NodeRef& node)
 				entry->withdraw = false;
 		}
 
-		if (this->nodeExists(it, "WithdrawFee"))
+		if (this->nodeExists(it, "DepositFee"))
 		{
-			int32 withdraw_fee;
+			int32 deposit_fee;
 
-			if (!this->asInt32(it, "WithdrawFee", withdraw_fee))
+			if (!this->asInt32(it, "DepositFee", deposit_fee))
 				return 0;
 
-			entry->withdraw_fee = withdraw_fee;
+			entry->deposit_fee = deposit_fee;
 		}
 		else
 		{
 			if (!exists)
-				entry->withdraw_fee = 0;
+				entry->deposit_fee = 0;
+		}
+
+		if (this->nodeExists(node, "WithdrawFee"))
+		{
+			int32 withdraw_fee;
+
+			if (!this->asInt32(node, "WithdrawFee", withdraw_fee))
+				return 0;
+
+			deposit->withdraw_fee = withdraw_fee;
+		}
+		else
+		{
+			if (!exists)
+				deposit->withdraw_fee = 0;
 		}
 
 		if (this->nodeExists(it, "Script"))

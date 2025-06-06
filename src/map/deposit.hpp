@@ -16,6 +16,7 @@ struct s_deposit_item {
 	uint16 amount;
 	char refine;
 	bool withdraw;
+	int32 deposit_fee;
 	int32 withdraw_fee;
 	struct script_code* script;
 
@@ -31,6 +32,7 @@ struct s_deposit_stor {
 	uint16 stor_id;
 	bool withdraw;
 	bool bound;
+	int32 deposit_fee;
 	int32 withdraw_fee;
 	std::vector<std::shared_ptr<s_deposit_item>> items;
 };

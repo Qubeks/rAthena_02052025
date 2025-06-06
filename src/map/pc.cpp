@@ -2396,7 +2396,7 @@ void pc_reg_received(map_session_data *sd)
 		if (!stor->bound)
 			mode |= STOR_MODE_CHAR;
 
-		intif_storage_request(sd, TABLE_STORAGE, stor->stor_id, mode);
+		intif_storage_request(sd, TABLE_STORAGE, static_cast<uint8>(stor->stor_id), static_cast<uint8>(mode));
 	}
 
 	intif_storage_request(sd,TABLE_STORAGE, 0, STOR_MODE_ALL); // Request storage data

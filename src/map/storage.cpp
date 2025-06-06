@@ -239,6 +239,17 @@ static enum e_storage_add storage_canGetItem(struct s_storage *stor, int32 idx, 
  * @param amount : quantity of items
  * @return 0:success, 1:failed, 2:failed because of room or stack checks
  */
+ // Helper function to format numbers with commas (add this at the top of the file)  
+std::string format_number_with_commas(int32 number) {
+	std::string str = std::to_string(number);
+	int insertPosition = str.length() - 3;
+	while (insertPosition > 0) {
+		str.insert(insertPosition, ",");
+		insertPosition -= 3;
+	}
+	return str;
+}
+
 static int32 storage_additem(map_session_data* sd, struct s_storage *stor, struct item *it, int32 amount)
 {
 	struct item_data *data;
@@ -323,6 +334,37 @@ static int32 storage_additem(map_session_data* sd, struct s_storage *stor, struc
 				return 1;
 			}
 		}
+
+		// Check for deposit fee  
+		int32 deposit_fee = 0;
+
+		// Updated deposit fee code  
+		if (entry != nullptr && entry->deposit_fee > 0) {
+			deposit_fee = entry->deposit_fee * amount; // Per-item deposit fee multiplied by amount  
+		}
+		else if (deposit->deposit_fee > 0) {
+			deposit_fee = deposit->deposit_fee * amount; // Storage-wide deposit fee multiplied by amount  
+		}
+
+		if (deposit_fee > 0) {
+			if (sd->status.zeny < deposit_fee) {
+				std::string formatted_fee = format_number_with_commas(deposit_fee);
+				safesnprintf(message, sizeof(message), "You need %s Zeny to deposit items in this storage.", formatted_fee.c_str());
+				clif_displaymessage(sd->fd, message);
+				return 1;
+			}
+
+			// Deduct deposit fee    
+			sd->status.zeny -= deposit_fee;
+			clif_updatestatus(*sd, SP_ZENY);
+
+			// Optional: Log the fee deduction    
+			log_zeny(*sd, LOG_TYPE_STORAGE, sd->status.char_id, -deposit_fee);
+
+			std::string formatted_fee = format_number_with_commas(deposit_fee);
+			safesnprintf(message, sizeof(message), "Deposit fee of %s Zeny has been charged.", formatted_fee.c_str());
+			clif_displaymessage(sd->fd, message);
+		}
 	}
 
 	if( itemdb_isstackable2(data) ) { // Stackable
@@ -373,6 +415,42 @@ int32 storage_delitem(map_session_data* sd, struct s_storage *stor, int32 index,
 
 	stor->u.items_storage[index].amount -= amount;
 	stor->dirty = true;
+
+	std::shared_ptr<s_deposit_stor> deposit = deposit_db.find(stor->stor_id);
+	if (deposit != nullptr)
+	{
+		char message[CHAT_SIZE_MAX + 1];
+		std::shared_ptr<s_deposit_item> entry = deposit_db.findItemInStor(stor->stor_id, stor->u.items_storage[index].nameid);
+
+		// Check for withdrawal fee  
+		int32 withdraw_fee = 0;
+		if (entry != nullptr && entry->withdraw_fee > 0) {
+			withdraw_fee = entry->withdraw_fee * amount; // Per-item withdrawal fee  
+		}
+		else if (deposit->withdraw_fee > 0) {
+			withdraw_fee = deposit->withdraw_fee * amount; // Storage-wide withdrawal fee  
+		}
+
+		if (withdraw_fee > 0) {
+			if (sd->status.zeny < withdraw_fee) {
+				std::string formatted_fee = format_number_with_commas(withdraw_fee);
+				safesnprintf(message, sizeof(message), "You need %s Zeny to withdraw items from this storage.", formatted_fee.c_str());
+				clif_displaymessage(sd->fd, message);
+				return 1; // Deny withdrawal  
+			}
+
+			// Deduct withdrawal fee  
+			sd->status.zeny -= withdraw_fee;
+			clif_updatestatus(*sd, SP_ZENY);
+
+			// Log the fee deduction  
+			log_zeny(*sd, LOG_TYPE_STORAGE, sd->status.char_id, -withdraw_fee);
+
+			std::string formatted_fee = format_number_with_commas(withdraw_fee);
+			safesnprintf(message, sizeof(message), "Withdrawal fee of %s Zeny has been charged.", formatted_fee.c_str());
+			clif_displaymessage(sd->fd, message);
+		}
+	}
 
 	if( stor->u.items_storage[index].amount == 0 ) {
 		memset(&stor->u.items_storage[index],0,sizeof(stor->u.items_storage[0]));

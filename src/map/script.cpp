@@ -27741,8 +27741,8 @@ BUILDIN_FUNC(getdepositstore)
 		if (stor->items.empty())
 			continue;
 
-		setd_sub_num(st, NULL, ".@stor_id", count, stor->stor_id, NULL);
-		setd_sub_str(st, NULL, ".@stor_name$", count++, storage_getName(stor->stor_id), NULL);
+		setd_sub_num(st, NULL, ".@stor_id", count, (uint8)stor->stor_id, NULL);
+		setd_sub_str(st, NULL, ".@stor_name$", count++, storage_getName((uint8)stor->stor_id), NULL);
 	}
 
 	script_pushint(st, count);

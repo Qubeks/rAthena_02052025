@@ -550,8 +550,8 @@ int32 char_memitemdata_to_sql(const struct item items[], int32 max, int32 id, en
 			selectoption = "char_id";
 			break;
 		case TABLE_STORAGE:
-			printname = inter_premiumStorage_getPrintableName(stor_id);
-			tablename = inter_premiumStorage_getTableName(stor_id);
+			printname = inter_premiumStorage_getPrintableName((uint8)stor_id);
+			tablename = inter_premiumStorage_getTableName((uint8)stor_id);
 			if (mode & STOR_MODE_CHAR)
 				selectoption = "char_id";
 			else
@@ -769,7 +769,7 @@ bool char_memitemdata_from_sql(struct s_storage* p, int32 max, int32 id, enum st
 			break;
 		case TABLE_STORAGE:
 			printname = "Storage";
-			tablename = inter_premiumStorage_getTableName(stor_id);
+			tablename = inter_premiumStorage_getTableName((uint8)stor_id);
 			if (mode & STOR_MODE_CHAR)
 				selectoption = "char_id";
 			else
@@ -792,7 +792,7 @@ bool char_memitemdata_from_sql(struct s_storage* p, int32 max, int32 id, enum st
 	memset(p, 0, sizeof(struct s_storage)); //clean up memory
 	p->id = id;
 	p->type = tableswitch;
-	p->stor_id = stor_id;
+	p->stor_id = (uint8)stor_id;
 	p->max_amount = max2;
 
 

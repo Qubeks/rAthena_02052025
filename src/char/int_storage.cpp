@@ -514,7 +514,7 @@ bool mapif_parse_StorageLoad(int32 fd) {
 	mode = RFIFOB(fd, 12);
 
 	memset(&stor, 0, sizeof(struct s_storage));
-	stor.stor_id = stor_id;
+	stor.stor_id = (uint8)stor_id;
 
 	//ShowInfo("Loading storage for AID=%d.\n", aid);
 	switch (type) {
