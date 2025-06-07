@@ -10063,12 +10063,25 @@ void clif_name( struct block_list* src, struct block_list *bl, send_target targe
 				packet.gid = bl->id;
 				safestrncpy( packet.name, md->name, NAME_LENGTH );
 
-				if(battle_config.show_mob_info&4){
-					std::string id_and_level = "ID: " + std::to_string(md->mob_id) + " | Lv. " + std::to_string(md->level);
-					safestrncpy(packet.party_name,id_and_level.c_str(),NAME_LENGTH);
+				std::string mob_info = "";  
+				  
+				if( battle_config.show_mob_info&1 ){  
+					mob_info += "HP: " + std::to_string(md->status.hp) + "/" + std::to_string(md->status.max_hp) + " | ";  
+				}  
+				  
+				if( battle_config.show_mob_info&2 ){  
+					mob_info += "HP: " + std::to_string(get_percentage(md->status.hp, md->status.max_hp)) + "% | ";  
+				}  
+				  
+				if( battle_config.show_mob_info&4 ){  
+					mob_info += "ID: " + std::to_string(md->mob_id) + " | ";  
+				}  
+
+				if( battle_config.show_mob_info&8 ){  
+					mob_info += "Lv: " + std::to_string(md->level) + " | ";  
 				}
 
-				if(battle_config.show_mob_info&1){
+				if(battle_config.show_mob_info&16){
 					std::string ele_name{};
 					switch(md->status.def_ele){
 						case ELE_NEUTRAL: ele_name = "Neutral";break;
@@ -10089,24 +10102,37 @@ void clif_name( struct block_list* src, struct block_list *bl, send_target targe
 					}
 				}
 
-				if(battle_config.show_mob_info&2){
-					std::string race_name{};
-					switch(md->status.race){
-						case RC_FORMLESS:	race_name = "Formless"; break;
-						case RC_UNDEAD:		race_name = "Undead"; break;
-						case RC_BRUTE:		race_name = "Brute"; break;
-						case RC_PLANT:		race_name = "Plant"; break;
-						case RC_INSECT:		race_name = "Insect"; break;
-						case RC_FISH:		race_name = "Fish"; break;
-						case RC_DEMON:		race_name = "Demon"; break;
-						case RC_DEMIHUMAN:	race_name = "Demi-Human"; break;
-						case RC_ANGEL:		race_name = "Angel"; break;
-						case RC_DRAGON:		race_name = "Dragon"; break;
-						default:			race_name = "";
-					}
-					if(race_name != "")
-						safestrncpy(packet.position_name,race_name.c_str(),NAME_LENGTH);
+				if(battle_config.show_mob_info&32){  
+					std::string race_name{};  
+					switch(md->status.race){  
+						case RC_FORMLESS:	race_name = "Formless"; break;  
+						case RC_UNDEAD:		race_name = "Undead"; break;  
+						case RC_BRUTE:		race_name = "Brute"; break;  
+						case RC_PLANT:		race_name = "Plant"; break;  
+						case RC_INSECT:		race_name = "Insect"; break;  
+						case RC_FISH:		race_name = "Fish"; break;  
+						case RC_DEMON:		race_name = "Demon"; break;  
+						case RC_DEMIHUMAN:	race_name = "Demi-Human"; break;  
+						case RC_ANGEL:		race_name = "Angel"; break;  
+						case RC_DRAGON:		race_name = "Dragon"; break;  
+						default:			race_name = "";  
+					}  
+					if(race_name != ""){  
+						// If element is not activated (flag 16), use guild_name instead of position_name  
+						if(!(battle_config.show_mob_info&16)){  
+							safestrncpy(packet.guild_name,race_name.c_str(),NAME_LENGTH);  
+						} else {  
+							safestrncpy(packet.position_name,race_name.c_str(),NAME_LENGTH);  
+						}  
+					}  
 				}
+
+				// Even thought mobhp ain't a name, we send it as one so the client can parse it. [Skotlex]
+				if(!mob_info.empty()){  
+					// Remove trailing " | "  
+					mob_info = mob_info.substr(0, mob_info.length() - 3);  
+					safestrncpy(packet.party_name, mob_info.c_str(), NAME_LENGTH);  
+				}  
 
 				clif_send(&packet, sizeof(packet), src, target);
 			} else {
