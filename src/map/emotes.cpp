@@ -187,7 +187,7 @@ void emotes_use(map_session_data *sd, int16 packId, int16 emoteId)
 		emoteId = rnd() % 6 + ET_DICE1;
 
 	// All good.. congrats!
-	clif_emotion_success(&sd->bl, packId, emoteId);
+	clif_emotion_success(sd, packId, emoteId);
 }
 
 void emotes_expantion_buy(map_session_data *sd, int16 packId, int16 itemId, int8 amount)

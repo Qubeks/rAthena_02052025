@@ -659,7 +659,7 @@ int32 clif_send(const void* buf, int32 len, struct block_list* bl, enum send_tar
 				if( sd->id == bl->id && (type == GUILD_WOS || type == GUILD_SAMEMAP_WOS || type == GUILD_AREA_WOS) )
 					continue;
 
-				if( type != GUILD && type != GUILD_NOBG && type != GUILD_WOS && sd->m != GUILD_ALLIANCE && sd->bl.m != bl->m )
+				if( type != GUILD && type != GUILD_NOBG && type != GUILD_WOS && sd->m != GUILD_ALLIANCE && sd->m != bl->m )
 					continue;
 
 				if( (type == GUILD_AREA || type == GUILD_AREA_WOS) && (sd->x < x0 || sd->y < y0 || sd->x > x1 || sd->y > y1) )
@@ -9290,7 +9290,7 @@ void clif_guild_alliance_message(const struct mmo_guild &g, const char *mes, int
 	safestrncpy(WBUFCP(buf,4), mes, len+1);
 
 	if ((sd = guild_getavailablesd(g)) != NULL)
-		clif_send(buf, WBUFW(buf, 2), &sd->bl, GUILD_ALLIANCE);
+		clif_send(buf, WBUFW(buf, 2), sd, GUILD_ALLIANCE);
 }
 
 /// Request for guild alliance 
@@ -11906,7 +11906,7 @@ void clif_parse_Restart(int32 fd, map_session_data *sd)
 	switch(RFIFOB(fd,packet_db[RFIFOW(fd,0)].pos[0])) {
 	case 0x00:
 		if(sd->state.autoattack)
-			status_change_end(&sd->bl, SC_AUTOATTACK);	
+			status_change_end(sd, SC_AUTOATTACK);	
 		pc_respawn(sd,CLR_OUTSIGHT);
 		break;
 	case 0x01:
@@ -22054,7 +22054,7 @@ void clif_ui_open( map_session_data& sd, enum out_ui_type ui_type, int32 data ){
 			PACKET_ZC_UI_OPEN3 p = {};
 			p.PacketType = HEADER_ZC_UI_OPEN3;
 			p.UIType = ui_type;
-			clif_send(&p, sizeof(p), &sd.bl, SELF);
+			clif_send(&p, sizeof(p), &sd, SELF);
 		}
 #endif
 			return;
@@ -25928,7 +25928,7 @@ void clif_macro_user_report_response(map_session_data *sd, int status, char *rep
 	else
 		memset(p->reportName, 0, NAME_LENGTH);
 	p->status = status;
-	clif_send(p, sizeof(struct PACKET_ZC_MACRO_USER_REPORT_RES), &sd->bl, SELF);
+	clif_send(p, sizeof(struct PACKET_ZC_MACRO_USER_REPORT_RES), sd, SELF);
 #endif
 }
 
@@ -26071,7 +26071,7 @@ void clif_quest_status_ack(map_session_data *sd, const struct PACKET_CZ_QUEST_ST
 		List[i].QuestStatus = QuestStatus;
 	}
 
-	clif_send(p, p->PacketLength, &sd->bl, SELF);
+	clif_send(p, p->PacketLength, sd, SELF);
 #endif
 }
 

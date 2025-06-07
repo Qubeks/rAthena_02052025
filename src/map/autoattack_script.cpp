@@ -84,7 +84,7 @@ std::map<int, std::string> get_unique_monsters_onmap(TBL_PC* sd, const char* mon
 		if (md == NULL)
 			break;
 
-		if (md->bl.m != sd->bl.m || md->status.hp <= 0)
+		if (md->m != sd->m || md->status.hp <= 0)
 			continue;
 
 		if (mob_searched[md->mob_id] == true)
@@ -612,7 +612,7 @@ bool handleAutoattack_fromitem(map_session_data* sd, t_itemid item_id, t_tick ma
 	}
 
 	if(duration_ > 0)
-		status_change_start(&sd->bl, &sd->bl, SC_AUTOATTACK, 10000, 0, 0, 0, 0, duration_, SCSTART_NOAVOID);
+		status_change_start(sd, sd, SC_AUTOATTACK, 10000, 0, 0, 0, 0, duration_, SCSTART_NOAVOID);
 
 	return SCRIPT_CMD_SUCCESS;
 }

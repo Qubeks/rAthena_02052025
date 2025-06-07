@@ -242,8 +242,8 @@ static enum e_storage_add storage_canGetItem(struct s_storage *stor, int32 idx, 
  // Helper function to format numbers with commas (add this at the top of the file)  
 std::string format_number_with_commas(int32 number) {
 	std::string str = std::to_string(number);
-	int insertPosition = str.length() - 3;
-	while (insertPosition > 0) {
+	size_t insertPosition = str.length() - 3;
+	while (insertPosition > 0 && insertPosition < str.length()) {
 		str.insert(insertPosition, ",");
 		insertPosition -= 3;
 	}

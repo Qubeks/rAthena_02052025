@@ -1147,7 +1147,7 @@ void pc_inventory_rentals(map_session_data *sd)
 				auto it = util::vector_get(AA_ITEMIDS, sd->inventory_data[i]->nameid);
 
 				if (it != AA_ITEMIDS.end())
-					status_change_end(&sd->bl, SC_AUTOATTACK);
+					status_change_end(sd, SC_AUTOATTACK);
 				else
 					run_script(sd->inventory_data[i]->unequip_script, 0, sd->id, fake_nd->id);
 			}

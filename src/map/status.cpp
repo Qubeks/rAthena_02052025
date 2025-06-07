@@ -3926,7 +3926,7 @@ int32 status_calc_pc_sub(map_session_data* sd, uint8 opt)
 				std::shared_ptr<s_deposit_item> entry = deposit_db.findItemInStor(stor_id, it.nameid);
 				if (entry != nullptr && entry->script && it.amount >= entry->amount && it.refine >= entry->refine)
 				{
-					run_script(entry->script, 0, sd->bl.id, 0);
+					run_script(entry->script, 0, sd->id, 0);
 					if (!calculating)
 						return 1;
 				}
