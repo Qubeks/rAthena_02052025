@@ -967,6 +967,8 @@ public:
 
 	std::vector<uint32> party_booking_requests;
 
+	void update_look( _look look );
+
 	struct {
 		bool calc;
 		std::unordered_map<uint16, std::vector<s_deposit_items>> items;
