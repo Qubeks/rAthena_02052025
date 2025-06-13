@@ -25993,7 +25993,7 @@ void clif_emotion_expansion_list(map_session_data *sd, std::vector<struct PACKET
 #endif
 	for (auto i = 0; i < list.size(); ++i)
 		p->list[i] = list[i];
-	p->packetLength = sizeof(struct PACKET_ZC_EMOTION_EXPANTION_LIST) + sizeof(struct PACKET_ZC_EMOTION_EXPANTION_LIST_sub) * list.size();
+	p->packetLength = static_cast<int16>(sizeof(struct PACKET_ZC_EMOTION_EXPANTION_LIST) + sizeof(struct PACKET_ZC_EMOTION_EXPANTION_LIST_sub) * list.size());
 	WFIFOSET(fd, p->packetLength);
 #endif
 }
