@@ -4057,19 +4057,18 @@ void clif_changelook(struct block_list *bl, int32 type, int32 val) {
 				vd->look[LOOK_ROBE] = val;
 #endif
 				break;
-			case LOOK_BODY2:
-#if PACKETVER < 20150513
-				return;
-#else
-#if PACKETVER_MAIN_NUM < 20231220
-				if( val != 0 && sc != nullptr && sc->option&OPTION_COSTUME ){
- 					val = 0;
-#endif
-				}
-
- 				vd->look[LOOK_BODY2] = val;
-#endif
-				break;
+			case LOOK_BODY2:  
+#if PACKETVER < 20150513  
+				return;  
+#else  
+#if PACKETVER_MAIN_NUM < 20231220  
+				if( val != 0 && sc != nullptr && sc->option&OPTION_COSTUME ){  
+					val = 0;  
+				}  
+#endif  
+    vd->look[LOOK_BODY2] = val;  
+#endif  
+    break;
 	}
 
 	// prevent leaking the presence of GM-hidden objects
