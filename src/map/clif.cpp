@@ -4066,7 +4066,7 @@ void clif_changelook(struct block_list *bl, int32 type, int32 val) {
 					val = 0;  
 				}  
 #endif  
-    vd->look[LOOK_BODY2] = val;  
+				vd->look[LOOK_BODY2] = val;  
 #endif  
     break;
 	}
