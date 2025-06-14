@@ -9,7 +9,9 @@
  **/
 
 //ACMD_DEF(newcommand),
-		ACMD_DEF(afk),		
+		ACMD_DEF(afk),
+		ACMD_DEFR(battlestats, ATCMD_NOCONSOLE|ATCMD_NOAUTOTRADE),
+		ACMD_DEFR(enemystats, ATCMD_NOCONSOLE|ATCMD_NOAUTOTRADE),		
 		ACMD_DEF(reloaddepositdb),		
 		ACMD_DEF(whosell),
 		ACMD_DEF(whobuy),

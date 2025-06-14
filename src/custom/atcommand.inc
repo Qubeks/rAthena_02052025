@@ -35,6 +35,157 @@ ACMD_FUNC(afk) {
 }
 
 /*==========================================
+* @battlestats / @enemystats
+*------------------------------------------*/
+void atcommand_battlestats_sub(int fd, struct map_session_data *sd) {
+	status_data *status = status_get_status_data(*sd);
+	char output[CHAT_SIZE_MAX];
+
+#define battlestats_msg(__msg__) (__msg__); clif_displaymessage(fd, output)
+
+	battlestats_msg(sprintf(output, "Battle Status: %s", sd->status.name));
+
+	clif_displaymessage(fd, "|--- Status Information ---|");
+	battlestats_msg(sprintf(output, "   -> Physical Damage (ATK): %d + %d", pc_leftside_atk(sd), pc_rightside_atk(sd)));
+	battlestats_msg(sprintf(output, "   -> Magical Damage (MATK): %d + %d", pc_leftside_matk(sd), pc_rightside_matk(sd)));
+	battlestats_msg(sprintf(output, "   -> Hit Rate (HIT): %d", status->hit));
+	battlestats_msg(sprintf(output, "   -> Critical Rate (CRIT): %d", status->cri / 10));
+	battlestats_msg(sprintf(output, "   -> Physical Defense (DEF): %d + %d", pc_leftside_def(sd), pc_rightside_def(sd)));
+	battlestats_msg(sprintf(output, "   -> Magical Defense (MDEF): %d + %d", pc_leftside_mdef(sd), pc_rightside_mdef(sd)));
+	battlestats_msg(sprintf(output, "   -> Flee Rate (FLEE): %d + %d", status->flee, status->flee2 / 10));
+	battlestats_msg(sprintf(output, "   -> Attack Speed (ASPD): %d", (2000 - status->amotion) / 10));
+
+	clif_displaymessage(fd, "|--- Trait Status Information ---|");
+	battlestats_msg(sprintf(output, "   -> Final Physical Damage (P.ATK): %d", status->patk));
+	battlestats_msg(sprintf(output, "   -> Final PhysicalMagical Damage (S.MATK): %d", status->smatk));
+	battlestats_msg(sprintf(output, "   -> Heal Plus (H.Plus): %d", status->hplus));
+	battlestats_msg(sprintf(output, "   -> Critical Damage Rate (C.Rate): %d", status->crate));
+	battlestats_msg(sprintf(output, "   -> Physical Resistance (RES): %d", status->res));
+	battlestats_msg(sprintf(output, "   -> Magical Resistance (MRES): %d", status->mres));
+
+	clif_displaymessage(fd, "|--- Bonus Physical Damage ---|");
+	if (sd->right_weapon.addsize[SZ_MEDIUM] + sd->left_weapon.addsize[SZ_MEDIUM]) {
+		battlestats_msg(sprintf(output, "   -> Medium Size: %d%%", sd->right_weapon.addsize[SZ_MEDIUM] + sd->left_weapon.addsize[SZ_MEDIUM]));
+	}
+	if (sd->right_weapon.addsize[SZ_ALL] + sd->left_weapon.addsize[SZ_ALL]) {
+		battlestats_msg(sprintf(output, "   -> All Sizes: %d%%", sd->right_weapon.addsize[SZ_ALL] + sd->left_weapon.addsize[SZ_ALL]));
+	}
+	if (sd->right_weapon.addrace[RC_PLAYER_HUMAN || RC_PLAYER_DORAM] + sd->left_weapon.addrace[RC_PLAYER_HUMAN || RC_PLAYER_DORAM]) {
+		battlestats_msg(sprintf(output, "   -> Player: %d%%", sd->right_weapon.addrace[RC_PLAYER_HUMAN || RC_PLAYER_DORAM] + sd->left_weapon.addrace[RC_PLAYER_HUMAN || RC_PLAYER_DORAM]));
+	}
+	if (sd->right_weapon.addrace[RC_ALL] + sd->left_weapon.addrace[RC_ALL]) {
+		battlestats_msg(sprintf(output, "   -> All Races: %d%%", sd->right_weapon.addrace[RC_ALL] + sd->left_weapon.addrace[RC_ALL]));
+	}
+	if (sd->right_weapon.addclass[CLASS_NORMAL] + sd->left_weapon.addclass[CLASS_NORMAL]) {
+		battlestats_msg(sprintf(output, "   -> Normal Class: %d%%", sd->right_weapon.addclass[CLASS_NORMAL] + sd->left_weapon.addclass[CLASS_NORMAL]));
+	}
+	if (sd->right_weapon.addclass[CLASS_ALL] + sd->left_weapon.addclass[CLASS_ALL]) {
+		battlestats_msg(sprintf(output, "   -> All Classes: %d%%", sd->right_weapon.addclass[CLASS_ALL] + sd->left_weapon.addclass[CLASS_ALL]));
+	}
+
+	clif_displaymessage(fd, "|--- Bonus Magic Damage ---|");
+	if (sd->indexed_bonus.magic_addsize[SZ_MEDIUM]) {
+		battlestats_msg(sprintf(output, "   -> Medium Size: %d%%", sd->indexed_bonus.magic_addsize[SZ_MEDIUM]));
+	}
+	if (sd->indexed_bonus.magic_addsize[SZ_ALL]) {
+		battlestats_msg(sprintf(output, "   -> All Sizes: %d%%", sd->indexed_bonus.magic_addsize[SZ_ALL]));
+	}
+	if (sd->indexed_bonus.magic_addrace[RC_PLAYER_HUMAN || RC_PLAYER_DORAM]) {
+		battlestats_msg(sprintf(output, "   -> Player: %d%%", sd->indexed_bonus.magic_addrace[RC_PLAYER_HUMAN || RC_PLAYER_DORAM]));
+	}
+	if (sd->indexed_bonus.magic_addrace[RC_ALL]) {
+		battlestats_msg(sprintf(output, "   -> All Races: %d%%", sd->indexed_bonus.magic_addrace[RC_ALL]));
+	}
+	if (sd->indexed_bonus.magic_addclass[CLASS_NORMAL]) {
+		battlestats_msg(sprintf(output, "   -> Normal Class: %d%%", sd->indexed_bonus.magic_addclass[CLASS_NORMAL]));
+	}
+	if (sd->indexed_bonus.magic_addclass[CLASS_ALL]) {
+		battlestats_msg(sprintf(output, "   -> All Classes: %d%%", sd->indexed_bonus.magic_addclass[CLASS_ALL]));
+	}
+
+	clif_displaymessage(fd, "|--- Elemental Resistance ---|");
+	struct {
+		const char *format;
+		int value;
+	} ele_resist_info[] = {
+		{ "   -> Neutral: %d%%", sd->indexed_bonus.subele_script[ELE_NEUTRAL] },
+		{ "   -> Water: %d%%", sd->indexed_bonus.subele_script[ELE_WATER] },
+		{ "   -> Earth: %d%%", sd->indexed_bonus.subele_script[ELE_EARTH] },
+		{ "   -> Fire: %d%%", sd->indexed_bonus.subele_script[ELE_FIRE] },
+		{ "   -> Wind: %d%%", sd->indexed_bonus.subele_script[ELE_WIND] },
+		{ "   -> Poison: %d%%", sd->indexed_bonus.subele_script[ELE_POISON] },
+		{ "   -> Holy: %d%%", sd->indexed_bonus.subele_script[ELE_HOLY] },
+		{ "   -> Dark: %d%%", sd->indexed_bonus.subele_script[ELE_DARK] },
+		{ "   -> Ghost: %d%%", sd->indexed_bonus.subele_script[ELE_GHOST] },
+		{ "   -> Undead: %d%%", sd->indexed_bonus.subele_script[ELE_UNDEAD] },
+		{ "   -> ALL: %d%%", sd->indexed_bonus.subele_script[ELE_ALL] },
+	};
+	for (int i = 0; i < ARRAYLENGTH(ele_resist_info); i++) {
+		if (ele_resist_info[i].value == 0)
+			continue;
+		battlestats_msg(sprintf(output, ele_resist_info[i].format, ele_resist_info[i].value));
+	}
+
+	clif_displaymessage(fd, "|--- Race Resistance ---|");
+	struct {
+		const char *format;
+		int value;
+	} race_resist_info[] = {
+		{ "   -> Formless: %d%%", sd->indexed_bonus.subrace[RC_FORMLESS] },
+		{ "   -> Undead: %d%%", sd->indexed_bonus.subrace[RC_UNDEAD] },
+		{ "   -> Beast: %d%%", sd->indexed_bonus.subrace[RC_BRUTE] },
+		{ "   -> Plant: %d%%", sd->indexed_bonus.subrace[RC_PLANT] },
+		{ "   -> Insect: %d%%", sd->indexed_bonus.subrace[RC_INSECT] },
+		{ "   -> Fish: %d%%", sd->indexed_bonus.subrace[RC_FISH] },
+		{ "   -> Demon: %d%%", sd->indexed_bonus.subrace[RC_DEMON] },
+		{ "   -> DemiHuman: %d%%", sd->indexed_bonus.subrace[RC_DEMIHUMAN] },
+		{ "   -> Angel: %d%%", sd->indexed_bonus.subrace[RC_ANGEL] },
+		{ "   -> Dragon: %d%%", sd->indexed_bonus.subrace[RC_DRAGON] },
+		{ "   -> Player: %d%%", sd->indexed_bonus.subrace[RC_PLAYER_HUMAN || RC_PLAYER_DORAM] },
+		{ "   -> ALL: %d%%", sd->indexed_bonus.subrace[RC_ALL] },
+		{ "   -> Normal Class: %d%%", sd->indexed_bonus.subclass[CLASS_NORMAL] },
+	};
+	for (int i = 0; i < ARRAYLENGTH(race_resist_info); i++) {
+		if (race_resist_info[i].value == 0)
+			continue;
+		battlestats_msg(sprintf(output, race_resist_info[i].format, race_resist_info[i].value));
+	}
+
+#undef battlestats_msg
+}
+
+ACMD_FUNC(battlestats) {
+	nullpo_retr(-1, sd);
+	atcommand_battlestats_sub(fd, sd);
+	return 0;
+}
+
+ACMD_FUNC(enemystats) {
+	struct map_session_data *pl_sd;
+
+	nullpo_retr(-1, sd);
+
+	memset(atcmd_player_name, '\0', sizeof atcmd_player_name);
+
+	if (!message || !*message || sscanf(message, "%23[^\n]", atcmd_player_name) < 1) {
+		clif_displaymessage(fd, "Please enter a player name (usage: @enemystats <char name>)");
+		return -1;
+	}
+
+	pl_sd = map_nick2sd(atcmd_player_name, true);
+	if (pl_sd == NULL ||
+		strncmp(pl_sd->status.name, atcmd_player_name, NAME_LENGTH) != 0 ||
+		(pc_has_permission(pl_sd, PC_PERM_HIDE_SESSION) && pc_get_group_level(pl_sd) > pc_get_group_level(sd))
+		) {
+		clif_displaymessage(fd, msg_txt(sd, 3)); // Character not found.
+		return -1;
+	}
+
+	atcommand_battlestats_sub(fd, pl_sd);
+	return 0;
+}
+
+/*==========================================
 * @reloaddepositdb
 *------------------------------------------*/
 ACMD_FUNC(reloaddepositdb){
