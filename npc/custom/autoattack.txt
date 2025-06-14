@@ -19,33 +19,56 @@
 //= 1.4 Added Timer to limit the usage per day
 //= 1.5 Merged enable/disable skills into ON/OFF menu method
 //= 1.6 Change input method for adding buff items to menu method
+//= 1.7 Change autoattack rental item into timer method
 //============================================================
-function	script	F_autoattacktoggle	{
+-	script	bot_at	-1,{
 
-goto(main_menu);
+	function calculate_remaining_time;
+
+OnInit:
+    .duration = 3600000; // 1 hour in milliseconds
+    .remaining_time = .duration;
+    .last_reset_day = gettime(7); // Initialize the reset day
+    .start_time = 0;
+    end;
+
+function calculate_remaining_time {
+    .@remaining_time = .remaining_time;
+    .@hours = .@remaining_time / 3600000;
+    .@minutes = (.@remaining_time % 3600000) / 60000;
+    .@seconds = (.@remaining_time % 60000) / 1000;
+    return .@hours + " hours, " + .@minutes + " minutes, " + .@seconds + " seconds.";
+}
+    
+goto(OnMainMenu);
 end;
 
-main_menu:
+OnMainMenu:
 	.@menu$ = "[AutoAttack Configuration]";
-    setdialogsize(400, 300);
-    setdialogpospercent(50, 50);
 	mes .@menu$;
-	
-	if(!rentalcountitem(50501)){
-		mes "You need to have an AutoBuff Device to use this feature";
-		close;
-	}
-	
-	.@main_menu = select(aa_getstate()?"[Stop]":"[Start]","[Configuration]","[Cancel]");
-	switch(.@main_menu){
+    setdialogsize(400, 300);
+    setdialogpospercent(50, 50);	
+	//if(!rentalcountitem(50501)){
+	//	mes "You need to have an AutoBuff Device to use this feature";
+	//	close;
+	//}
+    mes " ";
+    mes "Remaining Time: ^FF0000" + calculate_remaining_time() + "^000000";
+    mes "Current Time: ^0000FF" + gettimestr("%H:%M:%S", 10) + "^000000";
+    mes " ";	
+	next;
+	.@OnMainMenu = select(aa_getstate()?"[Stop]":"[Start]","[Configuration]","[Cancel]");
+	switch(.@OnMainMenu){
 		case 1:
-			if(aa_getstate())
-				sc_end SC_AUTOATTACK;
-			else
+			if (aa_getstate()) {
+				goto OnStop;
+			} else {
 				autoattack_fromitem(50501);
+				.start_time = gettimetick(2); // Save the current tick when starting
+			}
 			break;
 		case 2:
-			goto(config_menu);
+			goto config_menu;
 			break;
 	}
 	end;
@@ -56,16 +79,16 @@ config_menu:
 	mes .@menu$;
 
 	// To disable an option, comment the line
-	menu	"Return",main_menu,
-			" ~ Regeneration",regeneration_menu,
-			" ~ Attack Skills",attackskills_menu,
-			" ~ Buff Skills",buffskills_menu,
-			" ~ Buff Items",buffitems_menu,
-			" ~ Monsters Selection",monsters_menu,
-			" ~ Items Pickup Selection",pickupitems_menu,
-			" ~ Teleport",teleport_menu,
-			" ~ Others configurations",others_menu,
-			" ~ Reset all",reset_all;
+	menu	"Return",OnMainMenu,
+			" - Regeneration",regeneration_menu,
+			" - Attack Skills",attackskills_menu,
+			" - Buff Skills",buffskills_menu,
+			" - Buff Items",buffitems_menu,
+			" - Monsters Selection",monsters_menu,
+			" - Items Pickup Selection",pickupitems_menu,
+			" - Teleport",teleport_menu,
+			" - Others configurations",others_menu,
+			" - Reset all",reset_all;
 	end;
 
 pickupitems_menu:
@@ -318,7 +341,7 @@ monsters_menu:
 		mes .@menu$;
 		mes "Sorry, there is no monsters on the map";
 		next;
-		goto(main_menu);
+		goto(OnMainMenu);
 	}
 	
 	.@mobs_menu_list$ = "[Cancel]:" + .@mobs_menu_list$;
@@ -642,7 +665,7 @@ attackskills_menu:
 		mes .@menu$;
 		mes "Sorry, you don't have any kind of buff skills";
 		next;
-		goto(main_menu);
+		goto(OnMainMenu);
 	}
 	
 	.@skill_menu_list$ = "[Cancel]:" + .@skill_menu_list$;
@@ -734,7 +757,7 @@ buffskills_menu:
 		mes .@menu$;
 		mes "Sorry, you don't have any kind of buff skills";
 		next;
-		goto(main_menu);
+		goto(OnMainMenu);
 	}
 
 	.@skill_menu_list$ = "[Cancel]:" + .@skill_menu_list$;
@@ -911,5 +934,39 @@ sit_regen_menu:
 	clear;
 	goto(sit_regen_menu);
 	end;
+
+OnStop:
+    if(aa_getstate()) {
+        // Calculate elapsed time
+        .@elapsed_time = (gettimetick(2) - .start_time) * 1000;
+        .remaining_time -= .@elapsed_time;
+
+        if (.remaining_time < 0) {
+            .remaining_time = 0;
+        }
+
+        sc_end SC_AUTOATTACK;
+        setd(".remaining_time_" + getcharid(0), .remaining_time); // Save remaining time for the player
+        message strcharinfo(0), "Auto-attack stopped. Remaining time: " + calculate_remaining_time();
+    } else {
+        mes "You have no active auto-attack to stop.";
+    }
+    end;
+
+OnPCLogoutEvent:
+    if(aa_getstate()) {
+        // Calculate elapsed time
+        .@elapsed_time = (gettimetick(2) - .start_time) * 1000;
+        .remaining_time -= .@elapsed_time;
+
+        if (.remaining_time < 0) {
+            .remaining_time = 0;
+        }
+
+        sc_end SC_AUTOATTACK;
+        setd(".remaining_time_" + getcharid(0), .remaining_time); // Save remaining time for the player
+    }
+	
+    end;	
 }
 

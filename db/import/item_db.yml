@@ -125,4 +125,4 @@ Body:
         NoMail: true
         NoAuction: true        
       Script: |
-        callfunc "F_autoattacktoggle";
+        doevent "bot_at::OnMainMenu";
