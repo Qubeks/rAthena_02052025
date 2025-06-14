@@ -9,3 +9,7 @@
  **/
 
 //ACMD_DEF(newcommand),
+		ACMD_DEF(afk),		
+		ACMD_DEF(reloaddepositdb),		
+		ACMD_DEF(whosell),
+		ACMD_DEF(whobuy),
