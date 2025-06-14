@@ -3450,7 +3450,7 @@ ACMD_FUNC(whosell)
 	searchstore_clear(*sd); // clear previous result
 
 	if( !sd->searchstore.open )
-		searchstore_open(*sd, 1, SEARCHSTORE_EFFECT_NORMAL, sd->m);
+		searchstore_open(*sd, 1, SEARCHSTORE_EFFECT_REMOTE, sd->m);
 
 	if (sscanf(message, "+%d %d[%d](%d %d)", &refine, &item_id, &card_id, &option_id, &option_value) == 5){
 		s_type = 1+2+4+8;
@@ -3666,7 +3666,7 @@ ACMD_FUNC(whobuy)
 	searchstore_clear(*sd); // clear previous result
 
 	if( !sd->searchstore.open )
-		searchstore_open(*sd, 1, SEARCHSTORE_EFFECT_NORMAL, sd->m);
+		searchstore_open(*sd, 1, SEARCHSTORE_EFFECT_REMOTE, sd->m);
 
 	if (sscanf(message, "+%d %d", &refine, &item_id) == 2){
 		s_type = 1+2;
