@@ -3432,7 +3432,7 @@ ACMD_FUNC(whosell)
 	nullpo_retr(-1, sd);
 
 	if (!message || !*message) {
-		clif_displaymessage(fd, "Use: @whosell (<+refine> )(<item_id>)(<[card_id]>)((<option_id> <option_value>)) or @ws <name>");
+		clif_displaymessage(fd, "Use: @whosell (<+refine> )(<item_id>)(<[card_id]>)((<option_id> <option_value>)) or @whosell <name>");
 		return -1;
 	}
 
@@ -3493,7 +3493,7 @@ ACMD_FUNC(whosell)
 
 		search_item_name = true;
 	} else {
-		clif_displaymessage(fd, "Use: @ws (<+refine> )(<item_id>)(<[card_id]>)((<option_id> <option_value>)) or @ws <name>");
+		clif_displaymessage(fd, "Use: @whosell (<+refine> )(<item_id>)(<[card_id]>)((<option_id> <option_value>)) or @whosell <name>");
 		return -1;
 	}
    
@@ -3524,9 +3524,10 @@ ACMD_FUNC(whosell)
 		}
 		//check refine
 		if(s_type & 4){
-			if (refine<0 || refine>10){
-				clif_displaymessage(fd, "Refine out of bounds: 0 - 10");
-				return -1;
+			if (refine < 0 || refine > MAX_REFINE) {  
+				sprintf(atcmd_output, "Refine out of bounds: 0 - %d", MAX_REFINE);  
+				clif_displaymessage(fd, atcmd_output);  
+				return -1;  
 			}
 		}
 		iter = mapit_getallusers();
@@ -3648,7 +3649,7 @@ ACMD_FUNC(whobuy)
 	nullpo_retr(-1, sd);
 
 	if (!message || !*message) {
-		clif_displaymessage(fd, "Use: @whobuy (<+refine> )(<item_id>) or @wb <name>");
+		clif_displaymessage(fd, "Use: @whobuy (<+refine> )(<item_id>) or @whobuy <name>");
 		return -1;
 	}
 
@@ -3685,7 +3686,7 @@ ACMD_FUNC(whobuy)
 
 		search_item_name = true;
 	} else {
-		clif_displaymessage(fd, "Use: @wb (<+refine> )(<item_id>) or @wb <name>");
+		clif_displaymessage(fd, "Use: @whobuy (<+refine> )(<item_id>) or @whobuy <name>");
 		return -1;
 	}
     
