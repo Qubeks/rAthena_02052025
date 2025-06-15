@@ -368,15 +368,15 @@ BUILDIN_FUNC(getstatusstats) {
     status_data *status = status_get_status_data(*target_sd);  
     std::ostringstream output;  
       
-    output << "|--- Status Information ---|\n";  
-    output << "   -> Physical Damage (ATK): " << pc_leftside_atk(target_sd) << " + " << pc_rightside_atk(target_sd) << "\n";  
-    output << "   -> Magical Damage (MATK): " << pc_leftside_matk(target_sd) << " + " << pc_rightside_matk(target_sd) << "\n";  
-    output << "   -> Hit Rate (HIT): " << status->hit << "\n";  
-    output << "   -> Critical Rate (CRIT): " << status->cri / 10 << "\n";  
-    output << "   -> Physical Defense (DEF): " << pc_leftside_def(target_sd) << " + " << pc_rightside_def(target_sd) << "\n";  
-    output << "   -> Magical Defense (MDEF): " << pc_leftside_mdef(target_sd) << " + " << pc_rightside_mdef(target_sd) << "\n";  
-    output << "   -> Flee Rate (FLEE): " << status->flee << " + " << status->flee2 / 10 << "\n";  
-    output << "   -> Attack Speed (ASPD): " << (2000 - status->amotion) / 10 << "\n";  
+    output << "|--- Status Information ---|\n";    
+    output << "   -> Physical Damage (ATK): ^0000FF" << pc_leftside_atk(target_sd) << "^000000 + ^0000FF" << pc_rightside_atk(target_sd) << "^000000\n";    
+    output << "   -> Magical Damage (MATK): ^0000FF" << pc_leftside_matk(target_sd) << "^000000 + ^0000FF" << pc_rightside_matk(target_sd) << "^000000\n";    
+    output << "   -> Hit Rate (HIT): ^0000FF" << status->hit << "^000000\n";    
+    output << "   -> Critical Rate (CRIT): ^0000FF" << status->cri / 10 << "^000000\n";    
+    output << "   -> Physical Defense (DEF): ^0000FF" << pc_leftside_def(target_sd) << "^000000 + ^0000FF" << pc_rightside_def(target_sd) << "^000000\n";    
+    output << "   -> Magical Defense (MDEF): ^0000FF" << pc_leftside_mdef(target_sd) << "^000000 + ^0000FF" << pc_rightside_mdef(target_sd) << "^000000\n";    
+    output << "   -> Flee Rate (FLEE): ^0000FF" << status->flee << "^000000 + ^0000FF" << status->flee2 / 10 << "^000000\n";    
+    output << "   -> Attack Speed (ASPD): ^0000FF" << (2000 - status->amotion) / 10 << "^000000\n";  
       
     std::string result = output.str();  
     script_pushstr(st, aStrdup(result.c_str()));  
@@ -404,13 +404,13 @@ BUILDIN_FUNC(gettraitstats) {
     status_data *status = status_get_status_data(*target_sd);  
     std::ostringstream output;  
       
-    output << "|--- Trait Status Information ---|\n";  
-    output << "   -> Final Physical Damage (P.ATK): " << status->patk << "\n";  
-    output << "   -> Final PhysicalMagical Damage (S.MATK): " << status->smatk << "\n";  
-    output << "   -> Heal Plus (H.Plus): " << status->hplus << "\n";  
-    output << "   -> Critical Damage Rate (C.Rate): " << status->crate << "\n";  
-    output << "   -> Physical Resistance (RES): " << status->res << "\n";  
-    output << "   -> Magical Resistance (MRES): " << status->mres << "\n";  
+	output << "|--- Trait Status Information ---|\n";    
+	output << "   -> Final Physical Damage (P.ATK): ^0000FF" << status->patk << "^000000\n";    
+	output << "   -> Final PhysicalMagical Damage (S.MATK): ^0000FF" << status->smatk << "^000000\n";    
+	output << "   -> Heal Plus (H.Plus): ^0000FF" << status->hplus << "^000000\n";    
+	output << "   -> Critical Damage Rate (C.Rate): ^0000FF" << status->crate << "^000000\n";    
+	output << "   -> Physical Resistance (RES): ^0000FF" << status->res << "^000000\n";    
+	output << "   -> Magical Resistance (MRES): ^0000FF" << status->mres << "^000000\n";  
       
     std::string result = output.str();  
     script_pushstr(st, aStrdup(result.c_str()));  
@@ -440,37 +440,37 @@ BUILDIN_FUNC(getbonusphysical) {
       
     bool found_bonuses = false;  
         
-    // Size bonuses    
-    if (target_sd->right_weapon.addsize[SZ_MEDIUM] + target_sd->left_weapon.addsize[SZ_MEDIUM]) {    
-        output << "   -> Medium Size: " << (target_sd->right_weapon.addsize[SZ_MEDIUM] + target_sd->left_weapon.addsize[SZ_MEDIUM]) << "%\n";    
-        found_bonuses = true;  
-    }    
-    if (target_sd->right_weapon.addsize[SZ_ALL] + target_sd->left_weapon.addsize[SZ_ALL]) {    
-        output << "   -> All Sizes: " << (target_sd->right_weapon.addsize[SZ_ALL] + target_sd->left_weapon.addsize[SZ_ALL]) << "%\n";    
-        found_bonuses = true;  
-    }    
-        
-    // Race bonuses    
-    if (target_sd->right_weapon.addrace[RC_PLAYER_HUMAN] + target_sd->left_weapon.addrace[RC_PLAYER_HUMAN] +     
-        target_sd->right_weapon.addrace[RC_PLAYER_DORAM] + target_sd->left_weapon.addrace[RC_PLAYER_DORAM]) {    
-        output << "   -> Player: " << (target_sd->right_weapon.addrace[RC_PLAYER_HUMAN] + target_sd->left_weapon.addrace[RC_PLAYER_HUMAN] +     
-                                      target_sd->right_weapon.addrace[RC_PLAYER_DORAM] + target_sd->left_weapon.addrace[RC_PLAYER_DORAM]) << "%\n";    
-        found_bonuses = true;  
-    }    
-    if (target_sd->right_weapon.addrace[RC_ALL] + target_sd->left_weapon.addrace[RC_ALL]) {    
-        output << "   -> All Races: " << (target_sd->right_weapon.addrace[RC_ALL] + target_sd->left_weapon.addrace[RC_ALL]) << "%\n";    
-        found_bonuses = true;  
-    }    
-        
-    // Class bonuses    
-    if (target_sd->right_weapon.addclass[CLASS_NORMAL] + target_sd->left_weapon.addclass[CLASS_NORMAL]) {    
-        output << "   -> Normal Class: " << (target_sd->right_weapon.addclass[CLASS_NORMAL] + target_sd->left_weapon.addclass[CLASS_NORMAL]) << "%\n";    
-        found_bonuses = true;  
-    }    
-    if (target_sd->right_weapon.addclass[CLASS_ALL] + target_sd->left_weapon.addclass[CLASS_ALL]) {    
-        output << "   -> All Classes: " << (target_sd->right_weapon.addclass[CLASS_ALL] + target_sd->left_weapon.addclass[CLASS_ALL]) << "%\n";    
-        found_bonuses = true;  
-    }    
+	// Size bonuses      
+	if (target_sd->right_weapon.addsize[SZ_MEDIUM] + target_sd->left_weapon.addsize[SZ_MEDIUM]) {      
+		output << "   -> Medium Size: ^0000FF" << (target_sd->right_weapon.addsize[SZ_MEDIUM] + target_sd->left_weapon.addsize[SZ_MEDIUM]) << "^000000%\n";      
+		found_bonuses = true;    
+	}      
+	if (target_sd->right_weapon.addsize[SZ_ALL] + target_sd->left_weapon.addsize[SZ_ALL]) {      
+		output << "   -> All Sizes: ^0000FF" << (target_sd->right_weapon.addsize[SZ_ALL] + target_sd->left_weapon.addsize[SZ_ALL]) << "^000000%\n";      
+		found_bonuses = true;    
+	}      
+		  
+	// Race bonuses      
+	if (target_sd->right_weapon.addrace[RC_PLAYER_HUMAN] + target_sd->left_weapon.addrace[RC_PLAYER_HUMAN] +       
+		target_sd->right_weapon.addrace[RC_PLAYER_DORAM] + target_sd->left_weapon.addrace[RC_PLAYER_DORAM]) {      
+		output << "   -> Player: ^0000FF" << (target_sd->right_weapon.addrace[RC_PLAYER_HUMAN] + target_sd->left_weapon.addrace[RC_PLAYER_HUMAN] +       
+									  target_sd->right_weapon.addrace[RC_PLAYER_DORAM] + target_sd->left_weapon.addrace[RC_PLAYER_DORAM]) << "^000000%\n";      
+		found_bonuses = true;    
+	}      
+	if (target_sd->right_weapon.addrace[RC_ALL] + target_sd->left_weapon.addrace[RC_ALL]) {      
+		output << "   -> All Races: ^0000FF" << (target_sd->right_weapon.addrace[RC_ALL] + target_sd->left_weapon.addrace[RC_ALL]) << "^000000%\n";      
+		found_bonuses = true;    
+	}      
+		  
+	// Class bonuses      
+	if (target_sd->right_weapon.addclass[CLASS_NORMAL] + target_sd->left_weapon.addclass[CLASS_NORMAL]) {      
+		output << "   -> Normal Class: ^0000FF" << (target_sd->right_weapon.addclass[CLASS_NORMAL] + target_sd->left_weapon.addclass[CLASS_NORMAL]) << "^000000%\n";      
+		found_bonuses = true;    
+	}      
+	if (target_sd->right_weapon.addclass[CLASS_ALL] + target_sd->left_weapon.addclass[CLASS_ALL]) {      
+		output << "   -> All Classes: ^0000FF" << (target_sd->right_weapon.addclass[CLASS_ALL] + target_sd->left_weapon.addclass[CLASS_ALL]) << "^000000%\n";      
+		found_bonuses = true;    
+	}    
       
     // Check if no bonuses were found and display message  
     if (!found_bonuses) {  
@@ -505,81 +505,81 @@ BUILDIN_FUNC(getbonusmagic) {
       
     bool found_bonuses = false;  
         
-    // Size bonuses for magic damage    
-    if (target_sd->indexed_bonus.magic_addsize[SZ_MEDIUM]) {    
-        output << "   -> Medium Size: " << target_sd->indexed_bonus.magic_addsize[SZ_MEDIUM] << "%\n";    
-        found_bonuses = true;  
-    }    
-    if (target_sd->indexed_bonus.magic_addsize[SZ_ALL]) {    
-        output << "   -> All Sizes: " << target_sd->indexed_bonus.magic_addsize[SZ_ALL] << "%\n";    
-        found_bonuses = true;  
-    }    
-        
-    // Race bonuses for magic damage    
-    if (target_sd->indexed_bonus.magic_addrace[RC_PLAYER_HUMAN] + target_sd->indexed_bonus.magic_addrace[RC_PLAYER_DORAM]) {    
-        output << "   -> Player: " << (target_sd->indexed_bonus.magic_addrace[RC_PLAYER_HUMAN] + target_sd->indexed_bonus.magic_addrace[RC_PLAYER_DORAM]) << "%\n";    
-        found_bonuses = true;  
-    }    
-    if (target_sd->indexed_bonus.magic_addrace[RC_ALL]) {    
-        output << "   -> All Races: " << target_sd->indexed_bonus.magic_addrace[RC_ALL] << "%\n";    
-        found_bonuses = true;  
-    }    
-        
-    // Class bonuses for magic damage    
-    if (target_sd->indexed_bonus.magic_addclass[CLASS_NORMAL]) {    
-        output << "   -> Normal Class: " << target_sd->indexed_bonus.magic_addclass[CLASS_NORMAL] << "%\n";    
-        found_bonuses = true;  
-    }    
-    if (target_sd->indexed_bonus.magic_addclass[CLASS_ALL]) {    
-        output << "   -> All Classes: " << target_sd->indexed_bonus.magic_addclass[CLASS_ALL] << "%\n";    
-        found_bonuses = true;  
-    }    
-        
-    // Element bonuses for magic damage    
-    if (target_sd->indexed_bonus.magic_addele[ELE_NEUTRAL]) {    
-        output << "   -> Neutral Element: " << target_sd->indexed_bonus.magic_addele[ELE_NEUTRAL] << "%\n";    
-        found_bonuses = true;  
-    }    
-    if (target_sd->indexed_bonus.magic_addele[ELE_WATER]) {    
-        output << "   -> Water Element: " << target_sd->indexed_bonus.magic_addele[ELE_WATER] << "%\n";    
-        found_bonuses = true;  
-    }    
-    if (target_sd->indexed_bonus.magic_addele[ELE_EARTH]) {    
-        output << "   -> Earth Element: " << target_sd->indexed_bonus.magic_addele[ELE_EARTH] << "%\n";    
-        found_bonuses = true;  
-    }    
-    if (target_sd->indexed_bonus.magic_addele[ELE_FIRE]) {    
-        output << "   -> Fire Element: " << target_sd->indexed_bonus.magic_addele[ELE_FIRE] << "%\n";    
-        found_bonuses = true;  
-    }    
-    if (target_sd->indexed_bonus.magic_addele[ELE_WIND]) {    
-        output << "   -> Wind Element: " << target_sd->indexed_bonus.magic_addele[ELE_WIND] << "%\n";    
-        found_bonuses = true;  
-    }    
-    if (target_sd->indexed_bonus.magic_addele[ELE_POISON]) {    
-        output << "   -> Poison Element: " << target_sd->indexed_bonus.magic_addele[ELE_POISON] << "%\n";    
-        found_bonuses = true;  
-    }    
-    if (target_sd->indexed_bonus.magic_addele[ELE_HOLY]) {    
-        output << "   -> Holy Element: " << target_sd->indexed_bonus.magic_addele[ELE_HOLY] << "%\n";    
-        found_bonuses = true;  
-    }    
-    if (target_sd->indexed_bonus.magic_addele[ELE_DARK]) {    
-        output << "   -> Dark Element: " << target_sd->indexed_bonus.magic_addele[ELE_DARK] << "%\n";    
-        found_bonuses = true;  
-    }    
-    if (target_sd->indexed_bonus.magic_addele[ELE_GHOST]) {    
-        output << "   -> Ghost Element: " << target_sd->indexed_bonus.magic_addele[ELE_GHOST] << "%\n";    
-        found_bonuses = true;  
-    }    
-    if (target_sd->indexed_bonus.magic_addele[ELE_UNDEAD]) {    
-        output << "   -> Undead Element: " << target_sd->indexed_bonus.magic_addele[ELE_UNDEAD] << "%\n";    
-        found_bonuses = true;  
-    }    
-    if (target_sd->indexed_bonus.magic_addele[ELE_ALL]) {    
-        output << "   -> All Elements: " << target_sd->indexed_bonus.magic_addele[ELE_ALL] << "%\n";    
-        found_bonuses = true;  
-    }    
+	// Size bonuses for magic damage      
+	if (target_sd->indexed_bonus.magic_addsize[SZ_MEDIUM]) {      
+		output << "   -> Medium Size: ^0000FF" << target_sd->indexed_bonus.magic_addsize[SZ_MEDIUM] << "^000000%\n";      
+		found_bonuses = true;    
+	}      
+	if (target_sd->indexed_bonus.magic_addsize[SZ_ALL]) {      
+		output << "   -> All Sizes: ^0000FF" << target_sd->indexed_bonus.magic_addsize[SZ_ALL] << "^000000%\n";      
+		found_bonuses = true;    
+	}      
+		  
+	// Race bonuses for magic damage      
+	if (target_sd->indexed_bonus.magic_addrace[RC_PLAYER_HUMAN] + target_sd->indexed_bonus.magic_addrace[RC_PLAYER_DORAM]) {      
+		output << "   -> Player: ^0000FF" << (target_sd->indexed_bonus.magic_addrace[RC_PLAYER_HUMAN] + target_sd->indexed_bonus.magic_addrace[RC_PLAYER_DORAM]) << "^000000%\n";      
+		found_bonuses = true;    
+	}      
+	if (target_sd->indexed_bonus.magic_addrace[RC_ALL]) {      
+		output << "   -> All Races: ^0000FF" << target_sd->indexed_bonus.magic_addrace[RC_ALL] << "^000000%\n";      
+		found_bonuses = true;    
+	}      
+		  
+	// Class bonuses for magic damage      
+	if (target_sd->indexed_bonus.magic_addclass[CLASS_NORMAL]) {      
+		output << "   -> Normal Class: ^0000FF" << target_sd->indexed_bonus.magic_addclass[CLASS_NORMAL] << "^000000%\n";      
+		found_bonuses = true;    
+	}      
+	if (target_sd->indexed_bonus.magic_addclass[CLASS_ALL]) {      
+		output << "   -> All Classes: ^0000FF" << target_sd->indexed_bonus.magic_addclass[CLASS_ALL] << "^000000%\n";      
+		found_bonuses = true;    
+	}      
+		  
+	// Element bonuses for magic damage      
+	if (target_sd->indexed_bonus.magic_addele[ELE_NEUTRAL]) {      
+		output << "   -> Neutral Element: ^0000FF" << target_sd->indexed_bonus.magic_addele[ELE_NEUTRAL] << "^000000%\n";      
+		found_bonuses = true;    
+	}      
+	if (target_sd->indexed_bonus.magic_addele[ELE_WATER]) {      
+		output << "   -> Water Element: ^0000FF" << target_sd->indexed_bonus.magic_addele[ELE_WATER] << "^000000%\n";      
+		found_bonuses = true;    
+	}      
+	if (target_sd->indexed_bonus.magic_addele[ELE_EARTH]) {      
+		output << "   -> Earth Element: ^0000FF" << target_sd->indexed_bonus.magic_addele[ELE_EARTH] << "^000000%\n";      
+		found_bonuses = true;    
+	}      
+	if (target_sd->indexed_bonus.magic_addele[ELE_FIRE]) {      
+		output << "   -> Fire Element: ^0000FF" << target_sd->indexed_bonus.magic_addele[ELE_FIRE] << "^000000%\n";      
+		found_bonuses = true;    
+	}      
+	if (target_sd->indexed_bonus.magic_addele[ELE_WIND]) {      
+		output << "   -> Wind Element: ^0000FF" << target_sd->indexed_bonus.magic_addele[ELE_WIND] << "^000000%\n";      
+		found_bonuses = true;    
+	}      
+	if (target_sd->indexed_bonus.magic_addele[ELE_POISON]) {      
+		output << "   -> Poison Element: ^0000FF" << target_sd->indexed_bonus.magic_addele[ELE_POISON] << "^000000%\n";      
+		found_bonuses = true;    
+	}      
+	if (target_sd->indexed_bonus.magic_addele[ELE_HOLY]) {      
+		output << "   -> Holy Element: ^0000FF" << target_sd->indexed_bonus.magic_addele[ELE_HOLY] << "^000000%\n";      
+		found_bonuses = true;    
+	}      
+	if (target_sd->indexed_bonus.magic_addele[ELE_DARK]) {      
+		output << "   -> Dark Element: ^0000FF" << target_sd->indexed_bonus.magic_addele[ELE_DARK] << "^000000%\n";      
+		found_bonuses = true;    
+	}      
+	if (target_sd->indexed_bonus.magic_addele[ELE_GHOST]) {      
+		output << "   -> Ghost Element: ^0000FF" << target_sd->indexed_bonus.magic_addele[ELE_GHOST] << "^000000%\n";      
+		found_bonuses = true;    
+	}      
+	if (target_sd->indexed_bonus.magic_addele[ELE_UNDEAD]) {      
+		output << "   -> Undead Element: ^0000FF" << target_sd->indexed_bonus.magic_addele[ELE_UNDEAD] << "^000000%\n";      
+		found_bonuses = true;    
+	}      
+	if (target_sd->indexed_bonus.magic_addele[ELE_ALL]) {      
+		output << "   -> All Elements: ^0000FF" << target_sd->indexed_bonus.magic_addele[ELE_ALL] << "^000000%\n";      
+		found_bonuses = true;    
+	}    
       
     // Check if no bonuses were found and display message  
     if (!found_bonuses) {  
@@ -635,7 +635,7 @@ BUILDIN_FUNC(getelementalresist) {
 	
 	for (int i = 0; i < 11; i++) {    
 		if (ele_resist_info[i].value != 0) {    
-			output << "   -> " << ele_resist_info[i].name << ": " << ele_resist_info[i].value << "%\n";  
+			output << "   -> " << ele_resist_info[i].name << ":  ^0000FF" << ele_resist_info[i].value << "^000000%\n";  
 			found_bonuses = true;  
 		}  
 	}  
@@ -695,7 +695,7 @@ BUILDIN_FUNC(getraceresist) {
 	
     for (int i = 0; i < 13; i++) {    
         if (race_resist_info[i].value != 0) {    
-            output << "   -> " << race_resist_info[i].name << ": " << race_resist_info[i].value << "%\n";  
+            output << "   -> " << race_resist_info[i].name << ": ^0000FF" << race_resist_info[i].value << "^000000%\n";  
             found_bonuses = true;  
         }  
     }    
@@ -736,14 +736,14 @@ BUILDIN_FUNC(getskillbonus) {
     for (const auto &bonus : target_sd->skillatk) {  
         const char* skill_desc = skill_get_desc(bonus.id);  // Use description instead of name  
         if (skill_desc) {  
-            output << "   -> " << skill_desc << ": +" << bonus.val << "%\n";  
+            output << "   -> " << skill_desc << ": +^0000FF" << bonus.val << "^000000%\n";  
             found_bonuses = true;  
         }  
     }  
       
     // General skill ratio bonus  
     if (target_sd->bonus.skill_ratio != 0) {  
-        output << "   -> All Skills: " << target_sd->bonus.skill_ratio << "%\n";  
+        output << "   -> All Skills: ^0000FF" << target_sd->bonus.skill_ratio << "^000000%\n";  
         found_bonuses = true;  
     }  
       
