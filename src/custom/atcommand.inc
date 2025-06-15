@@ -40,6 +40,7 @@ ACMD_FUNC(afk) {
 void atcommand_battlestats_sub(int fd, class map_session_data *sd) {
 	status_data *status = status_get_status_data(*sd);
 	char output[CHAT_SIZE_MAX];
+	bool found_bonuses;
 
 #define battlestats_msg(__msg__) (__msg__); clif_displaymessage(fd, output)
 
@@ -64,46 +65,70 @@ void atcommand_battlestats_sub(int fd, class map_session_data *sd) {
 	battlestats_msg(sprintf(output, "   -> Magical Resistance (MRES): %d", status->mres));
 
 	clif_displaymessage(fd, "|--- Bonus Physical Damage ---|");
+	found_bonuses = false;
+	
 	if (sd->right_weapon.addsize[SZ_MEDIUM] + sd->left_weapon.addsize[SZ_MEDIUM]) {
 		battlestats_msg(sprintf(output, "   -> Medium Size: %d%%", sd->right_weapon.addsize[SZ_MEDIUM] + sd->left_weapon.addsize[SZ_MEDIUM]));
+		found_bonuses = true;
 	}
 	if (sd->right_weapon.addsize[SZ_ALL] + sd->left_weapon.addsize[SZ_ALL]) {
 		battlestats_msg(sprintf(output, "   -> All Sizes: %d%%", sd->right_weapon.addsize[SZ_ALL] + sd->left_weapon.addsize[SZ_ALL]));
+		found_bonuses = true;
 	}
 	if (sd->right_weapon.addrace[RC_PLAYER_HUMAN || RC_PLAYER_DORAM] + sd->left_weapon.addrace[RC_PLAYER_HUMAN || RC_PLAYER_DORAM]) {
 		battlestats_msg(sprintf(output, "   -> Player: %d%%", sd->right_weapon.addrace[RC_PLAYER_HUMAN || RC_PLAYER_DORAM] + sd->left_weapon.addrace[RC_PLAYER_HUMAN || RC_PLAYER_DORAM]));
+		found_bonuses = true;
 	}
 	if (sd->right_weapon.addrace[RC_ALL] + sd->left_weapon.addrace[RC_ALL]) {
 		battlestats_msg(sprintf(output, "   -> All Races: %d%%", sd->right_weapon.addrace[RC_ALL] + sd->left_weapon.addrace[RC_ALL]));
+		found_bonuses = true;
 	}
 	if (sd->right_weapon.addclass[CLASS_NORMAL] + sd->left_weapon.addclass[CLASS_NORMAL]) {
 		battlestats_msg(sprintf(output, "   -> Normal Class: %d%%", sd->right_weapon.addclass[CLASS_NORMAL] + sd->left_weapon.addclass[CLASS_NORMAL]));
+		found_bonuses = true;
 	}
 	if (sd->right_weapon.addclass[CLASS_ALL] + sd->left_weapon.addclass[CLASS_ALL]) {
 		battlestats_msg(sprintf(output, "   -> All Classes: %d%%", sd->right_weapon.addclass[CLASS_ALL] + sd->left_weapon.addclass[CLASS_ALL]));
+		found_bonuses = true;
 	}
+    if (!found_bonuses) {  
+        clif_displaymessage(fd, "   -> No bonus physical damage found");  
+    }
 
 	clif_displaymessage(fd, "|--- Bonus Magic Damage ---|");
+	found_bonuses = false;
+	
 	if (sd->indexed_bonus.magic_addsize[SZ_MEDIUM]) {
 		battlestats_msg(sprintf(output, "   -> Medium Size: %d%%", sd->indexed_bonus.magic_addsize[SZ_MEDIUM]));
+		found_bonuses = true;
 	}
 	if (sd->indexed_bonus.magic_addsize[SZ_ALL]) {
 		battlestats_msg(sprintf(output, "   -> All Sizes: %d%%", sd->indexed_bonus.magic_addsize[SZ_ALL]));
+		found_bonuses = true;
 	}
 	if (sd->indexed_bonus.magic_addrace[RC_PLAYER_HUMAN || RC_PLAYER_DORAM]) {
 		battlestats_msg(sprintf(output, "   -> Player: %d%%", sd->indexed_bonus.magic_addrace[RC_PLAYER_HUMAN || RC_PLAYER_DORAM]));
+		found_bonuses = true;
 	}
 	if (sd->indexed_bonus.magic_addrace[RC_ALL]) {
 		battlestats_msg(sprintf(output, "   -> All Races: %d%%", sd->indexed_bonus.magic_addrace[RC_ALL]));
+		found_bonuses = true;
 	}
 	if (sd->indexed_bonus.magic_addclass[CLASS_NORMAL]) {
 		battlestats_msg(sprintf(output, "   -> Normal Class: %d%%", sd->indexed_bonus.magic_addclass[CLASS_NORMAL]));
+		found_bonuses = true;
 	}
 	if (sd->indexed_bonus.magic_addclass[CLASS_ALL]) {
 		battlestats_msg(sprintf(output, "   -> All Classes: %d%%", sd->indexed_bonus.magic_addclass[CLASS_ALL]));
+		found_bonuses = true;
 	}
+    if (!found_bonuses) {  
+        clif_displaymessage(fd, "   -> No bonus magical damage found");  
+    }  
 
 	clif_displaymessage(fd, "|--- Elemental Resistance ---|");
+	found_bonuses = false;
+	
 	struct {
 		const char *format;
 		int value;
@@ -124,9 +149,15 @@ void atcommand_battlestats_sub(int fd, class map_session_data *sd) {
 		if (ele_resist_info[i].value == 0)
 			continue;
 		battlestats_msg(sprintf(output, ele_resist_info[i].format, ele_resist_info[i].value));
+		found_bonuses = true;
 	}
+    if (!found_bonuses) {  
+        clif_displaymessage(fd, "   -> No bonus element resistance found");  
+    }	
 
 	clif_displaymessage(fd, "|--- Race Resistance ---|");
+	found_bonuses = false;
+	
 	struct {
 		const char *format;
 		int value;
@@ -149,7 +180,33 @@ void atcommand_battlestats_sub(int fd, class map_session_data *sd) {
 		if (race_resist_info[i].value == 0)
 			continue;
 		battlestats_msg(sprintf(output, race_resist_info[i].format, race_resist_info[i].value));
+		found_bonuses = true;
 	}
+    if (!found_bonuses) {  
+        clif_displaymessage(fd, "   -> No bonus race resist found");  
+    }
+
+    clif_displaymessage(fd, "|--- Skill Damage Bonuses ---|");  
+    found_bonuses = false;  
+      
+    // General skill ratio bonus  
+    if (sd->bonus.skill_ratio != 0) {  
+        battlestats_msg(sprintf(output, "   -> All Skills: %d%%", sd->bonus.skill_ratio));  
+        found_bonuses = true;  
+    }  
+      
+    // Check skillatk vector for skill-specific bonuses  
+    for (const auto &bonus : sd->skillatk) {  
+        const char* skill_desc = skill_get_desc(bonus.id);  
+        if (skill_desc) {  
+            battlestats_msg(sprintf(output, "   -> %s: +%d%%", skill_desc, bonus.val));  
+            found_bonuses = true;  
+        }  
+    }  
+      
+    if (!found_bonuses) {  
+        clif_displaymessage(fd, "   -> No skill damage bonuses found");  
+    }
 
 #undef battlestats_msg
 }

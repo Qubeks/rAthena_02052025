@@ -631,15 +631,16 @@ BUILDIN_FUNC(getelementalresist) {
     };  
       
     // Output only non-zero resistance values  
-	bool found_any = false;  
+	bool found_bonuses = false;
+	
 	for (int i = 0; i < 11; i++) {    
 		if (ele_resist_info[i].value != 0) {    
 			output << "   -> " << ele_resist_info[i].name << ": " << ele_resist_info[i].value << "%\n";  
-			found_any = true;  
+			found_bonuses = true;  
 		}  
 	}  
 	  
-	if (!found_any) {  
+	if (!found_bonuses) {  
 		output << "   -> No element resist bonuses found\n";  
 	} 
       
@@ -690,7 +691,8 @@ BUILDIN_FUNC(getraceresist) {
     };  
       
     // Output only non-zero resistance values    
-    bool found_bonuses = false;  
+    bool found_bonuses = false;
+	
     for (int i = 0; i < 13; i++) {    
         if (race_resist_info[i].value != 0) {    
             output << "   -> " << race_resist_info[i].name << ": " << race_resist_info[i].value << "%\n";  
