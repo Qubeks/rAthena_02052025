@@ -63,8 +63,11 @@ OnMainMenu:
 			if (aa_getstate()) {
 				goto OnStop;
 			} else {
-				autoattack_fromitem(50501);
-				.start_time = gettimetick(2); // Save the current tick when starting
+				//autoattack_fromitem(50501);
+				// Start auto-attack
+				sc_start4 SC_AUTOATTACK, .remaining_time, 1, 0, 0, 0;
+				.start_time = gettimetick(2); // Record start time
+				message strcharinfo(0), "Auto-attack started. Timer set for: " + calculate_remaining_time();
 			}
 			break;
 		case 2:
