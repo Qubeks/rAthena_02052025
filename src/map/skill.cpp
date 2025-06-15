@@ -8101,10 +8101,10 @@ int32 skill_castend_nodamage_id (struct block_list *src, struct block_list *bl, 
 		
 		// Block the use of MO_BODYRELOCATION for the duration of RG_CLOSECONFINE
 		if (bl && bl->type == BL_PC) { // Ensure the target is a player character
-			struct map_session_data *sd = BL_CAST(BL_PC, bl);
+			class map_session_data *sd = BL_CAST(BL_PC, bl);
 			if (sd) {
 				// Block the MO_BODYRELOCATION skill
-				skill_blockpc_start(sd, MO_BODYRELOCATION, skill_get_time(skill_id, skill_lv));
+				skill_blockpc_start(*sd, MO_BODYRELOCATION, skill_get_time(skill_id, skill_lv));
 			}
 		}
 		break;
@@ -15023,46 +15023,46 @@ int32 skill_castend_pos2(struct block_list* src, int32 x, int32 y, uint16 skill_
 		}
 		break;
 
-	case HW_GANBANTEIN: { // Old Ganbantein Behavior [mauiboy]
+	case HW_GANBANTEIN: { // Old Ganbantein Behavior [mauiboy]  
 		if (rnd() % 100 < 80) {
 			int32 dummy = 1;
-			clif_skill_poseffect(src, skill_id, skill_lv, x, y, tick);
+			clif_skill_poseffect(*src, skill_id, skill_lv, x, y, tick);
 			int32 splash_range = skill_get_splash(skill_id, skill_lv);
 
-			// Step 1: Remove Land Protector units in the affected area
+			// Step 1: Remove Land Protector units in the affected area  
 			map_foreachinallarea([](struct block_list* bl, va_list ap) -> int32 {
 				struct skill_unit* unit = (struct skill_unit*)bl;
-				if (!unit || !unit->group) return 0; // Validate unit and group
-				if (unit->group->skill_id != SA_LANDPROTECTOR) return 0; // Skip non-Land Protector units
+				if (!unit || !unit->group) return 0;
+				if (unit->group->skill_id != SA_LANDPROTECTOR) return 0;
 
-				// Remove Land Protector unit
+				// Remove Land Protector unit  
 				skill_delunit(unit);
 
-				// Pass necessary arguments for the next step
+				// Get arguments passed from outer call  
 				struct block_list* src = va_arg(ap, struct block_list*);
 				int32 splash_range = va_arg(ap, int32);
 
-				// Step 2: Re-enable AOE damage by clearing suppression flags
+				// Step 2: Re-enable AOE damage by clearing suppression flags  
 				map_foreachinallarea([](struct block_list* bl, va_list ap) -> int32 {
 					struct skill_unit* aoe_unit = (struct skill_unit*)bl;
-					if (!aoe_unit || !aoe_unit->group) return 0; // Validate AOE unit and group
+					if (!aoe_unit || !aoe_unit->group) return 0;
 
-					// Check for AOE skills and remove suppression
+					// Check for AOE skills and remove suppression  
 					if (aoe_unit->group->skill_id == WZ_STORMGUST ||
 						aoe_unit->group->skill_id == WZ_METEOR ||
 						aoe_unit->group->skill_id == WZ_VERMILION) {
-						aoe_unit->flags &= ~UNITFLAG_SUPPRESSED; // Clear suppression
+						aoe_unit->flags &= ~UNITFLAG_SUPPRESSED;
 					}
 
 					return 0;
-				}, unit->bl.m, unit->bl.x - splash_range, unit->bl.y - splash_range,
-				   unit->bl.x + splash_range, unit->bl.y + splash_range, BL_SKILL, splash_range);
+					}, unit->m, unit->x - splash_range, unit->y - splash_range,
+					unit->x + splash_range, unit->y + splash_range, BL_SKILL);
 
-				return 1; // Land Protector removed successfully
-			}, src->m, x - splash_range, y - splash_range, x + splash_range, y + splash_range, BL_SKILL, src, splash_range);
+				return 1;
+				}, src->m, x - splash_range, y - splash_range, x + splash_range, y + splash_range, BL_SKILL, src, splash_range);
 
-		} else {
-			// Skill fails; notify the player
+		}
+		else {
 			if (sd) clif_skill_fail(*sd, skill_id);
 			return 1;
 		}
@@ -17327,21 +17327,22 @@ int32 skill_unit_onplace_timer(struct skill_unit *unit, struct block_list *bl, t
 			}
 			break;
 			
-		case UNT_SPIDERWEB: // Spider Web restrict movement when casted on the ground [Sneaky] mauiboy
+		case UNT_SPIDERWEB: // Spider Web restrict movement when casted on the ground [Sneaky] mauiboy  
 			if (sg->val2 == 0 && tsc) {
-				int32 sec = skill_get_time2(sg->skill_id, sg->skill_lv);
-				if (status_change_start(ss, bl, type, 10000, sg->skill_lv, sg->group_id, 0, 0, sec, tick)) {
+				t_tick sec = skill_get_time2(sg->skill_id, sg->skill_lv); // Changed from int32 to t_tick  
+				if (status_change_start(ss, bl, type, 10000, sg->skill_lv, sg->group_id, 0, 0, sec, SCSTART_NONE)) {
 					const struct TimerData* td = tsc->getSCE(type) ? get_timer(tsc->getSCE(type)->timer) : nullptr;
 					if (td)
-						sec = DIFF_TICK(td->tick, tick);
-						unit_movepos(bl, unit->bl.x, unit->bl.y, 0, 0);
-						clif_fixpos(*bl);
-						sg->val2 = bl->id;
+						sec = DIFF_TICK(td->tick, tick); // Now both sides are t_tick  
+					unit_movepos(bl, unit->x, unit->y, 0, 0);
+					clif_fixpos(*bl);
+					sg->val2 = bl->id;
 				}
-				else
+				else {
 					sg->limit = DIFF_TICK(tick, sg->tick) + sec;
 					sg->interval = -1;
 					unit->range = 0;
+				}
 			}
 			break;
 
@@ -19574,19 +19575,19 @@ bool skill_check_condition_castbegin( map_session_data& sd, uint16 skill_id, uin
 				default:
 					switch ((uint32)log2(require.weapon)) {
 						case W_REVOLVER:
-							clif_msg(&sd, MSI_FAIL_NEED_EQUIPPED_GUN_HANDGUN);
+							clif_msg(sd, MSI_FAIL_NEED_EQUIPPED_GUN_HANDGUN);
 							break;
 						case W_RIFLE:
-							clif_msg(&sd, MSI_FAIL_NEED_EQUIPPED_GUN_RIFLE);
+							clif_msg(sd, MSI_FAIL_NEED_EQUIPPED_GUN_RIFLE);
 							break;
 						case W_GATLING:
-							clif_msg(&sd, MSI_FAIL_NEED_EQUIPPED_GUN_GATLING);
+							clif_msg(sd, MSI_FAIL_NEED_EQUIPPED_GUN_GATLING);
 							break;
 						case W_SHOTGUN:
-							clif_msg(&sd, MSI_FAIL_NEED_EQUIPPED_GUN_SHOTGUN);
+							clif_msg(sd, MSI_FAIL_NEED_EQUIPPED_GUN_SHOTGUN);
 							break;
 						case W_GRENADE:
-							clif_msg(&sd, MSI_FAIL_NEED_EQUIPPED_GUN_GRANADE);
+							clif_msg(sd, MSI_FAIL_NEED_EQUIPPED_GUN_GRANADE);
 						default:
 							clif_skill_fail(sd, skill_id, USESKILL_FAIL_THIS_WEAPON);
 							break;
