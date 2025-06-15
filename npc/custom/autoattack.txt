@@ -24,12 +24,21 @@
 -	script	bot_at	-1,{
 
 	function calculate_remaining_time;
+	function reset;
 
-OnInit:
-    .duration = 3600000; // 1 hour in milliseconds
-    .remaining_time = .duration;
-    .last_reset_day = gettime(7); // Initialize the reset day
-    .start_time = 0;
+OnInit:  
+    .duration = 3600000 * 4; // 4 hour in milliseconds  
+    .remaining_time = .duration;  
+    .start_time = 0;  
+    end;  
+  
+OnHour00: // 12am server time will reset duration  
+    .@n = getunits(BL_PC, .@aid);  
+    for (.@i = 0; .@i < .@n; .@i++) {  
+        attachrid(.@aid[.@i]);  
+        reset();  
+        detachrid;  
+    }  
     end;
 
 function calculate_remaining_time {
@@ -38,6 +47,26 @@ function calculate_remaining_time {
     .@minutes = (.@remaining_time % 3600000) / 60000;
     .@seconds = (.@remaining_time % 60000) / 1000;
     return .@hours + " hours, " + .@minutes + " minutes, " + .@seconds + " seconds.";
+}
+
+function	reset	{
+    // Reset remaining time to full duration  
+    .remaining_time = .duration;  
+      
+    // Clear any saved player-specific remaining time  
+    setd(".remaining_time_" + getcharid(0), .duration);  
+      
+    // If player has active autoattack, restart it with full duration  
+    if (aa_getstate()) {  
+        sc_end SC_AUTOATTACK;  
+        sc_start4 SC_AUTOATTACK, .duration, 1, 0, 0, 0;  
+        .start_time = gettimetick(2);  
+    }
+	
+	dispbottom "[Autoattack System]: Your auto-attack has been refreshed for today.";
+	dispbottom "Current stamina : "+ F_InsertComma(.duration), 0x00ff00;
+
+	return;
 }
     
 goto(OnMainMenu);
@@ -957,6 +986,9 @@ OnStop:
     end;
 
 OnPCLogoutEvent:
+
+	reset();
+
     if(aa_getstate()) {
         // Calculate elapsed time
         .@elapsed_time = (gettimetick(2) - .start_time) * 1000;
