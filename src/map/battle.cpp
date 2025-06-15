@@ -4712,6 +4712,11 @@ static int32 battle_calc_attack_skill_ratio(struct Damage* wd, struct block_list
 		case AC_DOUBLE:
 		case MA_DOUBLE:
 			skillratio += 10 * (skill_lv - 1);
+			// Add STR-based percentage increase [mauiboy]
+			if (sc && sc->getSCE(SC_SPIRIT) && sc->getSCE(SC_SPIRIT)->val2 == SL_ROGUE) {
+				float str_bonus = sd->status.str / 1.5f; // Calculate STR-based percentage
+				skillratio += (int32)(skillratio * (str_bonus / 100.0f)); // Increase skillratio by STR percentage
+			}
 			break;
 		case AC_SHOWER:
 		case MA_SHOWER:

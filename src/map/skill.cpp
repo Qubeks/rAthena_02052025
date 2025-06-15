@@ -98,6 +98,7 @@ static char dir_ka = -1; // Holds temporary direction to the target for SR_KNUCK
 
 //Early declaration
 bool skill_strip_equip(struct block_list *src, struct block_list *target, uint16 skill_id, uint16 skill_lv);
+bool skill_strip_equip(struct block_list *src, struct block_list *target, uint16 skill_id, uint16 skill_lv, bool bypassFcp); // Custom Soul Linked Rogue Strip [10K]
 static int32 skill_check_unit_range (struct block_list *bl, int32 x, int32 y, uint16 skill_id, uint16 skill_lv);
 static int32 skill_check_unit_range2 (struct block_list *bl, int32 x, int32 y, uint16 skill_id, uint16 skill_lv, bool isNearNPC);
 static int32 skill_destroy_trap( struct block_list *bl, va_list ap );
@@ -1344,16 +1345,20 @@ int32 skill_additional_effect( struct block_list* src, struct block_list *bl, ui
 				if(sd) {
 					int32 skill;
 
-					// Automatic trigger of Blitz Beat
-					if (pc_isfalcon(sd) && sd->status.weapon == W_BOW && (skill = pc_checkskill(sd, HT_BLITZBEAT)) > 0 && rnd() % 1000 <= sstatus->luk * 10 / 3 + 1) {
-						int32 rate;
-
-						if ((sd->class_ & MAPID_THIRDMASK) == MAPID_RANGER)
-							rate = 5;
-						else
-							rate = (sd->status.job_level + 9) / 10;
-
-						skill_castend_damage_id(src, bl, HT_BLITZBEAT, (skill < rate) ? skill : rate, tick, SD_LEVEL);
+					// Automatic trigger of Falcon Assault when Soul Linked [MarkZD] mauiboy
+					if (sc && sc->getSCE(SC_SPIRIT) && sc->getSCE(SC_SPIRIT)->val2 == SL_HUNTER) {
+						if (pc_isfalcon(sd) && sd->status.weapon == W_BOW) {
+							// Check if the skill is learned
+							int32 skill = pc_checkskill(sd, SN_FALCONASSAULT);
+							if (skill > 0) {
+								// Calculate trigger probability
+								int32 trigger_chance = sstatus->luk * 10 / 3 + 1; // Adjust chance based on 0.3*LUK
+								if (rnd() % 1000 <= trigger_chance) {
+									// Cast Falcon Assault
+									skill_castend_damage_id(src, bl, SN_FALCONASSAULT, skill, tick, SD_LEVEL);
+								}
+							}
+						}
 					}
 					// Automatic trigger of Warg Strike
 					if (pc_iswug(sd) && (skill = pc_checkskill(sd, RA_WUGSTRIKE)) > 0) {
@@ -2954,6 +2959,11 @@ int32 skill_break_equip(struct block_list *src, struct block_list *bl, uint16 wh
  */
 bool skill_strip_equip(struct block_list *src, struct block_list *target, uint16 skill_id, uint16 skill_lv)
 {
+	return skill_strip_equip(src, target, skill_id, skill_lv, false); // Custom Soul Linked Rogue Strip [10K]
+}
+bool skill_strip_equip(struct block_list *src, struct block_list *target, uint16 skill_id, uint16 skill_lv, bool bypassFcp) // Custom Soul Linked Rogue Strip [10K]
+
+{
 	nullpo_retr(false, src);
 	nullpo_retr(false, target);
 
@@ -3065,9 +3075,11 @@ bool skill_strip_equip(struct block_list *src, struct block_list *target, uint16
 			break;
 	}
 
-	for (uint8 i = 0; i < ARRAYLENGTH(pos); i++) {
-		if (location&pos[i] && sc_def[i] > SC_NONE && tsc->getSCE(sc_def[i]))
-			location &=~ pos[i];
+	if (!bypassFcp) { // Custom Soul Linked Rogue Strip [10K]
+		for (uint8 i = 0; i < ARRAYLENGTH(pos); i++) {
+			if (location & pos[i] && sc_def[i] > SC_NONE && tsc->getSCE(sc_def[i]))
+				location &= ~pos[i];
+		}
 	}
 	if (!location)
 		return false;
@@ -8083,9 +8095,18 @@ int32 skill_castend_nodamage_id (struct block_list *src, struct block_list *bl, 
 		}
 		break;
 
-	case RG_CLOSECONFINE:
-		clif_skill_nodamage(src,*bl,skill_id,skill_lv,
-			sc_start4(src,bl,type,100,skill_lv,src->id,0,0,skill_get_time(skill_id,skill_lv)));
+	case RG_CLOSECONFINE: // Can't use Body Relocation when Confined [mauiboy]
+		clif_skill_nodamage(src, *bl, skill_id, skill_lv,
+			sc_start4(src, bl, type, 100, skill_lv, src->id, 0, 0, skill_get_time(skill_id, skill_lv)));
+		
+		// Block the use of MO_BODYRELOCATION for the duration of RG_CLOSECONFINE
+		if (bl && bl->type == BL_PC) { // Ensure the target is a player character
+			struct map_session_data *sd = BL_CAST(BL_PC, bl);
+			if (sd) {
+				// Block the MO_BODYRELOCATION skill
+				skill_blockpc_start(sd, MO_BODYRELOCATION, skill_get_time(skill_id, skill_lv));
+			}
+		}
 		break;
 	case SA_FLAMELAUNCHER:	// added failure chance and chance to break weapon if turned on [Valaris]
 	case SA_FROSTWEAPON:
@@ -8292,7 +8313,7 @@ int32 skill_castend_nodamage_id (struct block_list *src, struct block_list *bl, 
 	case NJ_NEN:
 	case NPC_DEFENDER:
 	case NPC_MAGICMIRROR:
-	case ST_PRESERVE:
+	//case ST_PRESERVE:
 	case NPC_KEEPING:
 	case NPC_WEAPONBRAKER:
 	case NPC_BARRIER:
@@ -9323,6 +9344,7 @@ int32 skill_castend_nodamage_id (struct block_list *src, struct block_list *bl, 
 	case SP_SOULCOLLECT:
 	case IG_GUARD_STANCE:
 	case IG_ATTACK_STANCE:
+	case ST_PRESERVE: // Toggle on and off Preserve Skill
 		if( tsce )
 		{
 			clif_skill_nodamage(src,*bl,skill_id,skill_lv,status_change_end(bl, type));
@@ -9819,10 +9841,61 @@ int32 skill_castend_nodamage_id (struct block_list *src, struct block_list *bl, 
 		}
 		break;
 
-	case RG_STRIPWEAPON:
+	case RG_STRIPWEAPON: // Custom Soul Linked Rogue Strip [10K]
 	case RG_STRIPSHIELD:
 	case RG_STRIPARMOR:
-	case RG_STRIPHELM:
+	case RG_STRIPHELM: {
+
+		if (sd && sd->sc.getSCE(SC_SPIRIT) && sd->sc.getSCE(SC_SPIRIT)->val2 == SL_ROGUE) {
+			int item_id = 7139; // Glistening Coat
+			int j;
+			bool i;
+
+			// Calculate strip chance based on player's DEX
+			int base_chance = 15; // Base 15% chance
+			int dex_bonus = sd->status.dex / 50; // Each 50 DEX adds 1% chance
+			int strip_chance = base_chance + dex_bonus;
+
+			if (rand() % 100 < strip_chance) {
+				if ((j = pc_search_inventory(sd, item_id)) != -1) {
+					i = skill_strip_equip(src, bl, skill_id, skill_lv, true);
+					if (i) {
+						pc_delitem(sd, j, 1, 0, 0, LOG_TYPE_CONSUME);
+						clif_skill_nodamage(src, *bl, skill_id, skill_lv, i);
+
+						switch (skill_id) {
+							case RG_STRIPWEAPON:
+								//clif_displaymessage(sd->fd, "Bypass Strip [ Weapon ] Success");
+								status_change_end(bl, SC_CP_WEAPON, INVALID_TIMER);
+								sc_start(nullptr, bl, SC_STRIPWEAPON, 100, skill_lv, i);
+								break;
+							case RG_STRIPSHIELD:
+								//clif_displaymessage(sd->fd, "Bypass Strip [ Shield ] Success");
+								status_change_end(bl, SC_CP_SHIELD, INVALID_TIMER);
+								sc_start(nullptr, bl, SC_STRIPSHIELD, 100, skill_lv, i);
+								break;
+							case RG_STRIPARMOR:
+								//clif_displaymessage(sd->fd, "Bypass Strip [ Armor ] Success");
+								status_change_end(bl, SC_CP_ARMOR, INVALID_TIMER);
+								sc_start(nullptr, bl, SC_STRIPARMOR, 100, skill_lv, i);
+								break;
+							case RG_STRIPHELM:
+								//clif_displaymessage(sd->fd, "Bypass Strip [ Helm ] Success");
+								status_change_end(bl, SC_CP_HELM, INVALID_TIMER);
+								sc_start(nullptr, bl, SC_STRIPHELM, 100, skill_lv, i);
+								break;
+						}
+					}
+				}
+
+				if (sd && !i)
+					clif_skill_fail(*sd, skill_id);
+
+				break;
+			}
+		}
+	}
+
 	case ST_FULLSTRIP:
 	case GC_WEAPONCRUSH:
 	case SC_STRIPACCESSARY:
@@ -10041,7 +10114,7 @@ int32 skill_castend_nodamage_id (struct block_list *src, struct block_list *bl, 
 				break; // Outside PvP it should only affect party members and no skill fail message
 			clif_skill_nodamage(src,*bl,skill_id,skill_lv);
 			if((dstsd && (dstsd->class_&MAPID_UPPERMASK) == MAPID_SOUL_LINKER)
-				|| (tsc && tsc->getSCE(SC_SPIRIT) && tsc->getSCE(SC_SPIRIT)->val2 == SL_ROGUE) //Rogue's spirit defends againt32 dispel.
+				|| (tsc && tsc->getSCE(SC_SPIRIT) && (tsc->getSCE(SC_SPIRIT)->val2 == SL_ROGUE || tsc->getSCE(SC_SPIRIT)->val2 == SL_BLACKSMITH)) //Rogue and Blacksmith's spirit defends against dispel [mauiboy]
 				|| rnd()%100 >= 50+10*skill_lv)
 			{
 				if (sd)
@@ -10796,15 +10869,19 @@ int32 skill_castend_nodamage_id (struct block_list *src, struct block_list *bl, 
 			status_heal(bl,hp,sp,0);
 		}
 		break;
-	// Full Chemical Protection
+	// Full Chemical Protection Bypass Strip Status [kevin1109] mauiboy 
 	case CR_FULLPROTECTION:
 		{
-			uint32 equip[] = {EQP_WEAPON, EQP_SHIELD, EQP_ARMOR, EQP_HEAD_TOP};
+			unsigned int equip[] = {EQP_WEAPON, EQP_SHIELD, EQP_ARMOR, EQP_HEAD_TOP};
 			int32 i_eqp, s = 0, skilltime = skill_get_time(skill_id,skill_lv);
 
 			for (i_eqp = 0; i_eqp < 4; i_eqp++) {
-				if( bl->type != BL_PC || ( dstsd && pc_checkequip(dstsd,equip[i_eqp]) < 0 ) )
+				if( bl->type != BL_PC )
 					continue;
+				status_change_end(bl, (sc_type)(SC_STRIPWEAPON + i), INVALID_TIMER);
+				status_change_end(bl, (sc_type)(SC_STRIPHELM + i), INVALID_TIMER);
+				status_change_end(bl, (sc_type)(SC_STRIPSHIELD + i), INVALID_TIMER);
+				status_change_end(bl, (sc_type)(SC_STRIPARMOR + i), INVALID_TIMER);
 				sc_start(src,bl,(sc_type)(SC_CP_WEAPON + i_eqp),100,skill_lv,skilltime);
 				s++;
 			}
@@ -10875,6 +10952,8 @@ int32 skill_castend_nodamage_id (struct block_list *src, struct block_list *bl, 
 	case SL_STAR:
 	case SL_SUPERNOVICE:
 	case SL_WIZARD:
+	case SL_NINJA: // Soul Link Modification Script Based [Singe Horizontal] mauiboy
+	case SL_GUNNER: // Soul Link Modification Script Based [Singe Horizontal] mauiboy	
 	case SL_HIGH:
 		if( sc_start2( src, bl, type, 100, skill_lv, skill_id, skill_get_time( skill_id, skill_lv ) ) ){
 			clif_skill_nodamage(src, *bl, skill_id, skill_lv);
@@ -14840,7 +14919,9 @@ int32 skill_castend_pos2(struct block_list* src, int32 x, int32 y, uint16 skill_
 			status_change_end(src,SC_CURSEDCIRCLE_ATKER);
 		return 0; // not to consume item.
 
-	case MO_BODYRELOCATION:
+	case MO_BODYRELOCATION: // Cannot use Body Relocation trapped in Spider Web and Ankle Snare [Katakuri] mauiboy
+		if(sc && (sc->getSCE(SC_SPIDERWEB) || sc->getSCE(SC_ANKLE)))
+					break;
 		if (unit_movepos(src, x, y, 2, 1)) {
 #if PACKETVER >= 20111005
 			clif_snap(src, src->x, src->y);
@@ -14942,17 +15023,51 @@ int32 skill_castend_pos2(struct block_list* src, int32 x, int32 y, uint16 skill_
 		}
 		break;
 
-	case HW_GANBANTEIN:
-		if (rnd()%100 < 80) {
+	case HW_GANBANTEIN: { // Old Ganbantein Behavior [mauiboy]
+		if (rnd() % 100 < 80) {
 			int32 dummy = 1;
-			clif_skill_poseffect( *src, skill_id, skill_lv, x, y, tick );
-			i = skill_get_splash(skill_id, skill_lv);
-			map_foreachinallarea(skill_cell_overlap, src->m, x-i, y-i, x+i, y+i, BL_SKILL, HW_GANBANTEIN, &dummy, src);
+			clif_skill_poseffect(src, skill_id, skill_lv, x, y, tick);
+			int32 splash_range = skill_get_splash(skill_id, skill_lv);
+
+			// Step 1: Remove Land Protector units in the affected area
+			map_foreachinallarea([](struct block_list* bl, va_list ap) -> int32 {
+				struct skill_unit* unit = (struct skill_unit*)bl;
+				if (!unit || !unit->group) return 0; // Validate unit and group
+				if (unit->group->skill_id != SA_LANDPROTECTOR) return 0; // Skip non-Land Protector units
+
+				// Remove Land Protector unit
+				skill_delunit(unit);
+
+				// Pass necessary arguments for the next step
+				struct block_list* src = va_arg(ap, struct block_list*);
+				int32 splash_range = va_arg(ap, int32);
+
+				// Step 2: Re-enable AOE damage by clearing suppression flags
+				map_foreachinallarea([](struct block_list* bl, va_list ap) -> int32 {
+					struct skill_unit* aoe_unit = (struct skill_unit*)bl;
+					if (!aoe_unit || !aoe_unit->group) return 0; // Validate AOE unit and group
+
+					// Check for AOE skills and remove suppression
+					if (aoe_unit->group->skill_id == WZ_STORMGUST ||
+						aoe_unit->group->skill_id == WZ_METEOR ||
+						aoe_unit->group->skill_id == WZ_VERMILION) {
+						aoe_unit->flags &= ~UNITFLAG_SUPPRESSED; // Clear suppression
+					}
+
+					return 0;
+				}, unit->bl.m, unit->bl.x - splash_range, unit->bl.y - splash_range,
+				   unit->bl.x + splash_range, unit->bl.y + splash_range, BL_SKILL, splash_range);
+
+				return 1; // Land Protector removed successfully
+			}, src->m, x - splash_range, y - splash_range, x + splash_range, y + splash_range, BL_SKILL, src, splash_range);
+
 		} else {
-			if (sd) clif_skill_fail( *sd, skill_id );
+			// Skill fails; notify the player
+			if (sd) clif_skill_fail(*sd, skill_id);
 			return 1;
 		}
-		break;
+	}
+	break;
 
 #ifndef RENEWAL
 	case HW_GRAVITATION:
@@ -17211,6 +17326,24 @@ int32 skill_unit_onplace_timer(struct skill_unit *unit, struct block_list *bl, t
 #endif
 			}
 			break;
+			
+		case UNT_SPIDERWEB: // Spider Web restrict movement when casted on the ground [Sneaky] mauiboy
+			if (sg->val2 == 0 && tsc) {
+				int32 sec = skill_get_time2(sg->skill_id, sg->skill_lv);
+				if (status_change_start(ss, bl, type, 10000, sg->skill_lv, sg->group_id, 0, 0, sec, tick)) {
+					const struct TimerData* td = tsc->getSCE(type) ? get_timer(tsc->getSCE(type)->timer) : nullptr;
+					if (td)
+						sec = DIFF_TICK(td->tick, tick);
+						unit_movepos(bl, unit->bl.x, unit->bl.y, 0, 0);
+						clif_fixpos(*bl);
+						sg->val2 = bl->id;
+				}
+				else
+					sg->limit = DIFF_TICK(tick, sg->tick) + sec;
+					sg->interval = -1;
+					unit->range = 0;
+			}
+			break;
 
 		case UNT_ANKLESNARE:
 		case UNT_MANHOLE:
@@ -19424,32 +19557,42 @@ bool skill_check_condition_castbegin( map_session_data& sd, uint16 skill_id, uin
 		return false;
 	}
 
-	if( require.weapon && !pc_check_weapontype(&sd,require.weapon) ) {
-		switch(skill_id) {
-			case RA_AIMEDBOLT:
-				break;
-			default:
-				switch((uint32)log2(require.weapon)) {
-					case W_REVOLVER:
-						clif_msg( sd, MSI_FAIL_NEED_EQUIPPED_GUN_HANDGUN );
-						break;
-					case W_RIFLE:
-						clif_msg( sd, MSI_FAIL_NEED_EQUIPPED_GUN_RIFLE );
-						break;
-					case W_GATLING:
-						clif_msg( sd, MSI_FAIL_NEED_EQUIPPED_GUN_GATLING );
-						break;
-					case W_SHOTGUN:
-						clif_msg( sd, MSI_FAIL_NEED_EQUIPPED_GUN_SHOTGUN );
-						break;
-					case W_GRENADE:
-						clif_msg( sd, MSI_FAIL_NEED_EQUIPPED_GUN_GRANADE );
-						break;
-					default:
-						clif_skill_fail( sd, skill_id, USESKILL_FAIL_THIS_WEAPON );
-						break;
-				}
-				return false;
+	// Enable to use Parry on 1 Hand Weapons when Knights, Star Gladiators and Blacksmiths are Soul Linked [vBrenth] mauiboy
+	if (require.weapon && !pc_check_weapontype(&sd, require.weapon)) {
+		if ((skill_id == LK_PARRYING 
+				&& sc 
+				&& sc->getSCE(SC_SPIRIT)) 
+			&& ((sc->getSCE(SC_SPIRIT)->val2 == SL_KNIGHT && sd.weapontype1 == W_1HSWORD)  // Knights with 1H Sword
+				|| (sc->getSCE(SC_SPIRIT)->val2 == SL_STAR && sd.weapontype1 == W_BOOK)     // Star Gladiators with Book
+				|| (sc->getSCE(SC_SPIRIT)->val2 == SL_BLACKSMITH && sd.weapontype1 == W_1HAXE))) { // Blacksmiths with 1H Axe
+				
+		} else {		
+		
+			switch (skill_id) {
+				case RA_AIMEDBOLT:
+					break;
+				default:
+					switch ((uint32)log2(require.weapon)) {
+						case W_REVOLVER:
+							clif_msg(&sd, MSI_FAIL_NEED_EQUIPPED_GUN_HANDGUN);
+							break;
+						case W_RIFLE:
+							clif_msg(&sd, MSI_FAIL_NEED_EQUIPPED_GUN_RIFLE);
+							break;
+						case W_GATLING:
+							clif_msg(&sd, MSI_FAIL_NEED_EQUIPPED_GUN_GATLING);
+							break;
+						case W_SHOTGUN:
+							clif_msg(&sd, MSI_FAIL_NEED_EQUIPPED_GUN_SHOTGUN);
+							break;
+						case W_GRENADE:
+							clif_msg(&sd, MSI_FAIL_NEED_EQUIPPED_GUN_GRANADE);
+						default:
+							clif_skill_fail(sd, skill_id, USESKILL_FAIL_THIS_WEAPON);
+							break;
+					}
+					return false;
+			}
 		}
 	}
 
@@ -21421,26 +21564,33 @@ static int32 skill_cell_overlap(struct block_list *bl, va_list ap)
 		return 0;
 
 	switch (skill_id) {
-		case SA_LANDPROTECTOR: {
-				if( unit->group->skill_id == SA_LANDPROTECTOR ) {//Check for offensive Land Protector to delete both. [Skotlex]
-					(*alive) = 0;
-					skill_delunit(unit);
-					return 1;
-				}
-
-				std::shared_ptr<s_skill_db> skill = skill_db.find(unit->group->skill_id);
-
-				//It deletes everything except traps and barriers
-				if ((!skill->inf2[INF2_ISTRAP] && !skill->inf2[INF2_IGNORELANDPROTECTOR]) || unit->group->skill_id == WZ_FIREPILLAR) {
-					if (skill->unit_flag[UF_RANGEDSINGLEUNIT]) {
-						if (unit->val2&(1 << UF_RANGEDSINGLEUNIT))
-							skill_delunitgroup(unit->group);
-					} else
-						skill_delunit(unit);
-					return 1;
-				}
+		case SA_LANDPROTECTOR: { // Old Land Protector Behavior [mauiboy]
+			if (unit->group->skill_id == SA_LANDPROTECTOR) {
+				// Check for offensive Land Protector to delete both
+				(*alive) = 0;
+				skill_delunit(unit);
+				return 1;
 			}
-			break;
+
+			std::shared_ptr<s_skill_db> skill = skill_db.find(unit->group->skill_id);
+
+			// Instead of deleting, suppress damage of AOE skills (retain duration)
+			if (unit->group->skill_id == WZ_STORMGUST || 
+				unit->group->skill_id == WZ_METEOR || 
+				unit->group->skill_id == WZ_VERMILION || 
+				unit->group->skill_id == WZ_FIREPILLAR) {
+				// Apply a hypothetical flag to suppress the damage without canceling the duration
+				unit->flags |= UNITFLAG_SUPPRESSED; // Hypothetical flag indicating damage suppression by Land Protector
+				return 0;
+			}
+
+			// It deletes everything except traps and barriers
+			if (!skill->inf2[INF2_ISTRAP] && !skill->inf2[INF2_IGNORELANDPROTECTOR]) {
+				skill_delunit(unit);
+				return 1;
+			}
+		}
+		break;
 		case GN_CRAZYWEED_ATK:
 			if (skill_get_unit_flag(unit->group->skill_id, UF_CRAZYWEEDIMMUNE))
 				break;

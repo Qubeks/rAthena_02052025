@@ -224,6 +224,7 @@
     <ClInclude Include="mapreg.hpp" />
     <ClInclude Include="mercenary.hpp" />
     <ClInclude Include="mob.hpp" />
+	<ClInclude Include="mod_soullink.hpp" />
     <ClInclude Include="navi.hpp" />
     <ClInclude Include="npc.hpp" />
     <ClInclude Include="packets.hpp" />
@@ -276,6 +277,7 @@
     <ClCompile Include="mob.cpp">
       <Optimization Condition="'$(Configuration)'=='Release'">Disabled</Optimization>
     </ClCompile>
+	<ClCompile Include="mod_soullink.cpp" />
     <ClCompile Include="navi.cpp" />
     <ClCompile Include="npc.cpp" />
     <ClCompile Include="npc_chat.cpp" />
@@ -386,6 +388,7 @@
     <Copy SourceFiles="$(SolutionDir)db\import-tmpl\status_disabled.txt" DestinationFolder="$(SolutionDir)db\import\" ContinueOnError="true" Condition="!Exists('$(SolutionDir)db\import\status_disabled.txt')" />
     <Copy SourceFiles="$(SolutionDir)db\import-tmpl\status.yml" DestinationFolder="$(SolutionDir)db\import\" ContinueOnError="true" Condition="!Exists('$(SolutionDir)db\import\status.yml')" />
     <Copy SourceFiles="$(SolutionDir)db\import-tmpl\stylist.yml" DestinationFolder="$(SolutionDir)db\import\" ContinueOnError="true" Condition="!Exists('$(SolutionDir)db\import\stylist.yml')" />
+	<Copy SourceFiles="$(SolutionDir)db\import-tmpl\soul_link_db.yml" DestinationFolder="$(SolutionDir)db\import\" ContinueOnError="true" Condition="!Exists('$(SolutionDir)db\import\soul_link_db.yml')" />
     <MakeDir Directories="$(SolutionDir)generated\clientside\data\luafiles514\lua files\navigation\" ContinueOnError="true" Condition="!Exists('$(SolutionDir)generated\clientside\data\luafiles514\lua files\navigation\')" />
     <MakeDir Directories="$(SolutionDir)generated\clientside\data\contentdata\" ContinueOnError="true" Condition="!Exists('$(SolutionDir)generated\clientside\data\contentdata\')" />
   </Target>

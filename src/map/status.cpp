@@ -7,6 +7,9 @@
 #include <cstdlib>
 #include <functional>
 #include <string>
+// GTB Blocked and Bypass List [mauiboy]
+#include <unordered_set>
+#include <memory>
 
 #include <common/cbasetypes.hpp>
 #include <common/ers.hpp>
@@ -30,6 +33,7 @@
 #include "map.hpp"
 #include "mercenary.hpp"
 #include "mob.hpp"
+#include "mod_soullink.hpp" // Soul Link Modification Script Based [Singe Horizontal] mauiboy
 #include "npc.hpp"
 #include "path.hpp"
 #include "pc.hpp"
@@ -37,6 +41,36 @@
 #include "pet.hpp"
 #include "script.hpp"
 #include "deposit.hpp"
+
+// GTB Blocked and Bypass List [mauiboy]
+// BYPASS
+// Professor Skills
+#define PF_SPIDERWEB 405
+// High Priest Skills
+#define PR_KYRIE 73
+#define PR_IMPOSITIO 66
+#define PR_GLORIA 75
+#define HP_ASSUMPTIO 361
+// Soul Linker
+#define SL_ALCHEMIST 445
+#define SL_MONK 447
+#define SL_STAR 448
+#define SL_SAGE 449
+#define SL_CRUSADER 450
+#define SL_SUPERNOVICE 451
+#define SL_KNIGHT 452
+#define SL_WIZARD 453
+#define SL_PRIEST 454
+#define SL_BARDDANCER 455
+#define SL_ROGUE 456
+#define SL_ASSASIN 457
+#define SL_BLACKSMITH 458
+#define SL_HUNTER 460
+#define SL_SOULLINKER 461
+#define SL_HIGH 494
+// BLOCKED
+// Professor Skills
+#define PF_SOULBURN 375
 
 using namespace rathena;
 
@@ -130,6 +164,26 @@ static bool status_change_isDisabledOnMap_(sc_type type, bool mapIsVS, bool mapI
 
 const std::string RefineDatabase::getDefaultLocation(){
 	return std::string( db_path ) + "/refine.yml";
+}
+
+// GTB Blocked and Bypass List [mauiboy]
+// Initialize sets for GTB immunity bypass and block
+const std::unordered_set<int32> GTB_BYPASS_SKILLS = { 
+    PF_SPIDERWEB, PR_KYRIE, PR_IMPOSITIO, PR_GLORIA, HP_ASSUMPTIO, SL_ALCHEMIST, SL_MONK, SL_STAR, SL_SAGE, SL_CRUSADER, SL_SUPERNOVICE, SL_KNIGHT, SL_WIZARD, SL_PRIEST, SL_BARDDANCER, SL_ROGUE, SL_ASSASIN, SL_BLACKSMITH, SL_HUNTER, SL_SOULLINKER, SL_HIGH // Add more skills to bypass GTB here
+};
+
+const std::unordered_set<int32> GTB_BLOCK_SKILLS = { 
+    PF_SOULBURN // Add more skills to block by GTB here
+};
+
+// Helper function to check if a skill bypasses GTB immunity
+bool is_skill_bypassing_gtb(int32 skill_id) {
+    return GTB_BYPASS_SKILLS.find(skill_id) != GTB_BYPASS_SKILLS.end();
+}
+
+// Helper function to check if a skill is blocked by GTB immunity
+bool is_skill_blocked_by_gtb(int32 skill_id) {
+    return GTB_BLOCK_SKILLS.find(skill_id) != GTB_BLOCK_SKILLS.end();
 }
 
 uint64 RefineDatabase::parseBodyNode( const ryml::NodeRef& node ){
@@ -4205,6 +4259,16 @@ int32 status_calc_pc_sub(map_session_data* sd, uint8 opt)
 			}
 		}
 		current_equip_opt_index = -1;
+	}
+	
+	// Soul Link Modification Script Based [Singe Horizontal] mauiboy
+	if (sd && sc->count && sc->getSCE(SC_SPIRIT)) {
+			auto spirit = sc->getSCE(SC_SPIRIT);
+			if (spirit != nullptr){
+				std::shared_ptr<mods::soul_link_data> sld = mods::soul_link_db.find(spirit->val2);
+				if(sld != nullptr && sld->script != nullptr)
+					run_script(sld->script, 0, sd->bl.id, 0);
+			}
 	}
 
 	if (!sc->empty()){
@@ -10649,6 +10713,14 @@ static bool status_change_start_post_delay(block_list* src, block_list* bl, sc_t
 						mask = sd->class_;
 						target_class = sd->class_;
 						break;
+					// Soul Link Modification Script Based [Singe Horizontal] mauiboy
+					case SL_NINJA:
+						target_class = MAPID_NINJA;
+						break;
+					case SL_GUNNER:
+						target_class = MAPID_GUNSLINGER;
+						break;
+						
 					default:
 						ShowError( "Unknown skill id %d for SC_SPIRIT.\n", val2 );
 						return false;
@@ -11597,8 +11669,16 @@ static bool status_change_start_post_delay(block_list* src, block_list* bl, sc_t
 			} else
 				val3 = val4 = 0;
 			break;
-		case SC_MAXOVERTHRUST:
-			val2 = 20*val1; // Power increase
+		case SC_MAXOVERTHRUST: // Increase Level 5 Maximum Over Thrust % when Soul Linked [MarkZD] mauiboy
+			if (sc && sc->getSCE(SC_SPIRIT)) {
+				if (sc->getSCE(SC_SPIRIT)->val2 == SL_BLACKSMITH) {
+					val2 = 100 + 20 * val1; // 300% at level 5 with Blacksmith Spirit
+				} else {
+					val2 = 20 * val1; // Regular power increase
+				}
+			} else {
+				val2 = 20 * val1; // Default behavior if no spirit link
+			}
 			break;
 		case SC_OVERTHRUST:
 		case SC_ADRENALINE2:
@@ -16484,6 +16564,11 @@ void StatusDatabase::loadingFinished(){
 
 StatusDatabase status_db;
 
+	// Soul Link Modification Script Based [Singe Horizontal] mauiboy
+	namespace mods {
+	SoulLinkDabatase soul_link_db;
+	}
+
 /**
  * Sets defaults in tables and starts read db functions
  * sv_readdb reads the file, outputting the information line-by-line to
@@ -16530,11 +16615,13 @@ void status_readdb( bool reload ){
 		refine_db.reload();
 		status_db.reload();
 		enchantgrade_db.reload();
+		mods::soul_link_db.reload(); // Soul Link Modification Script Based [Singe Horizontal] mauiboy		
 	}else{
 		size_fix_db.load();
 		refine_db.load();
 		status_db.load();
 		enchantgrade_db.load();
+		mods::soul_link_db.load(); // Soul Link Modification Script Based [Singe Horizontal] mauiboy		
 	}
 	elemental_attribute_db.load();
 }
@@ -16563,5 +16650,6 @@ void do_final_status(void) {
 	refine_db.clear();
 	status_db.clear();
 	elemental_attribute_db.clear();
+	mods::soul_link_db.clear(); // Soul Link Modification Script Based [Singe Horizontal] mauiboy
 	delay_status.clear();
 }

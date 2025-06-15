@@ -36,6 +36,8 @@ class status_change;
 #define SKILL_NAME_LENGTH 40 /// Max Skill Name length
 #define SKILL_DESC_LENGTH 40 /// Max Skill Desc length
 
+#define UNITFLAG_SUPPRESSED 0x01 // Old Land Protector and Ganbantein [mauiboy]
+
 /// Used with tracking the hitcount of Earthquake for skills that can avoid the first attack
 #define NPC_EARTHQUAKE_FLAG 0x800
 
@@ -370,6 +372,7 @@ struct skill_unit : public block_list {
 	int16 range;
 	bool alive;
 	bool hidden;
+	uint32 flags; // Old Land Protector and Ganbantein Behavior [mauiboy]	
 };
 
 /// Skill unit group
