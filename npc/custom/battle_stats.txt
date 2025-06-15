@@ -1,0 +1,102 @@
+prontera,150,150,4	script	Battle Stats NPC	100,{  
+    mes "[Battle Stats]";
+    mes "Welcome! Choose an option:";
+    setdialogsize(400, 300);
+    setdialogpospercent(50, 50);
+	next;	
+    switch(select("My Battle Stats:" +
+					"Enemy Stats:" +
+					"Cancel")) {  
+        case 1:  
+			mes "Choose what information you want to see:";  
+			next;
+			clear;
+			L_Start:
+			mes "[Battle Stats]";
+			switch(select("Status Information:" +
+							"Trait Status Information:" +
+							"Bonus Physical Damage:" +
+							"Elemental Resistance:" +
+							"Race Resistance:" +
+							"Skill Bonus Damage:" +
+							"Cancel")) {  
+				case 1:   
+					mes getstatusstats(strcharinfo(0));  
+					break;  
+				case 2:   
+					mes gettraitstats(strcharinfo(0));  
+					break;   
+				case 3:   
+					mes getbonusphysical(strcharinfo(0));  
+					break;  
+				case 4:   
+					mes getelementalresist(strcharinfo(0));  
+					break;  
+				case 5:  
+					mes getraceresist(strcharinfo(0));  
+					break;
+				case 6:  
+					mes getskillbonus(strcharinfo(0));  
+					break;					
+				case 7:  
+					close;  
+			}
+			next;  
+			mes "Would you like to see another category?";  
+			if(select("Yes:No") == 1) goto L_Menu;  
+			close;  
+			  
+			L_Menu:  
+				goto L_Start;			
+            break;  
+        case 2:  
+            mes "Enter player name:";  
+			mes "Disclaimer: This input is case-sensitive so be sure that name you're inputting is right";
+            input .@name$;
+			next;
+			mes "Choose what information you want to see:";  
+			next;
+			clear;
+			L_Start1:			
+			mes "[Battle Stats]";			
+			mes "Battle Stats of "+ .@name$ +".";
+			switch(select("Status Information:" +
+							"Trait Status Information:" +
+							"Bonus Physical Damage:" +
+							"Elemental Resistance:" +
+							"Race Resistance:" +
+							"Skill Bonus Damage:" +
+							"Cancel")) {  
+				case 1:  
+					mes getstatusstats(.@name$);  
+					break;  
+				case 2:   
+					mes gettraitstats(.@name$);  
+					break;    
+				case 3:   
+					mes getbonusphysical(.@name$);  
+					break;  
+				case 4:    
+					mes getelementalresist(.@name$);  
+					break;  
+				case 5:    
+					mes getraceresist(.@name$);  
+					break;
+				case 6:    
+					mes getskillbonus(.@name$);  
+					break;					
+				case 7:  
+					close;  
+			}
+			next;  
+			mes "Would you like to see another category?";  
+			if(select("Yes:No") == 1) goto L_Menu1;  
+			close;  
+			  
+			L_Menu1:  
+				goto L_Start1;			
+            break;  
+        case 3:  
+            close;  
+    }    
+}

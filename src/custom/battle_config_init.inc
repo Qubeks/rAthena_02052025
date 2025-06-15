@@ -9,6 +9,4 @@
  *
  * Format:
  *	 { "name", &battle_config.<variable name>, <default value>, <minimum value>, <maximum value> },
- **/ 
-	// Show Element Info [Hyroshima]
-	{ "mob_ele_view",                       &battle_config.mob_ele_view,                    0,      0,      1,              },
+ **/

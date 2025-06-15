@@ -37,7 +37,7 @@ ACMD_FUNC(afk) {
 /*==========================================
 * @battlestats / @enemystats
 *------------------------------------------*/
-void atcommand_battlestats_sub(int fd, struct map_session_data *sd) {
+void atcommand_battlestats_sub(int fd, class map_session_data *sd) {
 	status_data *status = status_get_status_data(*sd);
 	char output[CHAT_SIZE_MAX];
 
@@ -161,7 +161,7 @@ ACMD_FUNC(battlestats) {
 }
 
 ACMD_FUNC(enemystats) {
-	struct map_session_data *pl_sd;
+	class map_session_data *pl_sd;
 
 	nullpo_retr(-1, sd);
 

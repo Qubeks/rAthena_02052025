@@ -348,6 +348,412 @@ BUILDIN_FUNC(aa_getstate)
 	return SCRIPT_CMD_SUCCESS;
 }
 
+BUILDIN_FUNC(getstatusstats) {  
+    class map_session_data *target_sd;  
+      
+    if (script_hasdata(st, 2)) {  
+        const char *player_name = script_getstr(st, 2);  
+        target_sd = map_nick2sd(player_name, true);  
+        if (!target_sd) {  
+            script_pushconststr(st, "Player not found");  
+            return 0;  
+        }  
+    } else {  
+        if (!script_rid2sd(target_sd)) {  // This is the correct usage  
+            script_pushconststr(st, "Player not found"); 
+            return 0;  
+        }  
+    }  
+      
+    status_data *status = status_get_status_data(*target_sd);  
+    std::ostringstream output;  
+      
+    output << "|--- Status Information ---|\n";  
+    output << "   -> Physical Damage (ATK): " << pc_leftside_atk(target_sd) << " + " << pc_rightside_atk(target_sd) << "\n";  
+    output << "   -> Magical Damage (MATK): " << pc_leftside_matk(target_sd) << " + " << pc_rightside_matk(target_sd) << "\n";  
+    output << "   -> Hit Rate (HIT): " << status->hit << "\n";  
+    output << "   -> Critical Rate (CRIT): " << status->cri / 10 << "\n";  
+    output << "   -> Physical Defense (DEF): " << pc_leftside_def(target_sd) << " + " << pc_rightside_def(target_sd) << "\n";  
+    output << "   -> Magical Defense (MDEF): " << pc_leftside_mdef(target_sd) << " + " << pc_rightside_mdef(target_sd) << "\n";  
+    output << "   -> Flee Rate (FLEE): " << status->flee << " + " << status->flee2 / 10 << "\n";  
+    output << "   -> Attack Speed (ASPD): " << (2000 - status->amotion) / 10 << "\n";  
+      
+    std::string result = output.str();  
+    script_pushstr(st, aStrdup(result.c_str()));  
+    return 0;  
+}  
+  
+// Script command for trait status information    
+BUILDIN_FUNC(gettraitstats) {  
+    class map_session_data *target_sd;  
+      
+    if (script_hasdata(st, 2)) {  
+        const char *player_name = script_getstr(st, 2);  
+        target_sd = map_nick2sd(player_name, true);  
+        if (!target_sd) {  
+            script_pushconststr(st, "Player not found");
+            return 0;  
+        }  
+    } else {    
+        if (!script_rid2sd(target_sd)) {  
+            script_pushconststr(st, "Player not found");
+            return 0;  
+        }  
+    }  
+      
+    status_data *status = status_get_status_data(*target_sd);  
+    std::ostringstream output;  
+      
+    output << "|--- Trait Status Information ---|\n";  
+    output << "   -> Final Physical Damage (P.ATK): " << status->patk << "\n";  
+    output << "   -> Final PhysicalMagical Damage (S.MATK): " << status->smatk << "\n";  
+    output << "   -> Heal Plus (H.Plus): " << status->hplus << "\n";  
+    output << "   -> Critical Damage Rate (C.Rate): " << status->crate << "\n";  
+    output << "   -> Physical Resistance (RES): " << status->res << "\n";  
+    output << "   -> Magical Resistance (MRES): " << status->mres << "\n";  
+      
+    std::string result = output.str();  
+    script_pushstr(st, aStrdup(result.c_str()));  
+    return 0;  
+}
+
+BUILDIN_FUNC(getbonusphysical) {  
+    class map_session_data *target_sd;  
+      
+    if (script_hasdata(st, 2)) {  
+        const char *player_name = script_getstr(st, 2);  
+        target_sd = map_nick2sd(player_name, true);  
+        if (!target_sd) {  
+            script_pushconststr(st, "Player not found");  
+            return 0;  
+        }  
+    } else {  
+        if (!script_rid2sd(target_sd)) {  
+            script_pushconststr(st, "No player attached");  
+            return 0;  
+        }  
+    }  
+      
+    std::ostringstream output;  
+      
+    output << "|--- Bonus Physical Damage ---|\n";  
+      
+    bool found_bonuses = false;  
+        
+    // Size bonuses    
+    if (target_sd->right_weapon.addsize[SZ_MEDIUM] + target_sd->left_weapon.addsize[SZ_MEDIUM]) {    
+        output << "   -> Medium Size: " << (target_sd->right_weapon.addsize[SZ_MEDIUM] + target_sd->left_weapon.addsize[SZ_MEDIUM]) << "%\n";    
+        found_bonuses = true;  
+    }    
+    if (target_sd->right_weapon.addsize[SZ_ALL] + target_sd->left_weapon.addsize[SZ_ALL]) {    
+        output << "   -> All Sizes: " << (target_sd->right_weapon.addsize[SZ_ALL] + target_sd->left_weapon.addsize[SZ_ALL]) << "%\n";    
+        found_bonuses = true;  
+    }    
+        
+    // Race bonuses    
+    if (target_sd->right_weapon.addrace[RC_PLAYER_HUMAN] + target_sd->left_weapon.addrace[RC_PLAYER_HUMAN] +     
+        target_sd->right_weapon.addrace[RC_PLAYER_DORAM] + target_sd->left_weapon.addrace[RC_PLAYER_DORAM]) {    
+        output << "   -> Player: " << (target_sd->right_weapon.addrace[RC_PLAYER_HUMAN] + target_sd->left_weapon.addrace[RC_PLAYER_HUMAN] +     
+                                      target_sd->right_weapon.addrace[RC_PLAYER_DORAM] + target_sd->left_weapon.addrace[RC_PLAYER_DORAM]) << "%\n";    
+        found_bonuses = true;  
+    }    
+    if (target_sd->right_weapon.addrace[RC_ALL] + target_sd->left_weapon.addrace[RC_ALL]) {    
+        output << "   -> All Races: " << (target_sd->right_weapon.addrace[RC_ALL] + target_sd->left_weapon.addrace[RC_ALL]) << "%\n";    
+        found_bonuses = true;  
+    }    
+        
+    // Class bonuses    
+    if (target_sd->right_weapon.addclass[CLASS_NORMAL] + target_sd->left_weapon.addclass[CLASS_NORMAL]) {    
+        output << "   -> Normal Class: " << (target_sd->right_weapon.addclass[CLASS_NORMAL] + target_sd->left_weapon.addclass[CLASS_NORMAL]) << "%\n";    
+        found_bonuses = true;  
+    }    
+    if (target_sd->right_weapon.addclass[CLASS_ALL] + target_sd->left_weapon.addclass[CLASS_ALL]) {    
+        output << "   -> All Classes: " << (target_sd->right_weapon.addclass[CLASS_ALL] + target_sd->left_weapon.addclass[CLASS_ALL]) << "%\n";    
+        found_bonuses = true;  
+    }    
+      
+    // Check if no bonuses were found and display message  
+    if (!found_bonuses) {  
+        output << "   -> No bonus physical damage found\n";    
+    } 
+      
+    std::string result = output.str();  
+    script_pushstr(st, aStrdup(result.c_str()));  
+    return 0;  
+}
+
+BUILDIN_FUNC(getbonusmagic) {  
+    class map_session_data *target_sd;  
+      
+    if (script_hasdata(st, 2)) {  
+        const char *player_name = script_getstr(st, 2);  
+        target_sd = map_nick2sd(player_name, true);  
+        if (!target_sd) {  
+            script_pushconststr(st, "Player not found");  
+            return 0;  
+        }  
+    } else {  
+        if (!script_rid2sd(target_sd)) {  
+            script_pushconststr(st, "No player attached");  
+            return 0;  
+        }  
+    }  
+      
+    std::ostringstream output;  
+      
+    output << "|--- Bonus Magic Damage ---|\n";  
+      
+    bool found_bonuses = false;  
+        
+    // Size bonuses for magic damage    
+    if (target_sd->indexed_bonus.magic_addsize[SZ_MEDIUM]) {    
+        output << "   -> Medium Size: " << target_sd->indexed_bonus.magic_addsize[SZ_MEDIUM] << "%\n";    
+        found_bonuses = true;  
+    }    
+    if (target_sd->indexed_bonus.magic_addsize[SZ_ALL]) {    
+        output << "   -> All Sizes: " << target_sd->indexed_bonus.magic_addsize[SZ_ALL] << "%\n";    
+        found_bonuses = true;  
+    }    
+        
+    // Race bonuses for magic damage    
+    if (target_sd->indexed_bonus.magic_addrace[RC_PLAYER_HUMAN] + target_sd->indexed_bonus.magic_addrace[RC_PLAYER_DORAM]) {    
+        output << "   -> Player: " << (target_sd->indexed_bonus.magic_addrace[RC_PLAYER_HUMAN] + target_sd->indexed_bonus.magic_addrace[RC_PLAYER_DORAM]) << "%\n";    
+        found_bonuses = true;  
+    }    
+    if (target_sd->indexed_bonus.magic_addrace[RC_ALL]) {    
+        output << "   -> All Races: " << target_sd->indexed_bonus.magic_addrace[RC_ALL] << "%\n";    
+        found_bonuses = true;  
+    }    
+        
+    // Class bonuses for magic damage    
+    if (target_sd->indexed_bonus.magic_addclass[CLASS_NORMAL]) {    
+        output << "   -> Normal Class: " << target_sd->indexed_bonus.magic_addclass[CLASS_NORMAL] << "%\n";    
+        found_bonuses = true;  
+    }    
+    if (target_sd->indexed_bonus.magic_addclass[CLASS_ALL]) {    
+        output << "   -> All Classes: " << target_sd->indexed_bonus.magic_addclass[CLASS_ALL] << "%\n";    
+        found_bonuses = true;  
+    }    
+        
+    // Element bonuses for magic damage    
+    if (target_sd->indexed_bonus.magic_addele[ELE_NEUTRAL]) {    
+        output << "   -> Neutral Element: " << target_sd->indexed_bonus.magic_addele[ELE_NEUTRAL] << "%\n";    
+        found_bonuses = true;  
+    }    
+    if (target_sd->indexed_bonus.magic_addele[ELE_WATER]) {    
+        output << "   -> Water Element: " << target_sd->indexed_bonus.magic_addele[ELE_WATER] << "%\n";    
+        found_bonuses = true;  
+    }    
+    if (target_sd->indexed_bonus.magic_addele[ELE_EARTH]) {    
+        output << "   -> Earth Element: " << target_sd->indexed_bonus.magic_addele[ELE_EARTH] << "%\n";    
+        found_bonuses = true;  
+    }    
+    if (target_sd->indexed_bonus.magic_addele[ELE_FIRE]) {    
+        output << "   -> Fire Element: " << target_sd->indexed_bonus.magic_addele[ELE_FIRE] << "%\n";    
+        found_bonuses = true;  
+    }    
+    if (target_sd->indexed_bonus.magic_addele[ELE_WIND]) {    
+        output << "   -> Wind Element: " << target_sd->indexed_bonus.magic_addele[ELE_WIND] << "%\n";    
+        found_bonuses = true;  
+    }    
+    if (target_sd->indexed_bonus.magic_addele[ELE_POISON]) {    
+        output << "   -> Poison Element: " << target_sd->indexed_bonus.magic_addele[ELE_POISON] << "%\n";    
+        found_bonuses = true;  
+    }    
+    if (target_sd->indexed_bonus.magic_addele[ELE_HOLY]) {    
+        output << "   -> Holy Element: " << target_sd->indexed_bonus.magic_addele[ELE_HOLY] << "%\n";    
+        found_bonuses = true;  
+    }    
+    if (target_sd->indexed_bonus.magic_addele[ELE_DARK]) {    
+        output << "   -> Dark Element: " << target_sd->indexed_bonus.magic_addele[ELE_DARK] << "%\n";    
+        found_bonuses = true;  
+    }    
+    if (target_sd->indexed_bonus.magic_addele[ELE_GHOST]) {    
+        output << "   -> Ghost Element: " << target_sd->indexed_bonus.magic_addele[ELE_GHOST] << "%\n";    
+        found_bonuses = true;  
+    }    
+    if (target_sd->indexed_bonus.magic_addele[ELE_UNDEAD]) {    
+        output << "   -> Undead Element: " << target_sd->indexed_bonus.magic_addele[ELE_UNDEAD] << "%\n";    
+        found_bonuses = true;  
+    }    
+    if (target_sd->indexed_bonus.magic_addele[ELE_ALL]) {    
+        output << "   -> All Elements: " << target_sd->indexed_bonus.magic_addele[ELE_ALL] << "%\n";    
+        found_bonuses = true;  
+    }    
+      
+    // Check if no bonuses were found and display message  
+    if (!found_bonuses) {  
+        output << "   -> No bonus magic damage found\n";    
+    }
+	
+    std::string result = output.str();  
+    script_pushstr(st, aStrdup(result.c_str()));  
+    return 0;  
+}
+
+BUILDIN_FUNC(getelementalresist) {  
+    class map_session_data *target_sd;  
+      
+    if (script_hasdata(st, 2)) {  
+        const char *player_name = script_getstr(st, 2);  
+        target_sd = map_nick2sd(player_name, true);  
+        if (!target_sd) {  
+            script_pushconststr(st, "Player not found");  
+            return 0;  
+        }  
+    } else {  
+        if (!script_rid2sd(target_sd)) {  
+            script_pushconststr(st, "No player attached");  
+            return 0;  
+        }  
+    }  
+      
+    std::ostringstream output;  
+      
+    output << "|--- Elemental Resistance ---|\n";  
+      
+    // Define elemental resistance info array similar to your original implementation  
+    struct {  
+        const char *name;  
+        int value;  
+    } ele_resist_info[] = {  
+        { "Neutral", target_sd->indexed_bonus.subele_script[ELE_NEUTRAL] },  
+        { "Water", target_sd->indexed_bonus.subele_script[ELE_WATER] },  
+        { "Earth", target_sd->indexed_bonus.subele_script[ELE_EARTH] },  
+        { "Fire", target_sd->indexed_bonus.subele_script[ELE_FIRE] },  
+        { "Wind", target_sd->indexed_bonus.subele_script[ELE_WIND] },  
+        { "Poison", target_sd->indexed_bonus.subele_script[ELE_POISON] },  
+        { "Holy", target_sd->indexed_bonus.subele_script[ELE_HOLY] },  
+        { "Dark", target_sd->indexed_bonus.subele_script[ELE_DARK] },  
+        { "Ghost", target_sd->indexed_bonus.subele_script[ELE_GHOST] },  
+        { "Undead", target_sd->indexed_bonus.subele_script[ELE_UNDEAD] },  
+        { "ALL", target_sd->indexed_bonus.subele_script[ELE_ALL] },  
+    };  
+      
+    // Output only non-zero resistance values  
+	bool found_any = false;  
+	for (int i = 0; i < 11; i++) {    
+		if (ele_resist_info[i].value != 0) {    
+			output << "   -> " << ele_resist_info[i].name << ": " << ele_resist_info[i].value << "%\n";  
+			found_any = true;  
+		}  
+	}  
+	  
+	if (!found_any) {  
+		output << "   -> No element resist bonuses found\n";  
+	} 
+      
+    std::string result = output.str();  
+    script_pushstr(st, aStrdup(result.c_str()));  
+    return 0;  
+}
+
+BUILDIN_FUNC(getraceresist) {  
+    class map_session_data *target_sd;  
+      
+    if (script_hasdata(st, 2)) {  
+        const char *player_name = script_getstr(st, 2);  
+        target_sd = map_nick2sd(player_name, true);  
+        if (!target_sd) {  
+            script_pushconststr(st, "Player not found");  
+            return 0;  
+        }  
+    } else {  
+        if (!script_rid2sd(target_sd)) {  
+            script_pushconststr(st, "No player attached");  
+            return 0;  
+        }  
+    }  
+      
+    std::ostringstream output;  
+      
+    output << "|--- Race Resistance ---|\n";  
+      
+    // Define race resistance info array similar to your original implementation  
+    struct {  
+        const char *name;  
+        int value;  
+    } race_resist_info[] = {  
+        { "Formless", target_sd->indexed_bonus.subrace[RC_FORMLESS] },  
+        { "Undead", target_sd->indexed_bonus.subrace[RC_UNDEAD] },  
+        { "Beast", target_sd->indexed_bonus.subrace[RC_BRUTE] },  
+        { "Plant", target_sd->indexed_bonus.subrace[RC_PLANT] },  
+        { "Insect", target_sd->indexed_bonus.subrace[RC_INSECT] },  
+        { "Fish", target_sd->indexed_bonus.subrace[RC_FISH] },  
+        { "Demon", target_sd->indexed_bonus.subrace[RC_DEMON] },  
+        { "DemiHuman", target_sd->indexed_bonus.subrace[RC_DEMIHUMAN] },  
+        { "Angel", target_sd->indexed_bonus.subrace[RC_ANGEL] },  
+        { "Dragon", target_sd->indexed_bonus.subrace[RC_DRAGON] },  
+        { "Player", target_sd->indexed_bonus.subrace[RC_PLAYER_HUMAN] + target_sd->indexed_bonus.subrace[RC_PLAYER_DORAM] },  
+        { "ALL", target_sd->indexed_bonus.subrace[RC_ALL] },  
+        { "Normal Class", target_sd->indexed_bonus.subclass[CLASS_NORMAL] },  
+    };  
+      
+    // Output only non-zero resistance values    
+    bool found_bonuses = false;  
+    for (int i = 0; i < 13; i++) {    
+        if (race_resist_info[i].value != 0) {    
+            output << "   -> " << race_resist_info[i].name << ": " << race_resist_info[i].value << "%\n";  
+            found_bonuses = true;  
+        }  
+    }    
+      
+    // Check if no bonuses were found and display message  
+    if (!found_bonuses) {  
+        output << "   -> No race resist bonuses found\n";    
+    }  
+      
+    std::string result = output.str();  
+    script_pushstr(st, aStrdup(result.c_str()));  
+    return 0;  
+}
+
+BUILDIN_FUNC(getskillbonus) {  
+    class map_session_data *target_sd;  
+      
+    if (script_hasdata(st, 2)) {  
+        const char *player_name = script_getstr(st, 2);  
+        target_sd = map_nick2sd(player_name, true);  
+        if (!target_sd) {  
+            script_pushconststr(st, "Player not found");  
+            return 0;  
+        }  
+    } else {  
+        if (!script_rid2sd(target_sd)) {  
+            script_pushconststr(st, "No player attached");  
+            return 0;  
+        }  
+    } 
+      
+    std::ostringstream output;  
+    output << "|--- Skill Damage Bonuses ---|\n";  
+      
+    bool found_bonuses = false;  
+      
+    // Check the skillatk vector for skill-specific bonuses  
+    for (const auto &bonus : target_sd->skillatk) {  
+        const char* skill_desc = skill_get_desc(bonus.id);  // Use description instead of name  
+        if (skill_desc) {  
+            output << "   -> " << skill_desc << ": +" << bonus.val << "%\n";  
+            found_bonuses = true;  
+        }  
+    }  
+      
+    // General skill ratio bonus  
+    if (target_sd->bonus.skill_ratio != 0) {  
+        output << "   -> All Skills: " << target_sd->bonus.skill_ratio << "%\n";  
+        found_bonuses = true;  
+    }  
+      
+    if (!found_bonuses) {  
+        output << "   -> No skill damage bonuses found\n";  
+    }  
+      
+    std::string result = output.str();  
+    script_pushstr(st, aStrdup(result.c_str()));  
+    return 0;  
+}
+
 BUILDIN_FUNC(getdepositstore)
 {
 	int count = 0;

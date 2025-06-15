@@ -11,5 +11,3 @@
  * Format:
  *	 <datatype> name;
  **/
-	// Show Element Info [Hyroshima]
-	int mob_ele_view;
