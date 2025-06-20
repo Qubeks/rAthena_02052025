@@ -12803,7 +12803,7 @@ int32 skill_castend_nodamage_id (struct block_list *src, struct block_list *bl, 
 		}
 		break;
 	case KO_ZANZOU:
-		if(sd){
+		/*if (sd) {
 			struct mob_data *md2;
 
 			md2 = mob_once_spawn_sub(src, src->m, src->x, src->y, status_get_name(*src), MOBID_ZANZOU, "", SZ_SMALL, AI_NONE);
@@ -12818,6 +12818,38 @@ int32 skill_castend_nodamage_id (struct block_list *src, struct block_list *bl, 
 				map_foreachinallrange(unit_changetarget, src, AREA_SIZE, BL_MOB, src, md2);
 				clif_skill_nodamage(src,*bl,skill_id,skill_lv);
 				skill_blown(src,bl,skill_get_blewcount(skill_id,skill_lv),unit_getdir(bl),BLOWN_NONE);
+			}
+		}*/
+		if (sd) {
+			int32 clone_id;
+			struct mob_data* md;
+
+			// Create the clone with enhanced skill usage  
+			clone_id = mob_clone_spawn(sd, src->m, src->x, src->y, "", src->id, static_cast<enum e_mode>(MD_CANATTACK | MD_AGGRESSIVE), 1, skill_get_time(skill_id, skill_lv));
+			if (clone_id > 0) {
+				// Get the spawned clone  
+				md = map_id2md(clone_id);
+				if (md) {
+					// Enhance skill usage rates for the clone  
+					for (auto& skill : md->db->skill) {
+						// Increase skill usage chance significantly  
+						skill->permillage = min(skill->permillage * 4, 8000); // Cap at 80%  
+
+						// Reduce skill delays for more frequent casting  
+						skill->delay = max(skill->delay / 2, 1000); // Minimum 1 second delay  
+
+						// Make attack skills trigger more readily  
+						if (skill->cond1 == MSC_ALWAYS && (skill->state == MSS_BERSERK || skill->state == MSS_ANYTARGET)) {
+							skill->permillage = min(skill->permillage * 2, 9000); // Up to 90% for attack skills  
+						}
+					}
+
+					// Set aggressive targeting behavior  
+					md->state.aggressive = 1;
+				}
+
+				clif_skill_nodamage(src, *bl, skill_id, skill_lv);
+				skill_blown(src, bl, skill_get_blewcount(skill_id, skill_lv), unit_getdir(bl), BLOWN_NONE);
 			}
 		}
 		break;
