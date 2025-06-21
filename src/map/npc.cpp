@@ -2197,29 +2197,57 @@ int32 npc_globalmessage(const char* name, const char* mes)
 	return 0;
 }
 
-// MvP tomb [GreenBox]
-void run_tomb(map_session_data* sd, struct npc_data* nd)
-{
-	char buffer[200];
-	char time[10];
-
-	strftime(time, sizeof(time), "%H:%M", localtime(&nd->u.tomb.kill_time));
-
-	// TODO: Find exact color?
-	snprintf( buffer, sizeof( buffer ), msg_txt( sd, 657 ), nd->u.tomb.md->db->name.c_str() ); // [ ^EE0000%s^000000 ]
+// MvP tomb [GreenBox]    
+void run_tomb(map_session_data* sd, struct npc_data* nd)    
+{    
+	char buffer[300];    
+	char time[10];    
+    
+	strftime(time, sizeof(time), "%H:%M", localtime(&nd->u.tomb.kill_time));    
+    
+	// TODO: Find exact color?    
+	snprintf( buffer, sizeof( buffer ), msg_txt( sd, 657 ), nd->u.tomb.md->db->name.c_str() ); // [ ^EE0000%s^000000 ]    
+	clif_scriptmes( *sd, nd->id, buffer );    
+    
+	clif_scriptmes( *sd, nd->id, msg_txt( sd, 658 ) ); // Has met its demise    
+    
+	snprintf( buffer, sizeof( buffer ), msg_txt( sd, 659 ), time ); // Time of death : ^EE0000%s^000000    
+	clif_scriptmes( *sd, nd->id, buffer );    
+    
+	//snprintf(buffer, sizeof(buffer), msg_txt(sd, 660), nd->u.tomb.killer_name[0] ? nd->u.tomb.killer_name : "Unknown");    
+	//clif_scriptmes( *sd, nd->id, buffer);
+    
+ 	// Replace msg_txt(sd, 1550) with direct text  
+	snprintf(buffer, sizeof(buffer), " ");  
 	clif_scriptmes( *sd, nd->id, buffer );
-
-	clif_scriptmes( *sd, nd->id, msg_txt( sd, 658 ) ); // Has met its demise
-
-	snprintf( buffer, sizeof( buffer ), msg_txt( sd, 659 ), time ); // Time of death : ^EE0000%s^000000
-	clif_scriptmes( *sd, nd->id, buffer );
-
-	clif_scriptmes( *sd, nd->id, msg_txt( sd, 660 ) ); // Defeated by
-
-	snprintf( buffer, sizeof( buffer ), msg_txt( sd, 661 ), nd->u.tomb.killer_name[0] ? nd->u.tomb.killer_name : "Unknown" ); // [^EE0000%s^000000]
-	clif_scriptmes( *sd, nd->id, buffer );
-
-	clif_scriptclose( *sd, nd->id );
+	
+	// Replace msg_txt(sd, 1550) with direct text  
+	snprintf(buffer, sizeof(buffer), "[ ^FF0000Damage Rankings:^000000 ]");  
+	clif_scriptmes( *sd, nd->id, buffer );    
+    
+	// Replace msg_txt(sd, 1551) with direct formatting  
+	snprintf(buffer, sizeof(buffer), "^EE00001st Place:^000000 %s - ^0000FF%s^000000 damage",   
+		nd->u.tomb.killer_name[0] ? nd->u.tomb.killer_name : "[Server]",   
+		format_number_with_commas(nd->u.tomb.damage1).c_str());    
+	clif_scriptmes( *sd, nd->id, buffer );    
+    
+	if (nd->u.tomb.damage2 != NULL)    
+	{    
+		// Replace msg_txt(sd, 1552) with direct formatting  
+		snprintf(buffer, sizeof(buffer), "^EE00002nd Place:^000000 %s - ^0000FF%s^000000 damage",   
+			nd->u.tomb.p2, format_number_with_commas(nd->u.tomb.damage2).c_str());    
+		clif_scriptmes( *sd, nd->id, buffer);    
+	}    
+    
+	if (nd->u.tomb.damage3 != NULL)    
+	{    
+		// Replace msg_txt(sd, 1553) with direct formatting  
+		snprintf(buffer, sizeof(buffer), "^EE00003rd Place:^000000 %s - ^0000FF%s^000000 damage",   
+			nd->u.tomb.p3, format_number_with_commas(nd->u.tomb.damage3).c_str());    
+		clif_scriptmes( *sd, nd->id, buffer);    
+	}    
+    
+	clif_scriptclose( *sd, nd->id );    
 }
 
 /*==========================================

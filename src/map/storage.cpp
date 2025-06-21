@@ -239,16 +239,6 @@ static enum e_storage_add storage_canGetItem(struct s_storage *stor, int32 idx, 
  * @param amount : quantity of items
  * @return 0:success, 1:failed, 2:failed because of room or stack checks
  */
- // Helper function to format numbers with commas (add this at the top of the file)  
-std::string format_number_with_commas(int32 number) {
-	std::string str = std::to_string(number);
-	size_t insertPosition = str.length() - 3;
-	while (insertPosition > 0 && insertPosition < str.length()) {
-		str.insert(insertPosition, ",");
-		insertPosition -= 3;
-	}
-	return str;
-}
 
 static int32 storage_additem(map_session_data* sd, struct s_storage *stor, struct item *it, int32 amount)
 {

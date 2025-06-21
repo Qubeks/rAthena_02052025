@@ -186,6 +186,8 @@ TIMER_FUNC(mvptomb_delayspawn){
 void mvptomb_create(struct mob_data *md, char *killer, time_t time)
 {
 	struct npc_data *nd;
+	int cont = 0;
+	
 
 	if ( md->tomb_nid )
 		mvptomb_destroy(md);
@@ -201,9 +203,111 @@ void mvptomb_create(struct mob_data *md, char *killer, time_t time)
 	nd->y = md->y;
 	nd->type = BL_NPC;
 
-	safestrncpy(nd->name, msg_txt(nullptr,656), sizeof(nd->name));
+	safestrncpy(nd->name, md->name, sizeof(nd->name));
+
+	std::vector<std::pair<int, int>> mobClassId = {
+        {1038, 19100},
+		{1046, 19101},
+		{1059, 19102},
+		{1086, 19103},
+		{1087, 19104},
+		{1112, 19105},
+		{1115, 19106},
+		{1147, 19107},
+		{1150, 19108},
+		{1157, 19109},
+		{1159, 19110},
+		{1190, 19111},
+		{1251, 19112},
+		{1252, 19113},
+		{1272, 19114},
+		{1312, 19115},
+		{1373, 19116},
+		{1389, 19117},
+		{1418, 19118},
+		{1492, 19119},
+		{1511, 19120},
+		{1583, 19121},
+		{1623, 19122},
+		{1630, 19123},
+		{1646, 19124},
+		{1647, 19125},
+		{1648, 19126},
+		{1649, 19127},
+		{1650, 19128},
+		{1651, 19129},
+		{1685, 19130},
+		{1688, 19131},
+		{1708, 19132},
+		{1719, 19133},
+		{1734, 19134},
+		{1751, 19135},
+		{1768, 19136},
+		{1779, 19137},
+		{1785, 19138},
+		{1832, 19139},
+		{1885, 19140},
+		{1917, 19141},
+		{2022, 19142},
+		{2068, 19143},
+		{2087, 19144},
+		{2131, 19145},
+		{2156, 19146},
+		{2165, 19147},
+		{2202, 19148},
+		{2236, 19149},
+		{2237, 19150},
+		{2238, 19151},
+		{2239, 19152},
+		{2240, 19153},
+		{2241, 19154},
+		{2249, 19155},
+		{2251, 19156},
+		{2253, 19157},
+		{2255, 19158},
+		{2319, 19159},
+		{2362, 19160},
+		{2441, 19161},
+		{2442, 19162},
+		{2446, 19163},
+		{2529, 19164},
+		{2532, 19165},
+		{2533, 19166},
+		{2534, 19167},
+		{2535, 19168},
+		{2996, 19169},
+		{3000, 19170},
+		{3029, 19171},
+		{3073, 19172},
+		{3074, 19173},
+		{3091, 19174},
+		{3092, 19175},
+		{3096, 19176},
+		{3097, 19177},
+		{3124, 19178},
+		{3181, 19179},
+		{3254, 19180},
+		{3426, 19181},
+		{3427, 19182},
+		{3428, 19183},
+		{3429, 19184},
+		{3430, 19185},
+		{3450, 19186},
+		{3628, 19187},
+		{3633, 19188},
+		{3757, 19189},
+		{3758, 19190}
+    };
 
 	nd->class_ = 565;
+
+	for (const auto& pair : mobClassId) {
+        if (md->mob_id == pair.first) {
+            nd->class_ = pair.second;
+            break;
+        }
+    }
+	
 	nd->speed = DEFAULT_NPC_WALK_SPEED;
 	nd->subtype = NPCTYPE_TOMB;
 
@@ -214,6 +318,30 @@ void mvptomb_create(struct mob_data *md, char *killer, time_t time)
 	nd->dynamicnpc.owner_char_id = 0;
 	nd->dynamicnpc.last_interaction = 0;
 	nd->dynamicnpc.removal_tid = INVALID_TIMER;
+
+	// Tomb Damage
+	nd->u.tomb.damage1 = 0;
+	nd->u.tomb.damage2 = 0;
+	nd->u.tomb.damage3 = 0;
+
+	for (int i = 0; i < TOMB_DAMAGE_SIZE; i++)
+	{
+		if (md->tomb_dmg[i].damage > nd->u.tomb.damage1) {
+			nd->u.tomb.damage2 = nd->u.tomb.damage1;
+			nd->u.tomb.damage1 = md->tomb_dmg[i].damage;
+		}
+		else if (md->tomb_dmg[i].damage > nd->u.tomb.damage2) {
+			nd->u.tomb.damage3 = nd->u.tomb.damage2;
+			nd->u.tomb.damage2 = md->tomb_dmg[i].damage;
+		}
+		else if (md->tomb_dmg[i].damage > nd->u.tomb.damage3)
+			nd->u.tomb.damage3 = md->tomb_dmg[i].damage;
+	}
+
+	ARR_FIND(0, TOMB_DAMAGE_SIZE, cont, md->tomb_dmg[cont].damage == nd->u.tomb.damage2);
+	nd->u.tomb.p2 = md->tomb_dmg[cont].char_name;
+	ARR_FIND(0, TOMB_DAMAGE_SIZE, cont, md->tomb_dmg[cont].damage == nd->u.tomb.damage3);
+	nd->u.tomb.p3 = md->tomb_dmg[cont].char_name;
 
 	if (killer)
 		safestrncpy(nd->u.tomb.killer_name, killer, NAME_LENGTH);
@@ -2779,6 +2907,25 @@ void mob_log_damage(mob_data* md, block_list* src, int64 damage, int64 damage_ta
 //Call when a mob has received damage.
 void mob_damage(struct mob_data *md, struct block_list *src, int32 damage)
 {
+
+	class map_session_data* sd = BL_CAST(BL_PC, src);
+
+	for (int i = 0; i < TOMB_DAMAGE_SIZE; i++)
+	{
+
+		if (!md->tomb_dmg[i].char_name && !md->tomb_dmg[i].damage)
+		{
+			md->tomb_dmg[i].char_name = sd->status.name;
+			md->tomb_dmg[i].damage = damage;
+			break;
+		}
+		else if (md->tomb_dmg[i].char_name == sd->status.name)
+		{
+			md->tomb_dmg[i].damage += damage;
+			break;
+		}
+	}
+	
 	if (src && damage > 0) { //Store total damage...
 		//Log damage
 		mob_log_damage(md, src, static_cast<int64>(damage));
@@ -3636,6 +3783,12 @@ int32 mob_dead(struct mob_data *md, struct block_list *src, int32 type)
 	// MvP tomb [GreenBox]
 	if (battle_config.mvp_tomb_enabled && md->spawn->state.boss && map_getmapflag(md->m, MF_NOTOMB) != 1)
 		mvptomb_create(md, mvp_sd != nullptr ? mvp_sd->status.name : (first_sd != nullptr ? first_sd->status.name : nullptr), time(nullptr));
+
+	for (int i = 0; i < TOMB_DAMAGE_SIZE; i++)
+	{
+		md->tomb_dmg[i].char_name = 0;
+		md->tomb_dmg[i].damage = 0;
+	}
 
 	if( !rebirth )
 		mob_setdelayspawn(md); //Set respawning.

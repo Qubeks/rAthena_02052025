@@ -16,6 +16,8 @@
 
 #define NUM_WHISPER_VAR 10
 
+extern std::string format_number_with_commas(int32 number);
+
 ///////////////////////////////////////////////////////////////////////////////
 //## TODO possible enhancements: [FlavioJS]
 // - 'callfunc' supporting labels in the current npc "::LabelName"

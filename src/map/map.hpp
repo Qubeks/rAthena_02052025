@@ -61,6 +61,7 @@ void map_msg_reload(void);
 #ifndef DAMAGELOG_SIZE 
 	#define DAMAGELOG_SIZE 20
 #endif
+#define TOMB_DAMAGE_SIZE 100
 #define LOOTITEM_SIZE 10
 #define MAX_MOBSKILL 50		//Max 128, see mob skill_idx type if need this higher
 #define MAX_MOB_LIST_PER_MAP 128

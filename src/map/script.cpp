@@ -4917,6 +4917,18 @@ void script_reload(void) {
 #define BUILDIN_DEF2_DEPRECATED(x,x2,args,deprecationdate) { buildin_ ## x , x2 , args, deprecationdate }
 #define BUILDIN_FUNC(x) int32 buildin_ ## x (struct script_state* st)
 
+/*==========================================
+ * Commas function
+ *------------------------------------------*/
+std::string format_number_with_commas(int32 number) {  
+    std::string str = std::to_string(number);  
+    size_t insertPosition = str.length() - 3;  
+    while (insertPosition > 0 && insertPosition < str.length()) {  
+        str.insert(insertPosition, ",");  
+        insertPosition -= 3;  
+    }  
+    return str;  
+}
 /////////////////////////////////////////////////////////////////////
 // NPC interaction
 //
