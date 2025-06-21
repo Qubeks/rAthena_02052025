@@ -85,8 +85,7 @@ Body:
     Script: |
         bonus bDex,1;
         skill "SC_TRIANGLESHOT",10; 
-        .@str_bonus = readparam(bStr) / 1.5;  
-        bonus2 bSkillAtk,"MA_DOUBLE",.@str_bonus;  
+        bonus2 bSkillAtk,"MA_DOUBLE",readparam(bStr) / 2;  
         
   - Soul: Assassin
     Script: |
@@ -96,13 +95,13 @@ Body:
   - Soul: Blacksmith
     Script: |
         skill "LK_PARRYING",5;
-        skill "SC_MAXOVERTHRUST",10;
+        skill "WS_OVERTHRUSTMAX",10;
         bonus2 bSkillAtk,485,50;
   - Soul: Hunter
     Script: |
         bonus2 bSkillAtk,123,2000;
         bonus2 bSkillAtk,382,50;
-        bonus3 bAutoSpell,"SN_FALCONASSAULT",getskilllv("SN_FALCONASSAULT"),(readparam(bLuk)*10/3+1)/10;
+        bonus3 bAutoSpell,"SN_FALCONASSAULT",getskilllv("SN_FALCONASSAULT"),100;
   - Soul: Soul Linker
     Script: |
         bonus bMatkRate,20;
