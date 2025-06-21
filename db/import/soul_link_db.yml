@@ -32,49 +32,84 @@ Body:
 
   - Soul: Alchemist
     Script: |
-        bonus bStr,1;
+        bonus bHealPower,readparam(bInt)/10;
+        bonus2 bSkillHeal,478,500;	        
   - Soul: Monk
     Script: |
-        bonus bStr,1;
+        bonus2 bSkillAtk,267,20; 
   - Soul: Star Gladiator
     Script: |
-        bonus bStr,1;
+        skill "WZ_VERMILION",10;
+        skill "LK_PARRYING",10;
+        bonus2 bAddClass,Class_Boss,100;
+        bonus2 bAddEle,Ele_Holy,100;
   - Soul: Sage
     Script: |
-        bonus bStr,100;
-        bonus bAgi,100;
-        bonus bVit,100;
-        bonus bMatkRate,100;
+        bonus bMaxHP,BaseLevel*120;
+        bonus bVit,JobLevel/10*4;
+        if(getiteminfo(getequipid(EQI_HAND_R),11)==W_BOOK){bonus bAtkRange,3;}
   - Soul: Crusader
     Script: |
-        bonus bStr,1;
+        bonus2 bSkillAtk,368,100; 
   - Soul: Super Novice
     Script: |
-        bonus bStr,1;
+        bonus bStr,10;
+        bonus bAgi,10;
+        bonus bVit,10;
+        bonus bInt,10;
+        bonus bDex,10;
+        bonus bLuk,10;
   - Soul: Knight
     Script: |
-        bonus bStr,1;
+        bonus2 bSkillAtk,397,300;
+        bonus2 bSkillAtk,59,300;
+        bonus bDelayRate,-30;
+        if(getiteminfo(getequipid(EQI_HAND_R),11)==W_2HSWORD){bonus bShortAtkRate,30;bonus bCritAtkRate,30;}
+        if(getiteminfo(getequipid(EQI_HAND_R),11)==W_2HSPEAR){bonus2 bSkillAtk,57,25;}
   - Soul: Wizard
     Script: |
-        bonus bStr,1;
+        bonus bMaxHP,BaseLevel*200;
+        bonus bVit,readparam(bInt)/5;
+        bonus2 bSkillAtk,365,200;
+        bonus2 bSkillAtk,400,200;
   - Soul: Priest
     Script: |
-        bonus bStr,1;
+        bonus bShortWeaponDamageReturn,20;
+        bonus bHealPower,200;
+        bonus2 bSkillAtk,156,300;bonus bUseSPrate,300;
   - Soul: Bard Dancer
     Script: |
-        bonus bStr,1;
+        bonus2 bSkillAtk,316,50;
+        bonus2 bSkillAtk,394,50;
   - Soul: Rogue
     Script: |
-        bonus bStr,1;
+        bonus bDex,1;
+        skill "SC_TRIANGLESHOT",10; 
+        .@str_bonus = readparam(bStr) / 1.5;  
+        bonus2 bSkillAtk,"MA_DOUBLE",.@str_bonus;  
+        
   - Soul: Assassin
     Script: |
-        bonus bStr,1;
+        bonus2 bSkillAtk,136,100;
+        bonus2 bSkillAtk,137,100;
+        bonus2 bSkillAtk,379,100;
   - Soul: Blacksmith
     Script: |
-        bonus bStr,1;
+        skill "LK_PARRYING",5;
+        skill "SC_MAXOVERTHRUST",10;
+        bonus2 bSkillAtk,485,50;
   - Soul: Hunter
     Script: |
-        bonus bStr,1;
+        bonus2 bSkillAtk,123,2000;
+        bonus2 bSkillAtk,382,50;
+        bonus3 bAutoSpell,"SN_FALCONASSAULT",getskilllv("SN_FALCONASSAULT"),(readparam(bLuk)*10/3+1)/10;
   - Soul: Soul Linker
     Script: |
-        bonus bStr,1;
+        bonus bMatkRate,20;
+        bonus bMaxHPrate,20;
+  - Soul: Ninja
+    Script: |
+        bonus2 bSkillAtk,544,20;
+  - Soul: Gunslinger
+    Script: |
+        bonus2 bSkillAtk,516,100;

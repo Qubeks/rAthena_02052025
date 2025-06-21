@@ -97,7 +97,6 @@ struct s_skill_nounit_layout skill_nounit_layout[MAX_SKILL_UNIT_LAYOUT2];
 static char dir_ka = -1; // Holds temporary direction to the target for SR_KNUCKLEARROW
 
 //Early declaration
-bool skill_strip_equip(struct block_list *src, struct block_list *target, uint16 skill_id, uint16 skill_lv);
 bool skill_strip_equip(struct block_list *src, struct block_list *target, uint16 skill_id, uint16 skill_lv, bool bypassFcp); // Custom Soul Linked Rogue Strip [10K]
 static int32 skill_check_unit_range (struct block_list *bl, int32 x, int32 y, uint16 skill_id, uint16 skill_lv);
 static int32 skill_check_unit_range2 (struct block_list *bl, int32 x, int32 y, uint16 skill_id, uint16 skill_lv, bool isNearNPC);
@@ -1345,20 +1344,16 @@ int32 skill_additional_effect( struct block_list* src, struct block_list *bl, ui
 				if(sd) {
 					int32 skill;
 
-					// Automatic trigger of Falcon Assault when Soul Linked [MarkZD] mauiboy
-					if (sc && sc->getSCE(SC_SPIRIT) && sc->getSCE(SC_SPIRIT)->val2 == SL_HUNTER) {
-						if (pc_isfalcon(sd) && sd->status.weapon == W_BOW) {
-							// Check if the skill is learned
-							int32 skill = pc_checkskill(sd, SN_FALCONASSAULT);
-							if (skill > 0) {
-								// Calculate trigger probability
-								int32 trigger_chance = sstatus->luk * 10 / 3 + 1; // Adjust chance based on 0.3*LUK
-								if (rnd() % 1000 <= trigger_chance) {
-									// Cast Falcon Assault
-									skill_castend_damage_id(src, bl, SN_FALCONASSAULT, skill, tick, SD_LEVEL);
-								}
-							}
-						}
+					// Automatic trigger of Blitz Beat
+					if (pc_isfalcon(sd) && sd->status.weapon == W_BOW && (skill = pc_checkskill(sd, HT_BLITZBEAT)) > 0 && rnd() % 1000 <= sstatus->luk * 10 / 3 + 1) {
+						int32 rate;
+
+						if ((sd->class_ & MAPID_THIRDMASK) == MAPID_RANGER)
+							rate = 5;
+						else
+							rate = (sd->status.job_level + 9) / 10;
+
+						skill_castend_damage_id(src, bl, HT_BLITZBEAT, (skill < rate) ? skill : rate, tick, SD_LEVEL);
 					}
 					// Automatic trigger of Warg Strike
 					if (pc_iswug(sd) && (skill = pc_checkskill(sd, RA_WUGSTRIKE)) > 0) {
@@ -1811,7 +1806,7 @@ int32 skill_additional_effect( struct block_list* src, struct block_list *bl, ui
 		sc_start(src,bl,SC_FLING,100, sd?sd->spiritball_old:5,skill_get_time(skill_id,skill_lv));
 		break;
 	case GS_DISARM:
-		skill_strip_equip(src, bl, skill_id, skill_lv);
+		skill_strip_equip(src, bl, skill_id, skill_lv, false);
 		clif_skill_nodamage(src,*bl,skill_id,skill_lv);
 		break;
 	case NPC_EVILLAND:
@@ -2957,11 +2952,7 @@ int32 skill_break_equip(struct block_list *src, struct block_list *bl, uint16 wh
  * @param skill_lv: Skill level used
  * @return True on successful strip or false otherwise
  */
-bool skill_strip_equip(struct block_list *src, struct block_list *target, uint16 skill_id, uint16 skill_lv)
-{
-	return skill_strip_equip(src, target, skill_id, skill_lv, false); // Custom Soul Linked Rogue Strip [10K]
-}
-bool skill_strip_equip(struct block_list *src, struct block_list *target, uint16 skill_id, uint16 skill_lv, bool bypassFcp) // Custom Soul Linked Rogue Strip [10K]
+bool skill_strip_equip(struct block_list *src, struct block_list *target, uint16 skill_id, uint16 skill_lv, bool bypassFcp) 
 
 {
 	nullpo_retr(false, src);
@@ -9909,7 +9900,7 @@ int32 skill_castend_nodamage_id (struct block_list *src, struct block_list *bl, 
 			break;
 		}
 
-		if( (i = skill_strip_equip(src, bl, skill_id, skill_lv)) || (skill_id != ST_FULLSTRIP && skill_id != GC_WEAPONCRUSH ) )
+		if( (i = skill_strip_equip(src, bl, skill_id, skill_lv, false)) || (skill_id != ST_FULLSTRIP && skill_id != GC_WEAPONCRUSH ) )
 			clif_skill_nodamage(src,*bl,skill_id,skill_lv,i);
 
 		//Nothing stripped.
@@ -15055,51 +15046,17 @@ int32 skill_castend_pos2(struct block_list* src, int32 x, int32 y, uint16 skill_
 		}
 		break;
 
-	case HW_GANBANTEIN: { // Old Ganbantein Behavior [mauiboy]  
-		if (rnd() % 100 < 80) {
+	case HW_GANBANTEIN:
+		if (rnd()%100 < 80) {
 			int32 dummy = 1;
-			clif_skill_poseffect(*src, skill_id, skill_lv, x, y, tick);
-			int32 splash_range = skill_get_splash(skill_id, skill_lv);
-
-			// Step 1: Remove Land Protector units in the affected area  
-			map_foreachinallarea([](struct block_list* bl, va_list ap) -> int32 {
-				struct skill_unit* unit = (struct skill_unit*)bl;
-				if (!unit || !unit->group) return 0;
-				if (unit->group->skill_id != SA_LANDPROTECTOR) return 0;
-
-				// Remove Land Protector unit  
-				skill_delunit(unit);
-
-				// Get arguments passed from outer call  
-				struct block_list* src = va_arg(ap, struct block_list*);
-				int32 splash_range = va_arg(ap, int32);
-
-				// Step 2: Re-enable AOE damage by clearing suppression flags  
-				map_foreachinallarea([](struct block_list* bl, va_list ap) -> int32 {
-					struct skill_unit* aoe_unit = (struct skill_unit*)bl;
-					if (!aoe_unit || !aoe_unit->group) return 0;
-
-					// Check for AOE skills and remove suppression  
-					if (aoe_unit->group->skill_id == WZ_STORMGUST ||
-						aoe_unit->group->skill_id == WZ_METEOR ||
-						aoe_unit->group->skill_id == WZ_VERMILION) {
-						aoe_unit->flags &= ~UNITFLAG_SUPPRESSED;
-					}
-
-					return 0;
-					}, unit->m, unit->x - splash_range, unit->y - splash_range,
-					unit->x + splash_range, unit->y + splash_range, BL_SKILL);
-
-				return 1;
-				}, src->m, x - splash_range, y - splash_range, x + splash_range, y + splash_range, BL_SKILL, src, splash_range);
-
-		}
-		else {
-			if (sd) clif_skill_fail(*sd, skill_id);
+			clif_skill_poseffect( *src, skill_id, skill_lv, x, y, tick );
+			i = skill_get_splash(skill_id, skill_lv);
+			map_foreachinallarea(skill_cell_overlap, src->m, x-i, y-i, x+i, y+i, BL_SKILL, HW_GANBANTEIN, &dummy, src);
+		} else {
+			if (sd) clif_skill_fail( *sd, skill_id );
 			return 1;
 		}
-	}
-	break;
+		break;
 
 #ifndef RENEWAL
 	case HW_GRAVITATION:
@@ -21597,33 +21554,26 @@ static int32 skill_cell_overlap(struct block_list *bl, va_list ap)
 		return 0;
 
 	switch (skill_id) {
-		case SA_LANDPROTECTOR: { // Old Land Protector Behavior [mauiboy]
-			if (unit->group->skill_id == SA_LANDPROTECTOR) {
-				// Check for offensive Land Protector to delete both
-				(*alive) = 0;
-				skill_delunit(unit);
-				return 1;
-			}
+		case SA_LANDPROTECTOR: {
+				if( unit->group->skill_id == SA_LANDPROTECTOR ) {//Check for offensive Land Protector to delete both. [Skotlex]
+					(*alive) = 0;
+					skill_delunit(unit);
+					return 1;
+				}
 
-			std::shared_ptr<s_skill_db> skill = skill_db.find(unit->group->skill_id);
+				std::shared_ptr<s_skill_db> skill = skill_db.find(unit->group->skill_id);
 
-			// Instead of deleting, suppress damage of AOE skills (retain duration)
-			if (unit->group->skill_id == WZ_STORMGUST || 
-				unit->group->skill_id == WZ_METEOR || 
-				unit->group->skill_id == WZ_VERMILION || 
-				unit->group->skill_id == WZ_FIREPILLAR) {
-				// Apply a hypothetical flag to suppress the damage without canceling the duration
-				unit->flags |= UNITFLAG_SUPPRESSED; // Hypothetical flag indicating damage suppression by Land Protector
-				return 0;
+				//It deletes everything except traps and barriers
+				if ((!skill->inf2[INF2_ISTRAP] && !skill->inf2[INF2_IGNORELANDPROTECTOR]) || unit->group->skill_id == WZ_FIREPILLAR) {
+					if (skill->unit_flag[UF_RANGEDSINGLEUNIT]) {
+						if (unit->val2&(1 << UF_RANGEDSINGLEUNIT))
+							skill_delunitgroup(unit->group);
+					} else
+						skill_delunit(unit);
+					return 1;
+				}
 			}
-
-			// It deletes everything except traps and barriers
-			if (!skill->inf2[INF2_ISTRAP] && !skill->inf2[INF2_IGNORELANDPROTECTOR]) {
-				skill_delunit(unit);
-				return 1;
-			}
-		}
-		break;
+			break;
 		case GN_CRAZYWEED_ATK:
 			if (skill_get_unit_flag(unit->group->skill_id, UF_CRAZYWEEDIMMUNE))
 				break;

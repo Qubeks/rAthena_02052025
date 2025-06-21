@@ -11669,15 +11669,7 @@ static bool status_change_start_post_delay(block_list* src, block_list* bl, sc_t
 				val3 = val4 = 0;
 			break;
 		case SC_MAXOVERTHRUST: // Increase Level 5 Maximum Over Thrust % when Soul Linked [MarkZD] mauiboy
-			if (sc && sc->getSCE(SC_SPIRIT)) {
-				if (sc->getSCE(SC_SPIRIT)->val2 == SL_BLACKSMITH) {
-					val2 = 100 + 20 * val1; // 300% at level 5 with Blacksmith Spirit
-				} else {
-					val2 = 20 * val1; // Regular power increase
-				}
-			} else {
-				val2 = 20 * val1; // Default behavior if no spirit link
-			}
+			val2 = 20*val1; // Power increase
 			break;
 		case SC_OVERTHRUST:
 		case SC_ADRENALINE2:
