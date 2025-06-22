@@ -5644,8 +5644,10 @@ int32 skill_castend_damage_id (struct block_list* src, struct block_list *bl, ui
 	case MO_EXTREMITYFIST:
 		{
 			struct block_list *mbl = bl; // For NJ_ISSEN
-			int16 x, y, i = 2; // Move 2 cells (From target)
-			int16 dir = map_calc_dir(src,bl->x,bl->y);
+			struct unit_data *ud = unit_bl2ud(src);
+			int16 dx, dy, i = 2; // Move 2 cells (From target)
+			//int16 dir = map_calc_dir(src,bl->x,bl->y);
+			int16 speed;
 
 #ifdef RENEWAL
 			if (skill_id == MO_EXTREMITYFIST && sd && sd->spiritball_old > 5)
@@ -5665,25 +5667,41 @@ int32 skill_castend_damage_id (struct block_list* src, struct block_list *bl, ui
 			if (skill_id == MO_EXTREMITYFIST) {
 				mbl = src; // For MO_EXTREMITYFIST
 				i = 3; // Move 3 cells (From caster)
+
+				dx = bl->x - src->x;
+				dy = bl->y - src->y;
+				if (dx < 0)
+					dx-=i;
+				else if (dx > 0)
+					dx+=i;
+				if (dy < 0)
+					dy-=i;
+				else if (dy > 0)
+					dy+=i;
+				if (!dx && !dy)
+					dy++;
+				if (map_getcell(src->m, src->x+dx, src->y+dy, CELL_CHKNOPASS)){
+					dx = bl->x;
+					dy = bl->y;
+				} else {
+					dx = src->x + dx;
+					dy = src->y + dy;
+				}
+
+				if(unit_walktoxy(src, dx, dy, 2) && ud) {
+					//Increase can't walk delay to not alter your walk path
+					ud->canmove_tick = tick;
+					speed = status_get_speed(src);
+					for (i = 0; i < ud->walkpath.path_len; i ++)
+					{
+						if(ud->walkpath.path[i]&1)
+							ud->canmove_tick+=7*speed/5;
+						else
+							ud->canmove_tick+=speed;
+					}
+				}
 			}
-			if (dir > 0 && dir < 4)
-				x = -i;
-			else if (dir > 4)
-				x = i;
-			else
-				x = 0;
-			if (dir > 2 && dir < 6)
-				y = -i;
-			else if (dir == 7 || dir < 2)
-				y = i;
-			else
-				y = 0;
-			// Ashura Strike still has slide effect in GVG
-			if ((mbl == src || (!map_flag_gvg2(src->m) && !map_getmapflag(src->m, MF_BATTLEGROUND))) &&
-				unit_movepos(src, mbl->x + x, mbl->y + y, 1, 1)) {
-				clif_blown(src);
-				clif_spiritball(src);
-			}
+
 		}
 		break;
 
