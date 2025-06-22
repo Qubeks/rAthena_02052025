@@ -64,7 +64,7 @@ function	reset	{
     }
 	
 	dispbottom "[Autoattack System]: Your auto-attack has been refreshed for today.";
-	dispbottom "Current stamina : "+ F_InsertComma(.duration), 0x00ff00;
+	dispbottom "Current remainting time : " + calculate_remaining_time() + ".";
 
 	return;
 }
