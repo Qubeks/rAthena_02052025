@@ -19553,42 +19553,32 @@ bool skill_check_condition_castbegin( map_session_data& sd, uint16 skill_id, uin
 		return false;
 	}
 
-	// Enable to use Parry on 1 Hand Weapons when Knights, Star Gladiators and Blacksmiths are Soul Linked [vBrenth] mauiboy
 	if (require.weapon && !pc_check_weapontype(&sd, require.weapon)) {
-		if ((skill_id == LK_PARRYING 
-				&& sc 
-				&& sc->getSCE(SC_SPIRIT)) 
-			&& ((sc->getSCE(SC_SPIRIT)->val2 == SL_KNIGHT && sd.weapontype1 == W_1HSWORD)  // Knights with 1H Sword
-				|| (sc->getSCE(SC_SPIRIT)->val2 == SL_STAR && sd.weapontype1 == W_BOOK)     // Star Gladiators with Book
-				|| (sc->getSCE(SC_SPIRIT)->val2 == SL_BLACKSMITH && sd.weapontype1 == W_1HAXE))) { // Blacksmiths with 1H Axe
-				
-		} else {		
-		
-			switch (skill_id) {
-				case RA_AIMEDBOLT:
-					break;
-				default:
-					switch ((uint32)log2(require.weapon)) {
-						case W_REVOLVER:
-							clif_msg(sd, MSI_FAIL_NEED_EQUIPPED_GUN_HANDGUN);
-							break;
-						case W_RIFLE:
-							clif_msg(sd, MSI_FAIL_NEED_EQUIPPED_GUN_RIFLE);
-							break;
-						case W_GATLING:
-							clif_msg(sd, MSI_FAIL_NEED_EQUIPPED_GUN_GATLING);
-							break;
-						case W_SHOTGUN:
-							clif_msg(sd, MSI_FAIL_NEED_EQUIPPED_GUN_SHOTGUN);
-							break;
-						case W_GRENADE:
-							clif_msg(sd, MSI_FAIL_NEED_EQUIPPED_GUN_GRANADE);
-						default:
-							clif_skill_fail(sd, skill_id, USESKILL_FAIL_THIS_WEAPON);
-							break;
-					}
-					return false;
+		switch (skill_id) {
+		case RA_AIMEDBOLT:
+			break;
+		default:
+			switch ((uint32)log2(require.weapon)) {
+			case W_REVOLVER:
+				clif_msg(sd, MSI_FAIL_NEED_EQUIPPED_GUN_HANDGUN);
+				break;
+			case W_RIFLE:
+				clif_msg(sd, MSI_FAIL_NEED_EQUIPPED_GUN_RIFLE);
+				break;
+			case W_GATLING:
+				clif_msg(sd, MSI_FAIL_NEED_EQUIPPED_GUN_GATLING);
+				break;
+			case W_SHOTGUN:
+				clif_msg(sd, MSI_FAIL_NEED_EQUIPPED_GUN_SHOTGUN);
+				break;
+			case W_GRENADE:
+				clif_msg(sd, MSI_FAIL_NEED_EQUIPPED_GUN_GRANADE);
+				break;
+			default:
+				clif_skill_fail(sd, skill_id, USESKILL_FAIL_THIS_WEAPON);
+				break;
 			}
+			return false;
 		}
 	}
 
