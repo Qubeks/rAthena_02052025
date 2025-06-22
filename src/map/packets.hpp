@@ -1989,12 +1989,81 @@ struct PACKET_ZC_SKILLMSG {
 	int32 msgId;
 } __attribute__((packed));
 DEFINE_PACKET_HEADER(ZC_SKILLMSG, 0x215);
-
+/*
 struct PACKET_CZ_REQ_EMOTION_EXPANSION{
 	int16 packetType;
 	uint8 unknown[4];
 } __attribute__((packed));
 DEFINE_PACKET_HEADER(CZ_REQ_EMOTION_EXPANSION, 0xbe9);
+*/
+struct PACKET_CZ_REQ_EMOTION2
+{
+	uint16 PacketType;
+	uint16 ExpantionId;
+	uint16 EmotionId;
+} __attribute__((packed));
+DEFINE_PACKET_HEADER(CZ_REQ_EMOTION2, 0x0be9);
+
+struct PACKET_ZC_EMOTION2
+{
+	uint16 PacketType;
+	uint32 GID;
+	uint16 ExpantionId;
+	uint16 EmotionId;
+} __attribute__((packed));
+DEFINE_PACKET_HEADER(ZC_EMOTION2, 0x0bea);
+
+struct PACKET_ZC_EMOTION2_FAIL
+{
+	uint16 PacketType;
+	uint16 ExpantionId;
+	uint16 EmotionId;
+	uint8 Status;
+} __attribute__((packed));
+DEFINE_PACKET_HEADER(ZC_EMOTION2_FAIL, 0x0beb);
+
+struct PACKET_CZ_REQ_EMOTION2_EXPANTION
+{
+	uint16 PacketType;
+	uint16 ExpantionId;
+	uint16 ItemId;
+	uint8 Amount;
+} __attribute__((packed));
+DEFINE_PACKET_HEADER(CZ_REQ_EMOTION2_EXPANTION, 0x0bec);
+
+struct PACKET_ZC_EMOTION2_EXPANTION
+{
+	uint16 PacketType;
+	uint16 ExpantionId;
+	uint8 bRented;
+	uint32 Timestamp;
+} __attribute__((packed));
+DEFINE_PACKET_HEADER(ZC_EMOTION2_EXPANTION, 0x0bed);
+
+struct PACKET_ZC_EMOTION2_EXPANTION_FAIL
+{
+	uint16 PacketType;
+	uint16 ExpantionId;
+	uint8 Status;
+} __attribute__((packed));
+DEFINE_PACKET_HEADER(ZC_EMOTION2_EXPANTION_FAIL, 0x0bee);
+
+struct PACKET_ZC_EMOTION2_EXPANTION_LIST_SUB
+{
+	uint16 ExpantionId;
+	uint8 Rented;
+	uint32 Timestamp;
+} __attribute__((packed));
+
+struct PACKET_ZC_EMOTION2_EXPANTION_LIST
+{
+	uint16 PacketType;
+	uint16 PacketLength;
+	uint32 Timestamp;
+	int16 Timezone;
+	struct PACKET_ZC_EMOTION2_EXPANTION_LIST_SUB List[];
+} __attribute__((packed));
+DEFINE_PACKET_HEADER(ZC_EMOTION2_EXPANTION_LIST, 0x0bf6);
 
 struct PACKET_ZC_DISAPPEAR_ENTRY{
 	int16 packetType;

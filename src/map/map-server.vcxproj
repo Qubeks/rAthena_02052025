@@ -212,7 +212,6 @@
 	<ClInclude Include="deposit.hpp" />
     <ClInclude Include="duel.hpp" />
     <ClInclude Include="elemental.hpp" />
-    <ClInclude Include="emotes.hpp" />	
     <ClInclude Include="guild.hpp" />
     <ClInclude Include="homunculus.hpp" />
     <ClInclude Include="instance.hpp" />
@@ -263,7 +262,6 @@
 	<ClCompile Include="deposit.cpp" />
     <ClCompile Include="duel.cpp" />
     <ClCompile Include="elemental.cpp" />
-	<ClCompile Include="emotes.cpp" />	
     <ClCompile Include="guild.cpp" />
     <ClCompile Include="homunculus.cpp" />
     <ClCompile Include="instance.cpp" />

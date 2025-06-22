@@ -1,29 +1,31 @@
-#####################################################################################
-# Cash Emotiocons Database
-#####################################################################################
+###########################################################################
+# Emotions Database
+###########################################################################
 #
-# Cash Emotes
+# Emotions Settings
 #
-#####################################################################################
-# - PackId                     The id of the pack
-#   PackType                   1: account bound, 2: char bound
-#   PackPrice                  How many nyang fruit needed to purshase the pack (6909 is hardcoded in the client)
-#   SaleStart                  The starting time for the pack to be sold in the fomat YYYYMMDD
-#   SaleEnd                    The ending time for the pack to be sold in the fomat YYYYMMDD
-#   RentalPeriod               The durration of usability the pack has once purshased in days, 0 for unlimited
-#   EmotesList                 The list of emotes belonging to the pack
-######################################################################################
+###########################################################################
+# - Id                      Emotion expantion ID.
+#   Price                   Purchase price in Nyangvine Fruit (item id: 6909). (Default: 0)
+#   Type                    Bound type. 0 for account bound, 1 for character bound. (Default: 0)
+#   SaleStart               Rental starting time to be sold in the fomat YYYYMMDD. (Default: 0)
+#   SaleEnd                 Rental ending time to be sold in the fomat YYYYMMDD. (Default: 0)
+#   SaleRentalPeriod        Rental availability duration in days. 0 for unlimited. (Default: 0)
+#   Emotions                Emotions list for this expantion ID.
+###########################################################################
+
 Header:
-  Type: CASH_EMOTES_DB
+  Type: EMOTION_DB
   Version: 1
+
 Body:
-  - PackId: 0
-    PackType: 1
-    PackPrice: 0
+  - Id: 0
+    Price: 0
+    Type: 0
     SaleStart: 0
     SaleEnd: 0
-    RentalPeriod: 0
-    EmotesList:
+    SaleRentalPeriod: 0
+    Emotions:
       - ET_SURPRISE
       - ET_QUESTION
       - ET_DELIGHT
@@ -110,13 +112,14 @@ Body:
       - ET_YUT5
       - ET_YUT6
       - ET_YUT7
-  - PackId: 1
-    PackType: 1
-    PackPrice: 0
+
+  - Id: 1
+    Price: 10
+    Type: 0
     SaleStart: 0
     SaleEnd: 0
-    RentalPeriod: 0
-    EmotesList:
+    SaleRentalPeriod: 0
+    Emotions:
       - ET_KIK
       - ET_GO
       - ET_COOL
@@ -127,13 +130,14 @@ Body:
       - ET_CUSTOM_3
       - ET_CUSTOM_4
       - ET_CUSTOM_5
-  - PackId: 2
-    PackType: 1
-    PackPrice: 10
-    SaleStart: 0
+
+  - Id: 2
+    Price: 10
+    Type: 0
+    SaleStart: 20230810
     SaleEnd: 0
-    RentalPeriod: 0
-    EmotesList:
+    SaleRentalPeriod: 0
+    Emotions:
       - ET_THANKS
       - ET_AHA
       - ET_OK
@@ -144,13 +148,14 @@ Body:
       - ET_SCISSOR
       - ET_ROCK
       - ET_WRAP
-  - PackId: 3
-    PackType: 1
-    PackPrice: 10
-    SaleStart: 0
+
+  - Id: 3
+    Price: 10
+    Type: 0
+    SaleStart: 20231101
     SaleEnd: 0
-    RentalPeriod: 0
-    EmotesList:
+    SaleRentalPeriod: 0
+    Emotions:
       - ET_SEXY
       - ET_MERONG
       - ET_SHY

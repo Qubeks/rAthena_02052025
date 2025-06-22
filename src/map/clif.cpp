@@ -37,7 +37,6 @@
 #include "clan.hpp"
 #include "clif.hpp"
 #include "elemental.hpp"
-#include "emotes.hpp"
 #include "guild.hpp"
 #include "homunculus.hpp"
 #include "instance.hpp"
@@ -9381,16 +9380,16 @@ void clif_guild_position_selected(map_session_data& sd)
 ///     enum emotion_type
 void clif_emotion( block_list& bl, emotion_type type ){
 	PACKET_ZC_EMOTION p{};
-#if PACKETVER >= 20230802
-	clif_emotion_success(&bl, 0, type);
-#else
 
+#if (PACKETVER_MAIN_NUM < 20230925)
 	p.packetType = HEADER_ZC_EMOTION;
 	p.GID = bl.id;
 	p.type = static_cast<decltype(p.type)>( type );
 
 	clif_send( &p, sizeof(p), &bl, AREA );
-#endif		
+#else
+	clif_emotion2(&bl, 0, type);
+#endif
 }
 
 
@@ -10965,6 +10964,8 @@ void clif_parse_LoadEndAck(int32 fd,map_session_data *sd)
 				sc_start(sd,sd, SC_KNOWLEDGE, 100, lv, skill_get_time(SG_KNOWLEDGE, lv));
 		}
 
+		pc_load_emotion_expantion_list(sd);
+
 		if(sd->pd && sd->pd->pet.intimate > 900)
 			clif_pet_emotion( *sd->pd, (sd->pd->pet.class_ - 100)*100 + 50 + pet_hungry_val(sd->pd) );
 
@@ -10975,8 +10976,6 @@ void clif_parse_LoadEndAck(int32 fd,map_session_data *sd)
 			sd->state.night = 1;
 			clif_status_load(sd, EFST_SKE, 1);
 		}
-
-		emotes_get_player_packs(sd);
 
 		// Notify everyone that this char logged in.
 		if( battle_config.friend_auto_add ){
@@ -11651,10 +11650,10 @@ void clif_parse_ChangeDir(int32 fd, map_session_data *sd)
 /// type:
 ///     @see enum emotion_type
 void clif_parse_Emotion(int32 fd, map_session_data *sd){
+#if (PACKETVER_MAIN_NUM < 20230925)	
 	if( sd == nullptr ){
 		return;
 	}
-#if PACKETVER < 20230802
 	int32 emoticon = RFIFOB(fd,packet_db[RFIFOW(fd,0)].pos[0]);
 
 	if (battle_config.basic_skill_check == 0 || pc_checkskill(sd, NV_BASIC) >= 2 || pc_checkskill(sd, SU_BASIC_SKILL) >= 1) {
@@ -11689,7 +11688,7 @@ void clif_parse_Emotion(int32 fd, map_session_data *sd){
 		clif_emotion( *sd, static_cast<emotion_type>( emoticon ) );
 	} else
 		clif_skill_fail( *sd, 1, USESKILL_FAIL_LEVEL, 1 );
-#endif		
+#endif	
 }
 
 
@@ -25896,110 +25895,6 @@ void clif_macro_user_report_response(map_session_data *sd, int status, char *rep
 #endif
 }
 
-void clif_parse_emotion2(int fd, map_session_data *sd)
-{
-#if PACKETVER >= 20230802
-	nullpo_retv(sd);
-	const struct PACKET_CZ_REQ_EMOTION2 *p = (PACKET_CZ_REQ_EMOTION2 *)RFIFOP(fd, 0);
-	emotes_use(sd, p->packId, p->emoteId);
-#endif
-}
-
-void clif_parse_emotion_expansion_request(int fd, map_session_data *sd)
-{
-#if PACKETVER >= 20230802
-	nullpo_retv(sd);
-	const struct PACKET_CZ_EMOTION_EXPANTION_REQ *p = (PACKET_CZ_EMOTION_EXPANTION_REQ *)RFIFOP(fd, 0);
-	emotes_expantion_buy(sd, p->packId, p->itemId, p->amount);
-#endif
-}
-
-void clif_emotion_success(struct block_list *bl, int16 packId, int16 emoteId)
-{
-#if PACKETVER >= 20230802
-	nullpo_retv(bl);
-
-	struct PACKET_ZC_EMOTION_SUCCESS p = { 0 };
-	p.packetType = HEADER_ZC_EMOTION_SUCCESS;
-	p.GID = bl->id;
-	p.packId = packId;
-	p.emoteId = emoteId;
-	clif_send(&p, sizeof(p), bl, AREA);
-#endif
-}
-
-void clif_emotion_fail(map_session_data *sd, int16 packId, int16 emoteId, enum emote_msg status)
-{
-#if PACKETVER >= 20230802
-	nullpo_retv(sd);
-
-	const int fd = sd->fd;
-	WFIFOHEAD(fd, sizeof(struct PACKET_ZC_EMOTION_FAIL));
-	struct PACKET_ZC_EMOTION_FAIL *p = (PACKET_ZC_EMOTION_FAIL *)WFIFOP(fd, 0);
-	p->packetType = HEADER_ZC_EMOTION_FAIL;
-	p->packId = packId;
-	p->emoteId = emoteId;
-	p->status = status;
-	WFIFOSET(fd, sizeof(struct PACKET_ZC_EMOTION_FAIL));
-#endif
-}
-
-void clif_emotion_expansion_response_success(map_session_data *sd, int16 packId, int8 isRented, uint32 RentEndTime)
-{
-#if PACKETVER >= 20230802
-	nullpo_retv(sd);
-
-	const int fd = sd->fd;
-	WFIFOHEAD(fd, sizeof(struct PACKET_ZC_EMOTION_EXPANSION_SUCCESS));
-	struct PACKET_ZC_EMOTION_EXPANSION_SUCCESS *p = (PACKET_ZC_EMOTION_EXPANSION_SUCCESS *)WFIFOP(fd, 0);
-	p->packetType = HEADER_ZC_EMOTION_EXPANSION_SUCCESS;
-	p->packId = packId;
-	p->isRented = isRented;
-	p->timestamp = RentEndTime; // rental end time, 0 for permanent
-	WFIFOSET(fd, sizeof(struct PACKET_ZC_EMOTION_EXPANSION_SUCCESS));
-#endif
-}
-
-void clif_emotion_expansion_response_fail(map_session_data *sd, int16 packId, enum emotion_expansion_msg status)
-{
-#if PACKETVER >= 20230802
-	nullpo_retv(sd);
-
-	const int fd = sd->fd;
-	WFIFOHEAD(fd, sizeof(struct PACKET_ZC_EMOTION_EXPANSION_FAIL));
-	struct PACKET_ZC_EMOTION_EXPANSION_FAIL *p = (PACKET_ZC_EMOTION_EXPANSION_FAIL *)WFIFOP(fd, 0);
-	p->packetType = HEADER_ZC_EMOTION_EXPANSION_FAIL;
-	p->packId = packId;
-	p->status = status;
-	WFIFOSET(fd, sizeof(struct PACKET_ZC_EMOTION_EXPANSION_FAIL));
-#endif
-}
-
-void clif_emotion_expansion_list(map_session_data *sd, std::vector<struct PACKET_ZC_EMOTION_EXPANTION_LIST_sub> &list)
-{
-#if PACKETVER >= 20230802
-	nullpo_retv(sd);
-
-	const int fd = sd->fd;
-	WFIFOHEAD(fd, sizeof(struct PACKET_ZC_EMOTION_EXPANTION_LIST) + sizeof(struct PACKET_ZC_EMOTION_EXPANTION_LIST_sub) * list.size());
-	struct PACKET_ZC_EMOTION_EXPANTION_LIST *p = (PACKET_ZC_EMOTION_EXPANTION_LIST *)WFIFOP(fd, 0);
-	p->packetType = HEADER_ZC_EMOTION_EXPANTION_LIST;
-	time_t now = time(NULL);
-	if (now > UINT32_MAX) {
-		ShowError("clif_emotion_expansion_list: Timestamp exceeds maximum allowed value.\n");
-		return;
-	}
-	p->timestamp = static_cast<uint32>(now);
-#if PACKETVER >= 20230920
-	p->timezone = 60 * 9; // kRO UTC+9 = 540
-#endif
-	for (auto i = 0; i < list.size(); ++i)
-		p->list[i] = list[i];
-	p->packetLength = static_cast<int16>(sizeof(struct PACKET_ZC_EMOTION_EXPANTION_LIST) + sizeof(struct PACKET_ZC_EMOTION_EXPANTION_LIST_sub) * list.size());
-	WFIFOSET(fd, p->packetLength);
-#endif
-}
-
 void clif_quest_status_ack(map_session_data *sd, const struct PACKET_CZ_QUEST_STATUS_REQ_SUB *QuestList, uint16_t QuestCount)
 {
 #if PACKETVER >= 20240516
@@ -26076,6 +25971,128 @@ void clif_parse_MoveFromKafraFav( int32 fd, map_session_data* sd ){
 	}else if( sd->state.storage_flag == 3 ){
 		storage_storageget( sd, &sd->premiumStorage, item_index, item_amount, true );
 	}
+#endif
+}
+
+/*==========================================
+ * emotion 2 [@Asheraf]
+ *------------------------------------------*/
+void clif_parse_emotion2(const int32 fd, map_session_data* const sd)
+{
+#if (PACKETVER_MAIN_NUM >= 20230925)
+	nullpo_retv(sd);
+
+	const PACKET_CZ_REQ_EMOTION2* const Packet = reinterpret_cast<PACKET_CZ_REQ_EMOTION2*>(RFIFOP(fd, 0));
+
+	pc_use_emotion(sd, Packet->ExpantionId, Packet->EmotionId);
+#endif
+}
+
+void clif_emotion2(block_list* const bl, const uint16 ExpantionId, const uint16 EmotionId)
+{
+#if (PACKETVER_MAIN_NUM >= 20230925)
+	nullpo_retv(bl);
+
+	PACKET_ZC_EMOTION2 Packet = {};
+	Packet.PacketType = HEADER_ZC_EMOTION2;
+	Packet.GID = bl->id;
+	Packet.ExpantionId = ExpantionId;
+	Packet.EmotionId = EmotionId;
+
+	clif_send(&Packet, sizeof(PACKET_ZC_EMOTION2), bl, AREA);
+#endif
+}
+
+void clif_emotion2_fail(map_session_data* const sd, const uint16 ExpantionId, const uint16 EmotionId, const EEmotionStatus Status)
+{
+#if (PACKETVER_MAIN_NUM >= 20230925)
+	nullpo_retv(sd);
+
+	const int32 fd = sd->fd;
+
+	WFIFOHEAD(fd, sizeof(PACKET_ZC_EMOTION2_FAIL));
+
+	PACKET_ZC_EMOTION2_FAIL* const Packet = reinterpret_cast<PACKET_ZC_EMOTION2_FAIL*>(WFIFOP(fd, 0));
+	Packet->PacketType = HEADER_ZC_EMOTION2_FAIL;
+	Packet->ExpantionId = ExpantionId;
+	Packet->EmotionId = EmotionId;
+	Packet->Status = Status;
+
+	WFIFOSET(fd, sizeof(PACKET_ZC_EMOTION2_FAIL));
+#endif
+}
+
+void clif_parse_emotion2_expantion(const int32 fd, map_session_data* const sd)
+{
+#if (PACKETVER_MAIN_NUM >= 20230925)
+	nullpo_retv(sd);
+
+	const PACKET_CZ_REQ_EMOTION2_EXPANTION* const Packet = reinterpret_cast<PACKET_CZ_REQ_EMOTION2_EXPANTION*>(RFIFOP(fd, 0));
+
+	pc_buy_emotion_expantion(sd, Packet->ExpantionId, Packet->ItemId, Packet->Amount);
+#endif
+}
+
+void clif_emotion2_expantion(map_session_data* const sd, const uint16 ExpantionId, const bool bRented, const uint32 RentEndTime)
+{
+#if (PACKETVER_MAIN_NUM >= 20230925)
+	nullpo_retv(sd);
+
+	const int32 fd = sd->fd;
+
+	WFIFOHEAD(fd, sizeof(PACKET_ZC_EMOTION2_EXPANTION));
+
+	PACKET_ZC_EMOTION2_EXPANTION* const Packet = reinterpret_cast<PACKET_ZC_EMOTION2_EXPANTION*>(WFIFOP(fd, 0));
+	Packet->PacketType = HEADER_ZC_EMOTION2_EXPANTION;
+	Packet->ExpantionId = ExpantionId;
+	Packet->bRented = bRented;
+	Packet->Timestamp = RentEndTime;
+
+	WFIFOSET(fd, sizeof(PACKET_ZC_EMOTION2_EXPANTION));
+#endif
+}
+
+void clif_emotion2_expantion_fail(map_session_data* const sd, const uint16 ExpantionId, const EEmotionExpantionStatus Status)
+{
+#if (PACKETVER_MAIN_NUM >= 20230925)
+	nullpo_retv(sd);
+
+	const int fd = sd->fd;
+
+	WFIFOHEAD(fd, sizeof(PACKET_ZC_EMOTION2_EXPANTION_FAIL));
+
+	PACKET_ZC_EMOTION2_EXPANTION_FAIL* const Packet = reinterpret_cast<PACKET_ZC_EMOTION2_EXPANTION_FAIL*>(WFIFOP(fd, 0));
+	Packet->PacketType = HEADER_ZC_EMOTION2_EXPANTION_FAIL;
+	Packet->ExpantionId = ExpantionId;
+	Packet->Status = Status;
+
+	WFIFOSET(fd, sizeof(PACKET_ZC_EMOTION2_EXPANTION_FAIL));
+#endif
+}
+
+void clif_emotion2_expantion_list(map_session_data* const sd, const std::vector<PACKET_ZC_EMOTION2_EXPANTION_LIST_SUB>& List)
+{
+#if (PACKETVER_MAIN_NUM >= 20230925)
+	nullpo_retv(sd);
+
+	const int fd = sd->fd;
+
+	const size_t PacketTotalSize = sizeof(PACKET_ZC_EMOTION2_EXPANTION_LIST) + sizeof(PACKET_ZC_EMOTION2_EXPANTION_LIST_SUB) * List.size();
+	WFIFOHEAD(fd, PacketTotalSize);
+
+	PACKET_ZC_EMOTION2_EXPANTION_LIST* const Packet = reinterpret_cast<PACKET_ZC_EMOTION2_EXPANTION_LIST*>(WFIFOP(fd, 0));
+	Packet->PacketType = HEADER_ZC_EMOTION2_EXPANTION_LIST;
+	Packet->Timestamp = uint32(time(nullptr));
+	Packet->Timezone = 540; // Seems to be 9 (Korean UTC) * 60
+
+	for (size_t Num = 0; Num < List.size(); ++Num)
+	{
+		Packet->List[Num] = List[Num];
+	}
+
+	Packet->PacketLength = uint16(PacketTotalSize);
+
+	WFIFOSET(fd, PacketTotalSize);
 #endif
 }
 

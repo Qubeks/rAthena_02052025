@@ -164,9 +164,6 @@
     <ClInclude Include="vending.hpp">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="emotes.hpp">
-      <Filter>Header Files</Filter>
-    </ClInclude>	
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="achievement.cpp">
@@ -307,8 +304,5 @@
     <ClCompile Include="vending.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="emotes.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>	
   </ItemGroup>
 </Project>

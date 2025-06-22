@@ -54,9 +54,9 @@ enum e_macro_report_status : uint8;
 enum e_hom_state2 : uint8;
 enum _sp;
 enum e_searchstore_failure : uint16;
-enum emote_msg : int8;
-enum emotion_expansion_msg : int8;
-struct PACKET_ZC_EMOTION_EXPANTION_LIST_sub;
+enum EEmotionStatus : uint8;
+enum EEmotionExpantionStatus : uint8;
+struct PACKET_ZC_EMOTION2_EXPANTION_LIST_SUB;
 
 #define DMGVAL_IGNORE -30000
 
@@ -372,7 +372,8 @@ enum emotion_type {
 	ET_CUSTOM_12,
 	ET_CUSTOM_13,
 	ET_CUSTOM_14,
-	ET_CUSTOM_15,	
+	ET_CUSTOM_15,
+	ET_EMOTION_LAST,	
 	//
 	ET_MAX
 };
@@ -975,6 +976,13 @@ void clif_refresh_storagewindow(map_session_data *sd);
 void clif_refresh(map_session_data *sd);	// self
 
 void clif_emotion( block_list& bl, emotion_type type );
+void clif_parse_emotion2(const int32 fd, map_session_data* const sd);
+void clif_emotion2(block_list* const bl, const uint16 ExpantionId, const uint16 EmotionId);
+void clif_emotion2_fail(map_session_data* const sd, const uint16 ExpantionId, const uint16 EmotionId, const EEmotionStatus Status);
+void clif_parse_emotion2_expantion(const int32 fd, map_session_data* const sd);
+void clif_emotion2_expantion(map_session_data* const sd, const uint16 ExpantionId, const bool bRented, const uint32 RentEndTime);
+void clif_emotion2_expantion_fail(map_session_data* const sd, const uint16 ExpantionId, const EEmotionExpantionStatus Status);
+void clif_emotion2_expantion_list(map_session_data* const sd, const std::vector<PACKET_ZC_EMOTION2_EXPANTION_LIST_SUB>& List);
 void clif_talkiebox(struct block_list* bl, const char* talkie);
 void clif_wedding_effect( block_list& bl );
 void clif_divorced( map_session_data& sd, const char* name );
@@ -1546,14 +1554,6 @@ void clif_specialpopup(map_session_data& sd, int32 id);
 
 void clif_parse_macro_user_report(int fd, map_session_data *sd);
 void clif_macro_user_report_response(map_session_data *sd, int status, char *reportName);
-
-void clif_parse_emotion2(int fd, map_session_data *sd);
-void clif_parse_emotion_expansion_request(int fd, map_session_data *sd);
-void clif_emotion_success(struct block_list *bl, int16 packId, int16 emoteId);
-void clif_emotion_fail(map_session_data *sd, int16 packId, int16 emoteId, enum emote_msg status);
-void clif_emotion_expansion_response_success(map_session_data *sd, int16 packId, int8 isRented, uint32 RentEndTime);
-void clif_emotion_expansion_response_fail(map_session_data *sd, int16 packId, enum emotion_expansion_msg status);
-void clif_emotion_expansion_list(map_session_data *sd, std::vector<struct PACKET_ZC_EMOTION_EXPANTION_LIST_sub> &list);
 
 void clif_parse_GuildAllianceMessage(int fd, map_session_data* sd);
 void clif_guild_alliance_message(const struct mmo_guild &g, const char *mes, int len);

@@ -2032,11 +2032,11 @@
 #if PACKETVER_MAIN_NUM >= 20220216 || PACKETVER_ZERO_NUM >= 20220203
 	parseable_packet( HEADER_CZ_RESET_SKILL, sizeof( struct PACKET_CZ_RESET_SKILL ), clif_parse_reset_skill, 0 );
 #endif
-
+/*
 #if PACKETVER_MAIN_NUM >= 20230705
 	parseable_packet( HEADER_CZ_REQ_EMOTION_EXPANSION, sizeof( struct PACKET_CZ_REQ_EMOTION_EXPANSION ), clif_parse_dull, 0 );
 #endif
-
+*/
 #if PACKETVER_MAIN_NUM >= 20240502
 	parseable_packet( HEADER_CZ_GM_CHECKER, sizeof( struct PACKET_CZ_GM_CHECKER ), clif_parse_macro_checker, 0 );
 #endif
@@ -2050,14 +2050,14 @@
 	packet(0x0be3, sizeof(PACKET_ZC_MACRO_USER_REPORT_RES));
 #endif
 
-#if PACKETVER >= 20230802
-	parseable_packet(HEADER_CZ_REQ_EMOTION2, sizeof(struct PACKET_CZ_REQ_EMOTION2), clif_parse_emotion2, 0);
-	packet(HEADER_ZC_EMOTION_SUCCESS, sizeof(struct PACKET_ZC_EMOTION_SUCCESS));
-	packet(HEADER_ZC_EMOTION_FAIL, sizeof(struct PACKET_ZC_EMOTION_FAIL));
-	parseable_packet(HEADER_CZ_EMOTION_EXPANTION_REQ, sizeof(struct PACKET_CZ_EMOTION_EXPANTION_REQ), clif_parse_emotion_expansion_request, 0);
-	packet(HEADER_ZC_EMOTION_EXPANSION_SUCCESS, sizeof(struct PACKET_ZC_EMOTION_EXPANSION_SUCCESS));
-	packet(HEADER_ZC_EMOTION_EXPANSION_FAIL, sizeof(struct PACKET_ZC_EMOTION_EXPANSION_FAIL));
-	packet(HEADER_ZC_EMOTION_EXPANTION_LIST, -1);
+#if (PACKETVER_MAIN_NUM >= 20230925)
+	parseable_packet(HEADER_CZ_REQ_EMOTION2, sizeof(PACKET_CZ_REQ_EMOTION2), clif_parse_emotion2, 0);
+	packet(HEADER_ZC_EMOTION2, sizeof(PACKET_ZC_EMOTION2));
+	packet(HEADER_ZC_EMOTION2_FAIL, sizeof(PACKET_ZC_EMOTION2_FAIL));
+	parseable_packet(HEADER_CZ_REQ_EMOTION2_EXPANTION, sizeof(PACKET_CZ_REQ_EMOTION2_EXPANTION), clif_parse_emotion2_expantion, 0);
+	packet(HEADER_ZC_EMOTION2_EXPANTION, sizeof(PACKET_ZC_EMOTION2_EXPANTION));
+	packet(HEADER_ZC_EMOTION2_EXPANTION_FAIL, sizeof(PACKET_ZC_EMOTION2_EXPANTION_FAIL));
+	packet(HEADER_ZC_EMOTION2_EXPANTION_LIST, -1);
 #endif
 
 #if PACKETVER_MAIN_NUM >= 20230920
