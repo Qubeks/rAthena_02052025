@@ -1500,10 +1500,10 @@ int32 char_make_new_char( struct char_session_data* sd, char* name_, int32 str, 
 	}
 #endif
 
-#if PACKETVER_MAIN_NUM >= 20231220
-	const int body = start_job;
+#if PACKETVER >= 20231220
+	int32 body = start_job;
 #else
-	const int body = 0;
+	int32 body = 0;
 #endif
 
 	//Insert the new char entry to the database

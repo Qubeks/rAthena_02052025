@@ -2042,7 +2042,7 @@
 #endif
 
 #if PACKETVER >= 20231220
-	parseable_packet(HEADER_CZ_REQ_STYLE_CHANGE3, -1, clif_parse_stylist_buy_new, 0);
+	parseable_packet(HEADER_CZ_REQ_STYLE_CHANGE3, -1, clif_parse_stylist_buy, 0);
 #endif
 
 #if PACKETVER >= 20230920
