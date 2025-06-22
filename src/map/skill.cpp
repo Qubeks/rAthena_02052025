@@ -19552,11 +19552,8 @@ bool skill_check_condition_castbegin( map_session_data& sd, uint16 skill_id, uin
 		clif_skill_fail( sd, skill_id, USESKILL_FAIL_HP_INSUFFICIENT );
 		return false;
 	}
-
-	if (require.weapon && !(pc_check_weapontype(&sd, require.weapon) ||
-		(skill_id == LK_PARRYING && sc && sc->getSCE(SC_SPIRIT) && ((sc->getSCE(SC_SPIRIT)->val2 == SL_KNIGHT && sd.weapontype1 == W_1HSWORD)   // Knights with 1H Sword  
-			|| (sc->getSCE(SC_SPIRIT)->val2 == SL_STAR && sd.weapontype1 == W_BOOK)                                                             // Star Gladiators with Book  
-			|| (sc->getSCE(SC_SPIRIT)->val2 == SL_BLACKSMITH && sd.weapontype1 == W_1HAXE))))) {												// Blacksmith with 1H Axe
+	
+	if (require.weapon && !(pc_check_weapontype(&sd, require.weapon) || check_spirit_weapon_exception(sd, skill_id, sc))) {
 		switch (skill_id) {
 		case RA_AIMEDBOLT:
 			break;
@@ -19829,14 +19826,11 @@ bool skill_check_condition_castend( map_session_data& sd, uint16 skill_id, uint1
 	if( require.hp > 0 && status->hp <= (uint32)require.hp) {
 		clif_skill_fail( sd, skill_id, USESKILL_FAIL_HP_INSUFFICIENT );
 		return false;
-	}
-
-	if (require.weapon && !(pc_check_weapontype(&sd, require.weapon) ||
-		(skill_id == LK_PARRYING && sc && sc->getSCE(SC_SPIRIT) && ((sc->getSCE(SC_SPIRIT)->val2 == SL_KNIGHT && sd.weapontype1 == W_1HSWORD)   // Knights with 1H Sword  
-			|| (sc->getSCE(SC_SPIRIT)->val2 == SL_STAR && sd.weapontype1 == W_BOOK)                                                             // Star Gladiators with Book  
-			|| (sc->getSCE(SC_SPIRIT)->val2 == SL_BLACKSMITH && sd.weapontype1 == W_1HAXE))))) {												// Blacksmith with 1H Axe
-		clif_skill_fail( sd, skill_id, USESKILL_FAIL_THIS_WEAPON );
-		return false;
+	}  
+	    
+	if (require.weapon && !(pc_check_weapontype(&sd, require.weapon) || check_spirit_weapon_exception(sd, skill_id, sc))) {  
+		clif_skill_fail(sd, skill_id, USESKILL_FAIL_THIS_WEAPON);  
+		return false;  
 	}
 
 	if( require.ammo ) { //Skill requires stuff equipped in the ammo slot.

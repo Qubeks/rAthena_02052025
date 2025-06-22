@@ -17,6 +17,7 @@
 #define NUM_WHISPER_VAR 10
 
 extern std::string format_number_with_commas(int32 number);
+extern bool check_spirit_weapon_exception(class map_session_data& sd, uint16 skill_id, class status_change* sc);
 
 ///////////////////////////////////////////////////////////////////////////////
 //## TODO possible enhancements: [FlavioJS]

@@ -4929,6 +4929,25 @@ std::string format_number_with_commas(int32 number) {
     }  
     return str;  
 }
+
+/*==========================================  
+ * Check Soul Link 1 Hand Parry function  
+ *------------------------------------------*/  
+bool check_spirit_weapon_exception(map_session_data& sd, uint16 skill_id, status_change* sc) {  
+    if (skill_id != LK_PARRYING || !sc) return false;  
+      
+    auto spirit_sce = sc->getSCE(SC_SPIRIT);  
+    if (!spirit_sce) return false;  
+      
+    static const std::unordered_map<int, int> valid_combinations = {  
+        {SL_KNIGHT, W_1HSWORD},  
+        {SL_STAR, W_BOOK},  
+        {SL_BLACKSMITH, W_1HAXE}  
+    };  
+      
+    auto it = valid_combinations.find(spirit_sce->val2);  
+    return it != valid_combinations.end() && sd.weapontype1 == it->second;  
+}
 /////////////////////////////////////////////////////////////////////
 // NPC interaction
 //
