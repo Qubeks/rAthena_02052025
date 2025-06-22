@@ -2480,6 +2480,9 @@ void clif_scriptmes( map_session_data& sd, uint32 npcid, const char *mes ){
 	safestrncpy( p->message, mes, length );
 
 	clif_send( p, p->PacketLength, &sd, SELF );
+	
+	clif_set_npc_window_size(sd, 400, 300);
+	clif_set_npc_window_pos_percent(sd, 50, 50);	
 }
 
 
