@@ -31,3 +31,7 @@
 	BUILDIN_DEF(getdepositstore, ""),
 	BUILDIN_DEF(getdepositlist, "i?"),
 	BUILDIN_DEF(getdepositbonus, "?"),
+	
+	// Rune
+	BUILDIN_DEF(runeui, ""),
+	BUILDIN_DEF(getupgrade_rune, ""),	

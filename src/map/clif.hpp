@@ -57,6 +57,7 @@ enum e_searchstore_failure : uint16;
 enum EEmotionStatus : uint8;
 enum EEmotionExpantionStatus : uint8;
 struct PACKET_ZC_EMOTION2_EXPANTION_LIST_SUB;
+enum e_runedecompo_result: uint8;
 
 #define DMGVAL_IGNORE -30000
 
@@ -1557,5 +1558,22 @@ void clif_macro_user_report_response(map_session_data *sd, int status, char *rep
 
 void clif_parse_GuildAllianceMessage(int fd, map_session_data* sd);
 void clif_guild_alliance_message(const struct mmo_guild &g, const char *mes, int len);
+
+// Rune UI
+void clif_rune_ui_open( map_session_data* sd );
+void clif_parse_asktag_rune( int fd, map_session_data* sd );
+void clif_bookinfo_rune( map_session_data* sd, uint16 tagID );
+void clif_setinfo_rune( map_session_data* sd, uint16 tagID );
+void clif_parse_result_rune_ui_open( int fd, map_session_data* sd );
+void clif_parse_bookactivate_rune( int fd, map_session_data* sd );
+void clif_parse_setactivate_rune( int fd, map_session_data* sd );
+void clif_setactivate_rune (map_session_data* sd, uint16 tagID, uint32 runesetid );
+void clif_parse_setupgrade_rune( int fd, map_session_data* sd );
+void clif_setupgrade_rune (map_session_data* sd, uint16 tagID, uint32 runesetid );
+void clif_enablerefresh_rune (map_session_data* sd, uint16 tagID, uint32 runesetid );
+void clif_enablerefresh_rune2 (map_session_data* sd, uint16 tagID, uint32 runesetid );
+void clif_onlogenable_rune (map_session_data* sd);
+void clif_parse_decompo_rune( int fd, map_session_data* sd );
+void clif_runedecompowindow_result (map_session_data* sd, enum e_runedecompo_result result, std::unordered_map<t_itemid, uint32> material_item_list);
 
 #endif /* CLIF_HPP */

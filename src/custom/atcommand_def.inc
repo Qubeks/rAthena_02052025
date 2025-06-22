@@ -15,3 +15,4 @@
 		ACMD_DEF(reloaddepositdb),		
 		ACMD_DEF(whosell),
 		ACMD_DEF(whobuy),
+		ACMD_DEF(reloadrunedb),

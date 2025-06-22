@@ -40,6 +40,7 @@
 #include "pc_groups.hpp"
 #include "pet.hpp"
 #include "script.hpp"
+#include "rune.hpp"
 #include "deposit.hpp"
 
 // GTB Blocked and Bypass List [mauiboy]
@@ -4289,7 +4290,12 @@ int32 status_calc_pc_sub(map_session_data* sd, uint8 opt)
 
 	pc_bonus_script(sd);
 
-	if( sd->pd ) { // Pet Bonus
+	// Rune
+	if(sd->runeactivated_data.tagID)
+		rune_active_bonus(sd);
+	
+	// Pet Bonus
+	if( sd->pd ) { 
 		struct pet_data *pd = sd->pd;
 		std::shared_ptr<s_pet_db> pet_db_ptr = pd->get_pet_db();
 

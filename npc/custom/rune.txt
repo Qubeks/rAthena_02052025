@@ -1,0 +1,22 @@
+//===== rAthena Script =======================================
+//= Rune NPC
+//===== By: ==================================================
+//= Shakto
+//===== Current Version: =====================================
+//= 1.0
+//===== Compatible With: =====================================
+//= rAthena Project
+//===== Description: =========================================
+//= Allow to open Rune UI
+//===== Additional Comments: =================================
+//= 1.0 First version. [Shakto]
+// Sprite : [jobtbl.JT_4_RUNESTONE] = "4_RUNESTONE",
+//============================================================
+
+prontera,161,192,4	script	Runic Stone#eAcustom	10547,{
+	mes "[Runic Stone]";
+	mes "UI opening";
+	close2;
+	runeui();
+	end;
+}

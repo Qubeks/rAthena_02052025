@@ -640,3 +640,16 @@ ACMD_FUNC(whobuy)
 
 	return 0;
 }
+
+/**
+ * Reloads rune database
+ **/
+ACMD_FUNC(reloadrunedb)
+{
+	nullpo_retr(-1, sd);
+
+	rune_db_reload();
+	clif_displaymessage(fd, "Rune system has been reloaded");
+
+	return 0;
+}

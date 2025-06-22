@@ -117,6 +117,8 @@ typedef uint32 t_itemid;
 #ifndef MAX_BARTER_REQUIREMENTS
 	#define MAX_BARTER_REQUIREMENTS 6
 #endif
+#define MAX_RUNESLOT 5
+#define MAX_RUNEDECOMPO 8
 #ifndef WEB_AUTH_TOKEN_LENGTH
 	#define WEB_AUTH_TOKEN_LENGTH 16+1
 #endif
