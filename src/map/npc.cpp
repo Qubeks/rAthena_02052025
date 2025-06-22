@@ -370,7 +370,7 @@ uint64 StylistDatabase::parseBodyNode( const ryml::NodeRef& node ){
 					return 0;
 				}
 
-				entry->required_job.push_back(job_id);
+				entry->required_job.push_back(static_cast<uint16>(job_id));
 			}
 		}
 #endif
