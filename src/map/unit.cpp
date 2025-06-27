@@ -2341,6 +2341,9 @@ int32 unit_skilluse_id2(struct block_list *src, int32 target_id, uint16 skill_id
 		unit_stop_stepaction(src);
 	// Remember the skill request from the client while walking to the next cell
 	if(src->type == BL_PC && ud->walktimer != INVALID_TIMER && (!battle_check_range(src, target, range-1) || ignore_range)) {
+		if (ud->walktimer == INVALID_TIMER) {
+			unit_walktoxy(src, target->x, target->y, 8);
+		}
 		ud->stepaction = true;
 		ud->target_to = target_id;
 		ud->stepskill_id = skill_id;
@@ -3261,6 +3264,8 @@ static int32 unit_attack_timer_sub(struct block_list* src, int32 tid, t_tick tic
 		if (sd->state.autoattack && sd->state.autotrade)
 			unit_walktobl(sd, target, 2, 1);
 		else
+			// synchronize the player's position with the client
+			clif_fixpos( *src );
 			clif_movetoattack( *sd, *target );
 		return 1;
 	} else if(md && !check_distance_bl(src,target,range)) {
