@@ -1421,9 +1421,9 @@ bool aa_status_rest(map_session_data* sd, const status_data* status, t_tick last
     // Check overweight status based on game mode
 	bool is_overweight;
 #ifdef RENEWAL
-	is_overweight = pc_getpercentweight(*sd) >= battle_config.open_box_weight_rate;
+	is_overweight = pc_getpercentweight(*sd) >= battle_config.major_overweight_rate;
 #else
-	is_overweight = pc_getpercentweight(*sd) >= battle_config.open_box_weight_rate;
+	is_overweight = pc_getpercentweight(*sd) >= battle_config.natural_heal_weight_rate;
 #endif
 
     // Calculate HP and SP percentages
