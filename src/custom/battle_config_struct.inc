@@ -11,3 +11,8 @@
  * Format:
  *	 <datatype> name;
  **/
+ 
+ 	int32 feature_goldpc_active;
+	int32 feature_goldpc_time;
+	int32 feature_goldpc_max_points;
+	int32 feature_goldpc_vip;

@@ -1576,4 +1576,9 @@ void clif_onlogenable_rune (map_session_data* sd);
 void clif_parse_decompo_rune( int fd, map_session_data* sd );
 void clif_runedecompowindow_result (map_session_data* sd, enum e_runedecompo_result result, std::unordered_map<t_itemid, uint32> material_item_list);
 
+void clif_specialpopup(map_session_data& sd, int32 id);
+
+// Gold PC
+void clif_goldpc_info( map_session_data& sd );
+
 #endif /* CLIF_HPP */

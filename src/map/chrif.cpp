@@ -309,8 +309,21 @@ int32 chrif_save(map_session_data *sd, int32 flag) {
 	if (sd->premiumStorage.dirty)
 		storage_premiumStorage_save(sd);
 
-	if (flag&CSAVE_QUITTING)
+	if (flag&CSAVE_QUITTING) {
 		sd->state.storage_flag = 0; //Force close it.
+		if( sd->goldpc_tid != INVALID_TIMER ){
+			const struct TimerData* td = get_timer( sd->goldpc_tid );
+			if( td != nullptr ){
+				t_tick remaining = td->tick - gettick();
+				remaining += ( remaining % 1000 ) + 2000;
+				pc_setreg2( sd, GOLDPC_SECONDS_VAR, battle_config.feature_goldpc_time - remaining / 1000 );
+				delete_timer( sd->goldpc_tid, pc_goldpc_update );
+				sd->goldpc_tid = INVALID_TIMER;
+			}
+		}else{
+			sd->goldpc_tid = INVALID_TIMER;
+		}
+	}
 
 	//Saving of registry values.
 	if (sd->vars_dirty)
@@ -1586,6 +1599,8 @@ void chrif_parse_ack_vipActive(int32 fd) {
 			clif_displaymessage(sd->fd,msg_txt(sd,438)); // You are no longer VIP.
 		}
 	}
+	clif_goldpc_info( *sd );
+
 	// Show info if status changed
 	if (((flag&0x4) || changed) && !sd->vip.disableshowrate) {
 		clif_display_pinfo( *sd );

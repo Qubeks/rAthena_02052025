@@ -1,0 +1,240 @@
+//===== rAthena Script =======================================
+//= Gold PC Bonus NPC
+//===== Description: =========================================
+//= NPC that can be spawned via the Gold PC Timer Button.
+//===== Changelog: ===========================================
+//= 1.0 Initial release [Lemongrass]
+//= 1.1 Replay version [eppc0330]
+//= 1.2 Translation of the replay version [Lemongrass]
+//= 1.3 Cleanup of NPC logic [Lemongrass]
+//= 1.4 Added replay version of buff NPC [eppc0330]
+//============================================================
+prontera,0,0,4	script	Goldpoint Manager::GOLDPCCAFE	4_F_02,{
+	// ID:AMOUNT:PRICE
+	setarray .items$[1],
+		"25464:1:2",		// World_Tour_Ticket 1
+		"23919:1:10",		// K_Secret_Key 1
+		"23919:11:100",		// K_Secret_Key 11
+		"23919:33:300";		// K_Secret_Key 33
+
+	mes "[Goldpoint Manager]";
+	mes "You currently have ^0000ff"+Goldpc_Points+"^000000 points.";
+	mes "What reward do you want?";
+	next;
+
+	for(.@i = 1; .@i < getarraysize(.items$); .@i++) {
+		explode(.@array$, .items$[.@i], ":");
+		.@item = atoi(.@array$[0]);
+		.@amount = atoi(.@array$[1]);		
+		.@cost = atoi(.@array$[2]);
+		// Conditional color for cost
+		.@cost_color$ = (Goldpc_Points < .@cost) ? "^ff0000" : "^0000ff";
+		// Build menu string with colored cost
+		.@menu$ += ":[" + .@cost_color$ + .@cost + "^000000] " + .@amount + "x " + getitemname(.@item) + " ";
+	}
+
+	.@s = select(.@menu$)-1;
+
+	if(.@s == 0) {
+		mes "[Goldpoint Manager]";
+		mes "You currently have ^0000ff"+Goldpc_Points+"^000000 points.";
+		close;
+	}
+
+	explode(.@array$, .items$[.@s], ":");
+	.@itemid = atoi(.@array$[0]);
+	.@amount = atoi(.@array$[1]);
+	.@cost = atoi(.@array$[2]);
+
+	if(Goldpc_Points < .@cost) {
+		mes "[Goldpoint Manager]";
+		mes "You have ^0000ff"+Goldpc_Points+"^000000 points remaining.";
+		mes "You cannot get the prize with this amount of points.";
+		close;
+	}
+
+	mes "[Goldpoint Manager]";
+	mes "You chose the "+.@cost+" points gift. We will reward you immediately.";
+	Goldpc_Points -= .@cost;
+	getitem .@itemid,.@amount;
+	mes "You have ^0000ff"+Goldpc_Points+"^000000 points remaining.";
+	close;
+}
+
+prontera,146,93,5	script	PC room buff	4_M_MANAGER,{
+	mes "Hello~ Still seeing me, my friend.";
+	mes "It seems like you've seen me so many times";
+	mes "that we don't need many introductions, but...";
+	mes "Repeating the same thing is boring,";
+	mes "and I believe you already know very well.";
+	mes "So, I'll be brief.";
+	next;
+	mes "I'm here as the 'Fantasy PUB'.";
+	mes "Depending on where you are,";
+	mes "I offer various services.";
+	next;
+	mes "Anyway, let's check if you";
+	mes "can receive any service here.";
+	mes "Wait a moment.";
+	next;
+	if (vip_status(VIP_STATUS_ACTIVE) == 1 || getgroupid() == 99) {
+		goto VIP; // Custom. In KRo, there are two levels of PC cafe: gold and silver.
+	} else {
+		goto Normal;
+	}
+	
+Normal:
+	mes "Unfortunately, it seems you are not in a";
+	mes "location where you can receive services...";
+	mes "If you want to use our services, please contact";
+	mes "us from another location.";
+	next;
+	mes "Why not go to that place where";
+	mes "many people gather to";
+	mes "meet different worlds?";
+	mes "Go there and enter this world.";
+	next;
+	mes "We'll talk again at that time.";
+	mes "Have a nice day!";
+	close;
+	
+VIP:
+	// ID: Quantity: Price: Name: Search
+	setarray .items$[1],
+	"14529:10:2000:Greed Strike",
+	"12274:1:10000:Big Exchange Coupon",
+	"12275:1:10000:Big Exchange Coupon",
+	"12262:10:10000:Kafra Blossom Card";
+	mes "Ok. It seems you are in a place";
+	mes "where you can receive services... You are";
+	mes "Gold level, right? You can choose between";
+	mes "Greed Strike, Big Exchange Coupon,";
+	mes "Big Exchange Coupon, and Kafra Blossom Card...";
+	next;
+	mes "Each one costs 2000 Zeny, 10000 Zeny,";
+	mes "10000 Zeny, and 10000 Zeny, respectively!";
+	mes "So, which one would you like to receive?";
+	next;
+	for (.@i = 1; .@i < getarraysize(.items$); .@i++) {
+		explode(.@array$, .items$[.@i], ":");
+		.@menu$ += ":" + getitemname(atoi(.@array$[0]));
+	}
+	.@s = select(.@menu$ + ":I don't want anything.") - 1;
+	if (.@s == getarraysize(.items$)) {
+		mes "You are determined. Okay.";
+		mes "I won't force you into anything.";
+		mes "Have a nice day!";
+		close;
+	}
+	explode(.@array$, .items$[.@s], ":");
+	.@itemid = atoi(.@array$[0]);
+	.@amount = atoi(.@array$[1]);
+	.@cost = atoi(.@array$[2]);
+	.@name$ = getitemname(atoi(.@array$[0]));
+	.@part$ = (.@array$[3]);
+	if (zeny < .@cost) {
+		mes "Unfortunately, you don't have " + .@cost + " Zeny...";
+		mes "You can't receive services for free,";
+		mes "even if it's a service.";
+		close;
+	}
+	if (countitem(.@itemid) > 0) {
+		mes "Unfortunately... you already have " + .@name$ + " " + .@part$ + ".";
+		mes "Did I not mention this before? Oh, it seems like";
+		mes "my memory is getting worse.";
+		next;
+		mes "Well, since I have a few items, I can't";
+		mes "give items to those who already have them.";
+		next;
+		mes "Try next time.";
+		mes "See you again~!";
+		close;
+	}
+	mes "Great! Good choice. It really is a";
+	mes "excellent choice. Hahaha.";
+	mes "Use it wisely!";
+	set Zeny, Zeny - .@cost;
+	getitem .@itemid, .@amount;
+	next;
+	mes "Also... it's a promised service!";
+	next;
+	mes "Here's a surprise for Gold level customers!";
+	mes "You can choose one of the four services!";
+	next;
+	mes "First, ^FF0000STR+8, AGI+6, DEX+4,";
+	mes "^FF0000ATK+32, LUK+5!";
+	mes "^000000Second, ^FF0000INT+8, DEX+6,";
+	mes "^FF0000VIT+4, MATK+40!^000000";
+	next;
+	mes "Third, ^FF0000DEX+8, AGI+6, LUK+4,";
+	mes "^FF0000ATK+24, MATK+24!";
+	mes "^000000Fourth, ^FF0000ALLSTAT+6 ATK+24, MATK+24!!^000000";
+	next;
+	mes "Which one do you want to choose?";
+	next;
+	.@s2 = (select("First:Second:Third:Fourth"));
+	mes "Here we go!";
+	if (.@s2 == 1) {
+		sc_start SC_STRFOOD, 5400000, 8;
+		sc_start SC_AGIFOOD, 5400000, 6;
+		sc_start SC_DEXFOOD, 5400000, 4;
+		sc_start SC_ATKPOTION, 5400000, 32;
+		sc_start SC_FLEEFOOD, 5400000, 5;
+	} else if (.@s2 == 2) {
+		sc_start SC_INTFOOD, 5400000, 8;
+		sc_start SC_DEXFOOD, 5400000, 6;
+		sc_start SC_VITFOOD, 5400000, 4;
+		sc_start SC_MATKPOTION, 5400000, 40;
+	} else if (.@s2 == 3) {
+		sc_start SC_DEXFOOD, 5400000, 8;
+		sc_start SC_AGIFOOD, 5400000, 6;
+		sc_start SC_LUKFOOD, 5400000, 4;
+		sc_start SC_ATKPOTION, 5400000, 24;
+		sc_start SC_MATKPOTION, 5400000, 24;
+	} else {
+		sc_start SC_STRFOOD, 5400000, 6;
+		sc_start SC_AGIFOOD, 5400000, 6;
+		sc_start SC_VITFOOD, 5400000, 6;
+		sc_start SC_INTFOOD, 5400000, 6;
+		sc_start SC_DEXFOOD, 5400000, 6;
+		sc_start SC_LUKFOOD, 5400000, 6;
+		sc_start SC_ATKPOTION, 5400000, 24;
+		sc_start SC_MATKPOTION, 5400000, 24;
+	}
+	next;
+	mes "I've increased your strength. What do you think?";
+	mes "Don't you feel like it's worth it,";
+	mes "even if you've lost something? Hahaha.";
+	next;
+	mes "Well, see you again~";
+	close;
+}
+alberta,104,60,5	duplicate(PC room buff)	PC room buff#alb	4_M_MANAGER
+aldebaran,146,116,5	duplicate(PC room buff)	PC room buff#ald	4_M_MANAGER
+amatsu,102,152,5	duplicate(PC room buff)	PC room buff#ama	4_M_MANAGER
+ayothaya,212,173,5	duplicate(PC room buff)	PC room buff#ayo	4_M_MANAGER
+brasilis,200,224,5	duplicate(PC room buff)	PC room buff#bra	4_M_MANAGER
+comodo,199,149,5	duplicate(PC room buff)	PC room buff#com	4_M_MANAGER
+dewata,202,188,5	duplicate(PC room buff)	PC room buff#dew	4_M_MANAGER
+dicastes01,193,191,5	duplicate(PC room buff)	PC room buff#dic	4_M_MANAGER
+einbroch,235,207,5	duplicate(PC room buff)	PC room buff#ein	4_M_MANAGER
+geffen,126,64,5	duplicate(PC room buff)	PC room buff#gef	4_M_MANAGER
+gonryun,156,122,5	duplicate(PC room buff)	PC room buff#gon	4_M_MANAGER
+hugel,80,152,5	duplicate(PC room buff)	PC room buff#hug	4_M_MANAGER
+izlude,125,148,5	duplicate(PC room buff)	PC room buff#izl	4_M_MANAGER
+lighthalzen,167,97,5	duplicate(PC room buff)	PC room buff#lig	4_M_MANAGER
+louyang,210,107,5	duplicate(PC room buff)	PC room buff#lou	4_M_MANAGER
+malangdo,178,139,5	duplicate(PC room buff)	PC room buff#mld	4_M_MANAGER
+malaya,234,218,5	duplicate(PC room buff)	PC room buff#mly	4_M_MANAGER
+manuk,296,147,5	duplicate(PC room buff)	PC room buff#man	4_M_MANAGER
+mid_camp,201,237,5	duplicate(PC room buff)	PC room buff#mid	4_M_MANAGER
+mora,113,112,5	duplicate(PC room buff)	PC room buff#mra	4_M_MANAGER
+morocc,164,255,5	duplicate(PC room buff)	PC room buff#mro	4_M_MANAGER
+moscovia,220,191,5	duplicate(PC room buff)	PC room buff#mos	4_M_MANAGER
+niflheim,206,179,5	duplicate(PC room buff)	PC room buff#nif	4_M_MANAGER
+payon,184,102,5	duplicate(PC room buff)	PC room buff#pay	4_M_MANAGER
+rachel,111,143,5	duplicate(PC room buff)	PC room buff#rah	4_M_MANAGER
+splendide,201,153,5	duplicate(PC room buff)	PC room buff#spl	4_M_MANAGER
+umbala,93,160,5	duplicate(PC room buff)	PC room buff#umb	4_M_MANAGER
+veins,210,109,5	duplicate(PC room buff)	PC room buff#vei	4_M_MANAGER
+yuno,149,187,5	duplicate(PC room buff)	PC room buff#yun	4_M_MANAGER
