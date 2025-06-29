@@ -1730,12 +1730,62 @@ int32 clif_spawn( struct block_list *bl, bool walking ){
 			if (sd->spiritcharm_type != CHARM_TYPE_NONE && sd->spiritcharm > 0)
 				clif_spiritcharm( *sd );
 			clif_efst_status_change_sub(bl, bl, AREA);
-			clif_hat_effects( *sd, *sd, AREA );
+			clif_hat_effects( sd, sd, true, AREA);
 		}
 		break;
 	case BL_MOB:
 		{
 			TBL_MOB *md = ((TBL_MOB*)bl);
+
+			int32 val_ele = 0; // Initialize val_ele to avoid undefined behavior
+			int32 hateffect_id = 0;
+			
+			switch (md->status.def_ele) {
+				case ELE_NEUTRAL: 
+					val_ele = 2361; 
+					hateffect_id = 580; 
+					break;
+				case ELE_WATER:   
+					val_ele = 2361; 
+					hateffect_id = 454; 
+					break;
+				case ELE_EARTH:   
+					val_ele = 2361; 
+					hateffect_id = 434; 
+					break;
+				case ELE_FIRE:    
+					val_ele = 2361; 
+					hateffect_id = 379; 
+					break;
+				case ELE_WIND:    
+					val_ele = 2361; 
+					hateffect_id = 464; 
+					break;
+				case ELE_POISON:  
+					val_ele = 2361; 
+					hateffect_id = 508; 
+					break;
+				case ELE_HOLY:    
+					val_ele = 2361; 
+					hateffect_id = 520;
+					break;
+				case ELE_DARK:    
+					val_ele = 2361; 
+					hateffect_id = 572; 
+					break;
+				case ELE_GHOST:   
+					val_ele = 2361; 
+					hateffect_id = 488; 
+					break;
+				case ELE_UNDEAD:  
+					val_ele = 2361; 
+					hateffect_id = 658; 
+					break;	
+		}
+
+    // Apply element-based special effect
+			if (val_ele > 0) 
+				unit_hateffect(md, hateffect_id, true, AREA);			
 			if(md->special_state.size==SZ_BIG) // tiny/big mobs [Valaris]
 				clif_specialeffect(md,EF_GIANTBODY2,AREA);
 			else if(md->special_state.size==SZ_MEDIUM)
@@ -1743,6 +1793,7 @@ int32 clif_spawn( struct block_list *bl, bool walking ){
 			if ( md->special_state.ai == AI_ABR || md->special_state.ai == AI_BIONIC )
 				clif_summon_init(*md);
 			clif_name_area(md);
+			clif_hat_effects( md, md, true, AREA);
 		}
 		break;
 	case BL_NPC:
@@ -1754,6 +1805,7 @@ int32 clif_spawn( struct block_list *bl, bool walking ){
 				clif_specialeffect(nd,EF_BABYBODY2,AREA);
 			clif_efst_status_change_sub(bl, bl, AREA);
 			clif_progressbar_npc_area(nd);
+			clif_hat_effects( nd, nd, true, AREA);
 		}
 		break;
 	case BL_PET:
@@ -5066,12 +5118,13 @@ void clif_getareachar_unit( map_session_data* sd,struct block_list *bl ){
 			if( tsd->bg_id && map_getmapflag(tsd->m, MF_BATTLEGROUND) )
 				clif_sendbgemblem_single(sd->fd,tsd);
 			clif_efst_status_change_sub(sd, bl, SELF);
-			clif_hat_effects( *sd, *tsd, SELF );
+			clif_hat_effects( sd, tsd, true, AREA);
 		}
 		break;
 	case BL_MER: // Devotion Effects
 		if( ((TBL_MER*)bl)->devotion_flag )
 			clif_devotion(bl, sd);
+		clif_hat_effects( sd, bl, true, AREA);
 		break;
 	case BL_NPC:
 		{
@@ -5091,11 +5144,62 @@ void clif_getareachar_unit( map_session_data* sd,struct block_list *bl ){
 				clif_specialeffect_single(bl,EF_BABYBODY2,sd->fd);
 			clif_efst_status_change_sub(sd, bl, SELF);
 			clif_progressbar_npc(nd, sd);
+			clif_hat_effects( sd, nd, true, AREA);
 		}
 		break;
 	case BL_MOB:
 		{
 			TBL_MOB* md = (TBL_MOB*)bl;
+
+			int32 val_ele = 0; // Initialize val_ele to avoid undefined behavior
+			int32 hateffect_id = 0;
+			
+			switch (md->status.def_ele) {
+				case ELE_NEUTRAL: 
+					val_ele = 2361; 
+					hateffect_id = 580; 
+					break;
+				case ELE_WATER:   
+					val_ele = 2361; 
+					hateffect_id = 454; 
+					break;
+				case ELE_EARTH:   
+					val_ele = 2361; 
+					hateffect_id = 434; 
+					break;
+				case ELE_FIRE:    
+					val_ele = 2361; 
+					hateffect_id = 379; 
+					break;
+				case ELE_WIND:    
+					val_ele = 2361; 
+					hateffect_id = 464; 
+					break;
+				case ELE_POISON:  
+					val_ele = 2361; 
+					hateffect_id = 508; 
+					break;
+				case ELE_HOLY:    
+					val_ele = 2361; 
+					hateffect_id = 520;
+					break;
+				case ELE_DARK:    
+					val_ele = 2361; 
+					hateffect_id = 572; 
+					break;
+				case ELE_GHOST:   
+					val_ele = 2361; 
+					hateffect_id = 488; 
+					break;
+				case ELE_UNDEAD:  
+					val_ele = 2361; 
+					hateffect_id = 658; 
+					break;	
+		}
+
+    // Apply element-based special effect
+			if (val_ele > 0) 
+				unit_hateffect(md, hateffect_id, true, AREA);			
 			if(md->special_state.size==SZ_BIG) // tiny/big mobs [Valaris]
 				clif_specialeffect_single(bl,EF_GIANTBODY2,sd->fd);
 			else if(md->special_state.size==SZ_MEDIUM)
@@ -5110,6 +5214,7 @@ void clif_getareachar_unit( map_session_data* sd,struct block_list *bl ){
 				}
 			}
 #endif
+		clif_hat_effects( sd, md, true, AREA);
 		clif_name_area(md);
 		}
 		break;
@@ -10006,6 +10111,7 @@ void clif_name( struct block_list* src, struct block_list *bl, send_target targe
 			break;
 		case BL_MOB: {
 			mob_data *md = (mob_data *)bl;
+			int32 hateffect_id;
 
 			if( md->guardian_data && md->guardian_data->guild_id ){
 				PACKET_ZC_ACK_REQNAMEALL packet = { 0 };
@@ -10045,21 +10151,52 @@ void clif_name( struct block_list* src, struct block_list *bl, send_target targe
 				if(battle_config.show_mob_info&16){
 					std::string ele_name{};
 					switch(md->status.def_ele){
-						case ELE_NEUTRAL: ele_name = "Neutral";break;
-						case ELE_WATER	: ele_name = "Water";break;
-						case ELE_EARTH	: ele_name = "Earth";break;
-						case ELE_FIRE	: ele_name = "Fire";break;
-						case ELE_WIND	: ele_name = "Wind";break;
-						case ELE_POISON	: ele_name = "Poison";break;
-						case ELE_HOLY	: ele_name = "Holy";break;
-						case ELE_DARK	: ele_name = "Shadow";break;
-						case ELE_GHOST	: ele_name = "Ghost";break;
-						case ELE_UNDEAD	: ele_name = "Undead";break;
+						case ELE_NEUTRAL:
+							ele_name = "Neutral";
+							hateffect_id = 580;
+							break;
+						case ELE_WATER	:
+							ele_name = "Water";
+							hateffect_id = 454;
+							break;
+						case ELE_EARTH	:
+							ele_name = "Earth";
+							hateffect_id = 434;
+							break;
+						case ELE_FIRE	:
+							ele_name = "Fire";
+							hateffect_id = 379;
+							break;
+						case ELE_WIND	:
+							ele_name = "Wind";
+							hateffect_id = 464;
+							break;
+						case ELE_POISON	:
+							ele_name = "Poison";
+							hateffect_id = 508;
+							break;
+						case ELE_HOLY	:
+							ele_name = "Holy";
+							hateffect_id = 520;
+							break;
+						case ELE_DARK	:
+							ele_name = "Shadow";
+							hateffect_id = 572;
+							break;
+						case ELE_GHOST	:
+							ele_name = "Ghost";
+							hateffect_id = 488;
+							break;
+						case ELE_UNDEAD	:
+							ele_name = "Undead";
+							hateffect_id = 658;
+							break;
 						default			: ele_name = "";
 					}
 					if(ele_name != ""){
 						std::string ele = "[" + ele_name + " " + std::to_string(md->status.ele_lv) + "]";
 						safestrncpy(packet.guild_name,ele.c_str(),NAME_LENGTH);
+						unit_hateffect(md, hateffect_id, true, AREA);
 					}
 				}
 
@@ -21523,58 +21660,48 @@ void clif_navigateTo(map_session_data *sd, const char* mapname, uint16 x, uint16
 
 /// Send hat effects to the client.
 /// 0A3B <Length>.W <AID>.L <Status>.B { <HatEffectId>.W } (ZC_EQUIPMENT_EFFECT)
-void clif_hat_effects( map_session_data& sd, block_list& bl, enum send_target target ){
+void clif_hat_effects(struct block_list* src, struct block_list* bl, bool enable, enum send_target target) {
 #if PACKETVER_MAIN_NUM >= 20150507 || PACKETVER_RE_NUM >= 20150429 || defined(PACKETVER_ZERO)
-	map_session_data *tsd;
-	block_list* tbl;
-
-	if( target == SELF ){
-		tsd = BL_CAST(BL_PC,&bl);
-		tbl = &sd;
-	}else{
-		tsd = &sd;
-		tbl = &bl;
-	}
-
-	if( tsd == nullptr ){
+	struct unit_data* ud;
+	
+	if (!src || !bl || !(ud = unit_bl2ud( bl )))
 		return;
-	}
 
-	if( tsd->hatEffects.empty() || map_getmapdata(tbl->m)->getMapFlag(MF_NOCOSTUME) ){
-		return;
-	}
+	if( ud->hatEffects.empty() || map_getmapflag(src->m, MF_NOCOSTUME)){
+ 		return;
+ 	}
 
 	PACKET_ZC_EQUIPMENT_EFFECT* p = reinterpret_cast<PACKET_ZC_EQUIPMENT_EFFECT*>( packet_buffer );
 
-	p->packetType = HEADER_ZC_EQUIPMENT_EFFECT;
-	p->packetLength = sizeof( *p );
-	p->aid = tsd->id;
-	p->status = 1;
-
-	for( size_t i = 0; i < tsd->hatEffects.size(); i++ ){
-		p->effects[i] = tsd->hatEffects[i];
-
-		p->packetLength += static_cast<decltype(p->packetLength)>( sizeof( p->effects[0] ) );
-	}
-
-	clif_send( p, p->packetLength, tbl, target );
+ 	p->packetType = HEADER_ZC_EQUIPMENT_EFFECT;
+	
+	p->packetLength = (int16)( sizeof( struct PACKET_ZC_EQUIPMENT_EFFECT ) + sizeof( int16 ) * ud->hatEffects.size() );
+	p->aid = bl->id;
+	p->status = enable;
+	
+	for (size_t i = 0; i < ud->hatEffects.size(); i++) {
+		p->effects[i] = ud->hatEffects[i];
+ 	}
+	
+	clif_send(p, p->packetLength, src, target);
 #endif
 }
 
 /// Send a single hat effect to the client.
 /// 0A3B <Length>.W <AID>.L <Status>.B { <HatEffectId>.W } (ZC_EQUIPMENT_EFFECT)
-void clif_hat_effect_single( map_session_data& sd, uint16 effectId, bool enable ){
+void clif_hat_effect_single( struct block_list* bl, uint16 effectId, bool enable ){
 #if PACKETVER_MAIN_NUM >= 20150507 || PACKETVER_RE_NUM >= 20150429 || defined(PACKETVER_ZERO)
-	PACKET_ZC_EQUIPMENT_EFFECT* p = reinterpret_cast<PACKET_ZC_EQUIPMENT_EFFECT*>( packet_buffer );
-
-	p->packetType = HEADER_ZC_EQUIPMENT_EFFECT;
-	p->packetLength = sizeof( *p );
-	p->aid = sd.id;
-	p->status = enable;
-	p->effects[0] = effectId;
-	p->packetLength += static_cast<decltype(p->packetLength)>( sizeof( p->effects[0] ) );
-
-	clif_send( p, p->packetLength, &sd, AREA );
+	nullpo_retv(bl);
+ 
+ 	struct PACKET_ZC_EQUIPMENT_EFFECT* p = (struct PACKET_ZC_EQUIPMENT_EFFECT*)packet_buffer;
+ 
+ 	p->packetType = HEADER_ZC_EQUIPMENT_EFFECT;
+ 	p->packetLength = (int16)( sizeof( struct PACKET_ZC_EQUIPMENT_EFFECT ) + sizeof( int16 ) );
+	p->aid = bl->id;
+ 	p->status = enable;
+ 	p->effects[0] = effectId;
+ 
+	clif_send( p, p->packetLength, bl, AREA );
 #endif
 }
 

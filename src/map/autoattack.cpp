@@ -2166,19 +2166,17 @@ bool aa_changestate_autoattack(map_session_data* sd, int flag) {
 		}
 
 		if (battle_config.feature_autoattack_hateffect) {
+			struct unit_data* ud = unit_bl2ud(sd);
+
 			for (const auto& effectID : AA_HATEFFECTS) {
 				if (effectID <= HAT_EF_MIN || effectID >= HAT_EF_MAX)
 					continue;
 
-				auto it = util::vector_get(sd->hatEffects, effectID);
-
-				if (it != sd->hatEffects.end())
+				auto it = util::vector_get(ud->hatEffects, effectID);
+				if (it != ud->hatEffects.end())
 					continue;
 
-				sd->hatEffects.push_back(effectID);
-
-				if (!sd->state.connect_new)
-					clif_hat_effect_single(*sd, effectID, true);
+				unit_hateffect(sd, effectID, true, !sd->state.connect_new);
 			}
 		}
 
@@ -2244,19 +2242,17 @@ bool aa_changestate_autoattack(map_session_data* sd, int flag) {
 
 
 		if (battle_config.feature_autoattack_hateffect) {
+			struct unit_data* ud = unit_bl2ud(sd);
+
 			for (const auto& effectID : AA_HATEFFECTS) {
 				if (effectID <= HAT_EF_MIN || effectID >= HAT_EF_MAX)
 					continue;
 
-				auto it = util::vector_get(sd->hatEffects, effectID);
-
-				if (it == sd->hatEffects.end())
+				auto it = util::vector_get(ud->hatEffects, effectID);
+				if (it == ud->hatEffects.end())
 					continue;
 
-				util::vector_erase_if_exists(sd->hatEffects, effectID);
-
-				if (!sd->state.connect_new)
-					clif_hat_effect_single(*sd, effectID, false);
+				unit_hateffect(sd, effectID, false, !sd->state.connect_new);
 			}
 		}
 		sd->state.autoattack = false;
