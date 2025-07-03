@@ -10151,46 +10151,16 @@ void clif_name( struct block_list* src, struct block_list *bl, send_target targe
 				if(battle_config.show_mob_info&16){
 					std::string ele_name{};
 					switch(md->status.def_ele){
-						case ELE_NEUTRAL:
-							ele_name = "Neutral";
-							hateffect_id = 580;
-							break;
-						case ELE_WATER	:
-							ele_name = "Water";
-							hateffect_id = 454;
-							break;
-						case ELE_EARTH	:
-							ele_name = "Earth";
-							hateffect_id = 434;
-							break;
-						case ELE_FIRE	:
-							ele_name = "Fire";
-							hateffect_id = 379;
-							break;
-						case ELE_WIND	:
-							ele_name = "Wind";
-							hateffect_id = 464;
-							break;
-						case ELE_POISON	:
-							ele_name = "Poison";
-							hateffect_id = 508;
-							break;
-						case ELE_HOLY	:
-							ele_name = "Holy";
-							hateffect_id = 520;
-							break;
-						case ELE_DARK	:
-							ele_name = "Shadow";
-							hateffect_id = 572;
-							break;
-						case ELE_GHOST	:
-							ele_name = "Ghost";
-							hateffect_id = 488;
-							break;
-						case ELE_UNDEAD	:
-							ele_name = "Undead";
-							hateffect_id = 658;
-							break;
+						case ELE_NEUTRAL: ele_name = "Neutral";break;
+						case ELE_WATER	: ele_name = "Water";break;
+						case ELE_EARTH	: ele_name = "Earth";break;
+						case ELE_FIRE	: ele_name = "Fire";break;
+						case ELE_WIND	: ele_name = "Wind";break;
+						case ELE_POISON	: ele_name = "Poison";break;
+						case ELE_HOLY	: ele_name = "Holy";break;
+						case ELE_DARK	: ele_name = "Shadow";break;
+						case ELE_GHOST	: ele_name = "Ghost";break;
+						case ELE_UNDEAD	: ele_name = "Undead";break;
 						default			: ele_name = "";
 					}
 					if(ele_name != ""){
